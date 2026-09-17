@@ -115,6 +115,42 @@ class PublishDayTests(unittest.TestCase):
         self.assertIn('data-tag="经济"', page)
         self.assertIn('data-tag="因果推断"', page)
 
+    def test_rejects_reserved_keys_and_duplicate_base_arxiv_id(self):
+        for publication_key in ("assets", "index.html", "papers.json"):
+            with self.subTest(publication_key=publication_key):
+                self.args.publication_key = publication_key
+                with self.assertRaises(SystemExit):
+                    self.publish()
+                self.assertFalse(self.site.exists())
+
+        self.args.publication_key = None
+        self.publish()
+        before = self.snapshot()
+        self.args.publication_key = "2026-09-17-copy"
+        self.args.arxiv_id = "2608.12345v2"
+        with self.assertRaises(SystemExit):
+            self.publish()
+        self.assertEqual(self.snapshot(), before)
+
+    def test_rejects_noncanonical_arxiv_ids(self):
+        for arxiv_id in (
+            "2608.12345V2",
+            "2608.12345v02",
+            "2608.12345v2 ",
+            "2608.123",
+            "../2608.12345v1",
+        ):
+            with self.subTest(arxiv_id=arxiv_id):
+                self.args.arxiv_id = arxiv_id
+                with self.assertRaises(SystemExit):
+                    self.publish()
+                self.assertFalse(self.site.exists())
+
+        self.args.arxiv_id = "hep-th/9901001v2"
+        self.publish()
+        entry = json.loads((self.site / "papers.json").read_text())[0]
+        self.assertEqual(entry["arxiv_id"], "hep-th/9901001v2")
+
     def test_rejects_invalid_bilingual_metadata_without_touching_site(self):
         self.publish()
         before = self.snapshot()

@@ -11,8 +11,8 @@ import shutil
 import tempfile
 from datetime import date
 from pathlib import Path, PurePosixPath
-from urllib.parse import quote
 from typing import Any
+from urllib.parse import quote
 
 
 PUBLIC_EXTENSIONS = {
@@ -98,6 +98,20 @@ def validate_publication_key(value: str) -> None:
         )
 
 
+def base_arxiv_id(value: str) -> str:
+    modern = re.fullmatch(r"(?P<base>\d{4}\.\d{4,5})(?:v[1-9]\d*)?", value)
+    legacy = re.fullmatch(
+        r"(?P<base>[A-Za-z][A-Za-z.-]*/\d{7})(?:v[1-9]\d*)?",
+        value,
+    )
+    match = modern or legacy
+    if not match:
+        raise SystemExit(
+            "--arxiv-id must be a canonical arXiv ID, optionally followed by a lowercase version such as v2"
+        )
+    return match.group("base").casefold()
+
+
 def normalize_tags(direction: str, tags: list[str]) -> list[str]:
     normalized = []
     for raw in [direction, *tags]:
@@ -132,6 +146,7 @@ def validate(args: argparse.Namespace) -> list[Path]:
         raise SystemExit("English and Chinese titles must both be non-empty")
     if len(args.title) > 500 or len(args.title_zh) > 200:
         raise SystemExit("Paper title is unreasonably long")
+    base_arxiv_id(args.arxiv_id)
     normalize_tags(args.direction, args.tags)
 
     if args.source.is_symlink() or not args.source.is_dir():
@@ -188,6 +203,7 @@ def load_manifest(path: Path) -> list[dict[str, Any]]:
             raise SystemExit(f"Existing manifest contains an invalid paper entry: {path}")
         validate_date(item["date"])
         validate_slide_path(item["slides"])
+        base_arxiv_id(item["arxiv_id"])
         publication_key = item["path"].removesuffix("/")
         validate_publication_key(publication_key)
         if "title_zh" in item and (
@@ -463,8 +479,8 @@ def publish(args: argparse.Namespace) -> None:
     manifest_path = site_root / "papers.json"
     index_path = site_root / "index.html"
     entries = [item for item in load_manifest(manifest_path) if item["path"] != f"{publication_key}/"]
-    base_id = re.sub(r"v\d+$", "", args.arxiv_id)
-    if any(re.sub(r"v\d+$", "", item["arxiv_id"]) == base_id for item in entries):
+    base_id = base_arxiv_id(args.arxiv_id)
+    if any(base_arxiv_id(item["arxiv_id"]) == base_id for item in entries):
         raise SystemExit("This paper already exists under another publication key; update that key instead")
 
     entry = {
