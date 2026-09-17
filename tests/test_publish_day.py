@@ -132,6 +132,32 @@ class PublishDayTests(unittest.TestCase):
         self.assertEqual(names, {"index.html", "slides.html", "notes.md", "demo.py", "diagram.mmd",
                                  "assets/figure.svg", "assets/style.css"})
 
+    def test_day_page_explains_alternative_complete_reading_routes(self):
+        (self.source / "notes.html").write_text("<h1>Full article</h1>")
+        self.publish()
+        page = (self.day / "index.html").read_text()
+        self.assertIn("图解全文", page)
+        self.assertIn("详细讲解", page)
+        self.assertIn("不需要重复读两遍", page)
+        self.assertIn('href="notes.html"', page)
+        self.assertIn("可选资料与文件", page)
+        self.assertTrue(all(line == line.rstrip() for line in page.splitlines()))
+
+    def test_day_page_does_not_link_missing_optional_notes(self):
+        self.publish()
+        page = (self.day / "index.html").read_text()
+        self.assertNotIn('href="notes.html"', page)
+        self.assertTrue(all(line == line.rstrip() for line in page.splitlines()))
+
+    def test_day_page_escapes_metadata_for_reading_guide(self):
+        self.args.title = '<img src=x onerror=alert(1)>'
+        self.args.summary = '<script>alert(1)</script>'
+        self.publish()
+        page = (self.day / "index.html").read_text()
+        self.assertNotIn('<script>alert(1)</script>', page)
+        self.assertIn('&lt;script&gt;', page)
+        self.assertIn('&lt;img', page)
+
     def test_copy_failure_preserves_existing_publication(self):
         self.publish()
         before = self.snapshot()

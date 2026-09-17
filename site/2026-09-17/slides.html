@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="The Axiomatic Trader 中文机制带读：用可交互的四块算例理解 Λ-recurrence 与最坏块损失 CVaR。">
-  <title>历史均值之外：给未来的坏时段留多少空间？｜每日 arXiv 带读</title>
+  <meta name="description" content="零金融基础读懂 The Axiomatic Trader：从两个公交站和八天的天气排法，理解为什么过去平均更好不代表未来总是更好。">
+  <title>过去表现好，未来凭什么还能信？｜The Axiomatic Trader 图解全文</title>
   <style>
     :root { --ink: #172b35; --muted: #536974; --paper: #f5f5ef; --card: #fff; --line: #d6e0db; --accent: #076b61; --soft: #e8f3ed; --warm: #a54820; --warm-soft: #fff0e6; font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; font-size: 18px; color: var(--ink); background: var(--paper); }
     * { box-sizing: border-box; }
@@ -112,132 +112,344 @@
       h1 { font-size: 30pt; }
       h2 { font-size: 25pt; }
     }
+
+    .route { list-style: none; padding: 0; display: grid; gap: 14px; }
+    .route li { display: grid; grid-template-columns: 48px 1fr; align-items: start; gap: 16px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+    .route .number { color: var(--accent); font-size: 1.6rem; font-weight: 750; }
+    .route p { margin: 4px 0 0; color: var(--muted); }
+    .route strong { font-size: 1.15rem; }
+    .calendar { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 9px; margin: 20px 0; }
+    .calendar span { padding: 14px 3px; text-align: center; border: 1px solid #b7cbbb; background: var(--soft); border-radius: 12px; }
+    .calendar .rain { background: var(--warm-soft); border-color: #debaa5; }
+    .calendar small { display: block; font-size: 1rem; color: var(--muted); }
+    .presets { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 0; }
+    .presets button { padding: 8px 14px; min-height: 46px; border: 1px solid #aac0b5; border-radius: 10px; background: white; color: var(--ink); cursor: pointer; }
+    .presets button[aria-pressed="true"] { background: var(--accent); color: white; border-color: var(--accent); }
+    .result-line { margin: 14px 0 0; color: var(--muted); }
+    .definitions { margin: 0; }
+    .definitions dt { font-weight: 750; color: var(--accent); margin-top: 20px; }
+    .definitions dd { margin: 4px 0 0; }
+    .toy-heading .unit { font-size: 1rem; font-weight: 500; }
+    .toy-table td:nth-child(3) { min-width: 0; }
+    .toy-table th:first-child { white-space: nowrap; }
+    .toy-table td:nth-child(2) { min-width: 60px; }
+    .record-table { margin: 18px 0 24px; }
+    .record-table th:first-child { min-width: 80px; }
+    .story-note { margin-top: 24px; color: var(--muted); }
+    @media (max-width: 680px) {
+      .calendar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .route li { grid-template-columns: 34px 1fr; gap: 12px; }
+      .control-panel { grid-template-columns: 1fr; gap: 8px; }
+      .control-panel output { font-size: 1.35rem; }
+      .toy-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .toy-table th, .toy-table td { font-size: 1rem; padding-inline: 3px; }
+      .record-table th, .record-table td { padding-inline: 5px; }
+    }
+    @media print { .presets { display: none; } }
+
+    .reading-guide { width: min(1180px, calc(100% - 64px)); margin: 16px auto 0; color: var(--muted); font-size: 1rem; }
+    .source { font-size: .9rem; line-height: 1.65; margin-top: 25px; }
+    .source a { color: var(--muted); }
+    .topbar nav a[aria-current="page"] { font-weight: 750; }
+    .overview-diagram { margin: 22px 0; padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+    .overview-diagram figcaption { color: var(--muted); margin-top: 12px; font-size: .95rem; }
+    .overview-diagram details { margin-top: 12px; }
+    .overview-diagram pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .plain-steps { padding-left: 1.35em; }
+    .plain-steps li { margin: 16px 0; }
+    .plain-steps strong { display: block; margin-bottom: 4px; }
+    .reading-note { margin-top: 24px; color: var(--muted); }
+    @media (max-width: 680px) {
+      .reading-guide { width: calc(100% - 36px); }
+      .overview-diagram { padding: 12px; }
+      .topbar nav { gap: 16px; }
+    }
+    @media print { .reading-guide { display: none; } }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">每日 arXiv 带读 · 金融</div>
-    <nav aria-label="学习包导航"><a href="./">学习包</a><a href="notes.html">阅读笔记</a></nav>
+    <div class="brand">每日 arXiv · 金融</div>
+    <nav aria-label="同一篇学习包的阅读入口"><a href="index.html">本篇总览</a><a href="slides.html" aria-current="page">图解全文</a><a href="notes.html">详细讲解</a></nav>
   </header>
-  <noscript><p class="noscript">本页翻页与算例需要 JavaScript。你仍可阅读下方全部幻灯片，或打开<a href="notes.html">阅读笔记</a>。</p></noscript>
-  <main aria-label="论文带读幻灯片">
+  <p class="reading-guide">从第 1 页顺读，覆盖整篇的主要论证；有疑问时查同主题的详细讲解。全部内容已提供，无需等作答后解锁。</p>
+  <noscript><p class="noscript">未启用 JavaScript 时，下方会展示全部内容；交互和关系图需要启用 JavaScript，也可以查看<a href="notes.html">详细讲解</a>。</p></noscript>
+  <main aria-label="论文图解全文">
     <section class="slide" aria-labelledby="title-1" tabindex="-1">
-      <p class="eyebrow">01 / 真实问题 · 2026-09-17</p>
-      <h1 id="title-1">历史均值之外，<br>给未来的坏时段<br>留多少空间？</h1>
-      <p class="lead">两个方法：一个平时很好、偶尔很差；另一个一直平稳。<br>如果坏时段在未来变得更常见，仅比较平均损失还够吗？</p>
-      <p><span class="pill">今天只学一个机制</span><span class="pill">Λ-recurrence → CVaR</span></p>
-      <p class="muted">读完应能解释：怎样限制未来对历史时段的重新加权，并用四个数字算出最坏平均损失。</p>
-      <p class="source">Jiayu Li · <cite>The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</cite><br><a href="https://arxiv.org/abs/2608.23416v2" target="_blank" rel="noopener noreferrer">arXiv:2608.23416v2</a> 首发 2026-08-24 · 所读 v2：2026-09-02<br>这是聚焦核心机制的导读，未逐项审计全文 97 页的全部证明。</p>
+      <p class="eyebrow">01 / 从一个生活问题，读完一篇论文</p>
+      <h2 id="title-1">过去表现好，未来凭什么还能信？</h2>
+
+      <p class="lead">你有两个公交站可选：A 站平时等得少、大雨时等很久；B 站一直比较稳定。过去 A 站平均更快，如果以后大雨天变多，它还一定更好吗？</p>
+      <p>这篇金融论文问的是一个更大的问题：市场会变化，一套依靠历史资料作判断的投资系统，需要怎样说明假设、学习规律、检查结果并控制行动？</p>
+      <p class="tagline">我们先用公交故事算清一个关键环节，再把它放回作者提出的五步流程。本课覆盖整篇的主要问题、方法、证据与局限。</p>
+      <p>本篇总览是入口，图解全文是这份课件，详细讲解是同一内容的展开版。它们是同一篇学习包的三种入口，不是三套额外课程。</p>
+      <p class="source">金融方向 · Jiayu Li · <cite>The Axiomatic Trader</cite> · <a href="https://arxiv.org/abs/2608.23416v2" target="_blank" rel="noopener noreferrer">论文首页</a><br>公交站、天气和等待分钟均为教学假设，不是采集数据，也不是论文做过的公交实验。</p>
     </section>
 
     <section class="slide" aria-labelledby="title-2" tabindex="-1">
-      <p class="eyebrow">02 / 全景 · 我们站在哪里</p>
-      <h2 id="title-2">今天放大的是：怎样评估候选方法。</h2>
-      <p class="lead">作者提出的五阶段标准形，把假设、建模、验证、搜索和规模选择接在一起。今天沿着第 3 步往里看。</p>
-      <ol class="pipeline">
-        <li><div><strong>声明表示方式</strong><small>哪些信息可用？用什么输入描述市场？</small></div></li>
-        <li><div><strong>限制容量并收缩集成</strong><small>防止模型复杂度超过信息所能支持的程度。</small></div></li>
-        <li class="current"><div><strong>连续、净化的块验证 → CVaR 聚合</strong><small>保留时间结构、减少训练验证泄漏，再对坏时段施加压力。</small></div></li>
-        <li><div><strong>限定搜索预算并校正筛选偏差</strong><small>试过很多候选后，不能把最幸运的结果当作确定能力。</small></div></li>
-        <li><div><strong>稳健的 fractional Kelly 规模选择</strong><small>把剩余不确定性传递到风险规模；本课不展开交易操作。</small></div></li>
-      </ol>
-      <p class="source">作者的方法结构：<a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">§10，五阶段标准形</a> 本课中的五句话是教学概括。</p>
+      <p class="eyebrow">02 / 先看全文地图</p>
+      <h2 id="title-2">作者把可靠的判断拆成五步。</h2>
+
+      <p>这里的“投资系统”，指从收集资料到决定怎样使用资金的一整套流程。作者希望每一步都交代：用了多少信息，还留下多少不确定性。</p>
+      <figure data-mermaid class="overview-diagram">
+        <div data-mermaid-output></div>
+        <p data-mermaid-status role="status">若关系图尚未显示，可先看图注、展开源码，或继续阅读下方讲解；也可尝试用新版浏览器刷新。</p>
+        <details><summary>查看图的源码</summary><pre data-mermaid-source>flowchart TD
+    accTitle: 从历史成绩到谨慎决策
+    accDescr: 研究问题经过五个必要检查，最后连接作者的实验结果和方法边界。
+    question["历史成绩好，未来就可靠吗？"] --> scope["第一步：规定看什么、相信什么"]
+    scope --> capacity["第二步：别让规则比证据更复杂"]
+    capacity --> evaluation["第三步：让坏日子变多，再检查"]
+    evaluation --> search["第四步：把试错次数算进去"]
+    search --> sizing["第五步：按不确定程度限制投入"]
+    sizing --> evidence["核查：作者证明和实验支持什么"]
+    evidence --> limits["边界：不等于保证盈利或覆盖新情况"]</pre></details>
+        <figcaption>上一步交出可用的结果和剩余疑问，下一步接着处理。<a href="map.mmd">完整关系图源码</a></figcaption>
+      </figure>
+      <p>公交算例帮助我们深入第 3 步；前后四步同样会在这份课件中讲完。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">五阶段整体回答</a><br>作者的必要性论证依赖文中各阶段的具体模型条件，不能解读成所有市场、所有系统只有这一种实现。</p>
     </section>
 
     <section class="slide" aria-labelledby="title-3" tabindex="-1">
-      <p class="eyebrow">03 / 输入与输出</p>
-      <h2 id="title-3">先把未来看成“历史时段的不同配比”。</h2>
-      <div class="grid">
-        <article class="card"><h3>输入</h3><p>把历史划成 <strong>B 个连续时间块</strong>；每块给出同一候选方法的块损失。</p><p>再声明一个 <strong>Λ ≥ 1</strong>：未来可以把某一块的重要性放大多少。</p></article>
-        <article class="card highlight"><h3>输出</h3><p>在允许的配比里，找出<strong>最大的平均损失</strong>。</p><p>损失越低越好。这个输出是评估用的压力值。</p></article>
-      </div>
-      <p class="tagline">中间过程：给每块分配权重 → 检查约束 → 尽量多分给损失大的块。</p>
-      <p><strong>成立条件：</strong>这里采用 A2 的零缺陷简化：生成机制保持不变；A3 再限制未来对历史块的重加权。机制不变不等于观测到的市场分布永远不变。</p>
-      <p class="muted">理论中的块风险与有限样本测得的块损失需要区分；本课先用给定数字看清算术，第 8 页补上估计误差。</p>
-      <p class="source">假设来源：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4，A2 与 A3</a> 本页配比表述为教学解释。</p>
+      <p class="eyebrow">03 / 五条假设 · 先看前三条</p>
+      <h2 id="title-3">先问：过去凭什么能帮助未来？</h2>
+
+      <ol class="plain-steps">
+        <li><strong>当时不知道的消息，不能用来作当时的决定。</strong>例如，不能把明天公布的数据偷偷放进昨天的模拟判断。</li>
+        <li><strong>先说明怎样描述环境；相同状态下，产生资料的规律大致一致。</strong>表面变化可能来自状态变了。允许规律偏离多少，需要另外声明。</li>
+        <li><strong>未来的状态，要能被历史覆盖；出现比例可以改变，但放大程度有上限。</strong>公交故事里，这就像允许原有天气重新配比，同时先说清每种最多占几天。</li>
+      </ol>
+      <p class="reading-note">这三条都是讨论的前提，不是看一眼旧资料就能保证未来成立的事实。公交算例先忽略第 2 条里的机制误差，让计算更容易看清。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">信息、机制与状态覆盖的假设</a></p>
     </section>
 
     <section class="slide" aria-labelledby="title-4" tabindex="-1">
-      <p class="eyebrow">04 / 中间状态 · 权重的边界</p>
-      <h2 id="title-4">Λ 限制的是“最多能偏重多少”。</h2>
-      <div class="formula">pᵢ ≥ 0，　∑ pᵢ = 1，　pᵢ ≤ Λ / B<span class="explain">pᵢ：未来对第 i 个历史块分配的概率权重；B：块数。</span></div>
-      <div class="grid">
-        <article class="card"><h3>4 个块，Λ = 1</h3><p>每块权重最多 ¼；四块加起来又必须是 1。</p><p class="big-number">[¼, ¼, ¼, ¼]</p><p>因此只能等权，结果就是普通均值。</p></article>
-        <article class="card highlight"><h3>4 个块，Λ = 2</h3><p>每块权重最多 ½；可以让两个坏块各占一半。</p><p class="big-number">[½, 0, 0, ½]</p><p>这是可行配比之一，不是预测出的未来频率。</p></article>
-      </div>
-      <p class="source"><a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4，Λ-recurrence</a> Λ 是声明的假设强度，不能把它当作从历史中可靠估出的保证。</p>
+      <p class="eyebrow">04 / 五条假设 · 再看后两条</p>
+      <h2 id="title-4">旧资料很多，不代表独立信息很多。</h2>
+
+      <ol class="plain-steps" start="4">
+        <li><strong>环境会持续一阵，但相隔很远的资料也不能永远纠缠在一起。</strong>连续几天受同一场大雨影响，不能简单当成几次完全独立的天气经历。论文要求说明相关性持续的尺度；一种方便计算的衰减形式，不等于唯一可能的真实规律。</li>
+        <li><strong>即使知道环境，可预测的成分也可能远小于随机波动。</strong>金融资料中，微弱规律很容易被噪声盖住；看到漂亮曲线，还需要检查它是不是偶然。</li>
+      </ol>
+      <p class="tagline">这些假设共同约束了“能学多少”“怎么验证”和“该相信多少”，所以后面的五步需要接在一起。</p>
+      <p>接下来每一步，都看它拿到什么、做什么、交出什么，以及少了它会出什么问题。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">状态持续与弱信号的假设</a></p>
     </section>
 
     <section class="slide" aria-labelledby="title-5" tabindex="-1">
-      <p class="eyebrow">05 / 同一输入 · 排名会改变</p>
-      <h2 id="title-5">均值更好，未必更耐“坏时段变多”。</h2>
-      <div class="grid">
-        <article class="card"><h3>候选 A · 三好一坏</h3><div class="blocks"><div class="block">块 1<span>1</span></div><div class="block">块 2<span>1</span></div><div class="block">块 3<span>1</span></div><div class="block bad">块 4<span>9</span></div></div><p>普通均值：<strong>3</strong></p></article>
-        <article class="card"><h3>候选 B · 相对平稳</h3><div class="blocks"><div class="block">块 1<span>3</span></div><div class="block">块 2<span>3</span></div><div class="block">块 3<span>3</span></div><div class="block">块 4<span>4</span></div></div><p>普通均值：<strong>3.25</strong></p></article>
-      </div>
-      <table class="comparison"><caption>在不同 Λ 下的最坏平均损失（越低越好）</caption><thead><tr><th scope="col">Λ</th><th scope="col">候选 A</th><th scope="col">候选 B</th></tr></thead><tbody><tr><th scope="row">1</th><td class="good">3</td><td>3.25</td></tr><tr><th scope="row">1.5</th><td>4</td><td class="good">3.375</td></tr><tr><th scope="row">2</th><td>5</td><td class="good">3.5</td></tr><tr><th scope="row">4</th><td>9</td><td class="good">4</td></tr></tbody></table>
-      <p class="source">全部数字均为<strong>人为构造、无量纲的教学损失</strong>，不是论文实验、市场数据或收益预测。下一页解释算式。</p>
+      <p class="eyebrow">05 / 第 1 步 · 先说明看什么、相信什么</p>
+      <h2 id="title-5">先订规则，再看成绩。</h2>
+
+      <p class="lead">同一份历史，可以被整理成许多种输入。要先说清楚自己准备怎样看它，才能讨论后面的保证。</p>
+      <dl class="definitions">
+        <dt>拿到什么</dt><dd>过去的记录、当时确实可用的信息，以及准备预测的结果。</dd>
+        <dt>做什么</dt><dd>预先决定用哪些资料描述环境、每个时间块有多长，并声明：未来比例允许怎样变、规律能偏离多少、环境会持续多久、可预测信号预计有多弱。</dd>
+        <dt>交出什么</dt><dd>一张可检查的“输入与假设清单”。后面的学习和评估都按它来。</dd>
+      </dl>
+      <p class="tagline">如果看见结果不理想，就不断重选描述方式或放宽假设，原来的保证也随之改变。不能把事后挑好的条件说成事先承诺。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">表示与声明</a> · <a href="https://arxiv.org/html/2608.23416v2#S5" target="_blank" rel="noopener noreferrer">历史无法保证的未来边界</a></p>
     </section>
 
     <section class="slide" aria-labelledby="title-6" tabindex="-1">
-      <p class="eyebrow">06 / 核心等式 · Theorem 6.2</p>
-      <h2 id="title-6">把权重先填给最坏的块，就是上尾 CVaR。</h2>
-      <ol class="steps"><li>按块损失从大到小排序。</li><li>从最坏的块开始，每块最多分配 Λ / B 的权重。</li><li>分满总权重 1 后停止；最后一块可以只分到一部分。</li></ol>
-      <div class="formula">max<sub>pᵢ≥0, ∑pᵢ=1, pᵢ≤Λ/B</sub> ∑ pᵢ ℓᵢ = CVaR<sub>1/Λ</sub>(块损失)<span class="explain">这里的下标是<strong>尾部比例</strong>，不是置信水平；取损失最大的 1/Λ 部分做平均。</span></div>
-      <div class="card highlight"><h3>沿候选 A 走一遍：Λ = 2</h3><p>损失按原块顺序为 [1, 1, 1, 9]。先给块 4 分配 ½，再给并列次坏中的块 1 分配 ½。</p><p><strong>权重 [½, 0, 0, ½] → ½ × 1 + ½ × 9 = 5。</strong></p><p>并列块可能有多种最优分配；最坏平均损失相同。</p></div>
-      <p class="source">论文定理：<a href="https://arxiv.org/html/2608.23416v2#S6" target="_blank" rel="noopener noreferrer">§6，Theorem 6.2</a> 上面的四块分配是该机制的教学算例。</p>
+      <p class="eyebrow">06 / 第 2 步 · 别把偶然当规律</p>
+      <h2 id="title-6">让模型的自由度，配得上资料里的信息。</h2>
+
+      <p>这里的“模型”就是把输入变成预测的一套规则。规则越能灵活调整，越可能把随机波动也记下来。</p>
+      <dl class="definitions">
+        <dt>拿到什么</dt><dd>第 1 步确定的输入、候选规则，以及关于信号和资料相关性的假设。</dd>
+        <dt>做什么</dt><dd>限制随数据自由变化的程度；把不稳定、过激的预测往保守中心拉回；对同一模型、同一设置的训练扰动作平均，而不是只挑最幸运的一次。</dd>
+        <dt>交出什么</dt><dd>更受约束、较少被偶然波动左右的预测器。</dd>
+      </dl>
+      <p class="tagline">把同一份资料反复训练十遍，不会凭空得到十份新的市场经历。</p>
+      <p class="reading-note">论文讨论的是有效复杂度，不是简单数参数。相应推导依赖特定损失与模型条件，不能据此宣布某一类大模型一律无效。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S7.SS2" target="_blank" rel="noopener noreferrer">学习容量与收缩</a> · <a href="https://arxiv.org/html/2608.23416v2#S9.SS1" target="_blank" rel="noopener noreferrer">如何处理估计不确定性</a></p>
     </section>
 
     <section class="slide" aria-labelledby="title-7" tabindex="-1">
-      <p class="eyebrow">07 / 最小实践 · 拖动参数看中间状态</p>
-      <h2 id="title-7">允许更大偏重时，权重怎样移动？</h2>
-      <p>需求：输入两组固定损失和 Λ，输出最坏配比及加权损失；保留原块顺序展示，排序时并列按块编号处理。</p>
-      <div class="control-panel"><label for="lambda">重加权上限 Λ</label><output id="lambda-value" for="lambda">2</output><div class="range"><input id="lambda" type="range" min="1" max="4" step="0.25" value="2" aria-describedby="lambda-details"><div class="range-labels"><span>1 · 等权</span><span>4 · 可集中于一块</span></div></div><p id="lambda-details" style="grid-column:1/-1;margin:0">每块权重上限 50%；上尾比例 50%。</p></div>
-      <div class="grid">
-        <article class="card"><div class="toy-heading"><h3>候选 A</h3><output class="big-number" id="risk-a" aria-label="候选 A 最坏平均损失">5</output></div><table class="toy-table"><caption>原块顺序 · 损失 [1, 1, 1, 9]</caption><thead><tr><th scope="col">块</th><th scope="col">损失</th><th scope="col">权重</th><th scope="col">贡献</th></tr></thead><tbody id="weights-a"></tbody></table></article>
-        <article class="card"><div class="toy-heading"><h3>候选 B</h3><output class="big-number" id="risk-b" aria-label="候选 B 最坏平均损失">3.5</output></div><table class="toy-table"><caption>原块顺序 · 损失 [3, 3, 3, 4]</caption><thead><tr><th scope="col">块</th><th scope="col">损失</th><th scope="col">权重</th><th scope="col">贡献</th></tr></thead><tbody id="weights-b"></tbody></table></article>
-      </div>
-      <p class="toy-result" id="toy-result" role="status" aria-live="polite" aria-atomic="true">Λ = 2：A 为 5，B 为 3.5；本算例中 B 的最坏平均损失较低。</p>
-      <p class="source">教学模拟：无训练、无交易、无论文实验复现。横条表示权重占 100% 的比例；“贡献” = 该块损失 × 权重。</p>
+      <p class="eyebrow">07 / 第 3 步 · 先读懂记录</p>
+      <h2 id="title-7">过去，四种天气各占四分之一。</h2>
+      <p>我们假设：只要遇到某种天气，就等待卡片上固定的分钟数。先不考虑同一天内的其他变化。</p>
+      <table class="record-table">
+        <caption>四张情景卡 · 数字表示每次等车的分钟数</caption>
+        <thead><tr><th scope="col">天气</th><th scope="col">A 站</th><th scope="col">B 站</th><th scope="col">过去占比</th></tr></thead>
+        <tbody><tr><th scope="row">晴天</th><td>1 分钟</td><td>3 分钟</td><td>¼</td></tr><tr><th scope="row">阴天</th><td>1 分钟</td><td>3 分钟</td><td>¼</td></tr><tr><th scope="row">小雨</th><td>1 分钟</td><td>3 分钟</td><td>¼</td></tr><tr><th scope="row">大雨</th><td>9 分钟</td><td>4 分钟</td><td>¼</td></tr></tbody>
+      </table>
+      <div class="grid"><div><h3>A 站的平均等待</h3><p class="big-number">3 分钟</p><p>把 1、1、1、9 加起来，得到 12；再除以 4。</p></div><div><h3>B 站的平均等待</h3><p class="big-number">3.25 分钟</p><p>把 3、3、3、4 加起来，得到 13；再除以 4。</p></div></div>
+      <p class="tagline">如果直接用这两个平均数判断未来，就沿用了“未来也各占四分之一”这个比例。</p>
+      <p class="source">以上均为教学算例。平均数同时依赖两件事：每种情景下等多久，以及每种情景出现得多不多。</p>
     </section>
 
     <section class="slide" aria-labelledby="title-8" tabindex="-1">
-      <p class="eyebrow">08 / 证据边界 · 理论风险与测量值</p>
-      <h2 id="title-8">能算出 CVaR，不等于知道真实部署风险。</h2>
-      <div class="grid"><article class="card highlight"><h3>定理回答的事</h3><p>在论文声明的假设下，对块损失做最坏混合，与上尾 CVaR 对应。</p><p>这是关于<strong>风险结构</strong>的等式。</p></article><article class="card"><h3>现实还要补的事</h3><p>历史块损失只是有限样本估计；样本可能相关，模型还经历过搜索筛选。</p><p>需要控制<strong>估计误差、容量和筛选偏差</strong>，才能讨论部署风险。</p></article></div>
-      <p class="tagline">把估计的块损失代进公式，得到的是一个经验压力分数；这一步本身没有消除估计误差。</p>
-      <div class="card warning"><h3>论文实证并不支持“稳健聚合总能提高收益”</h3><p>附录 B.3 的股票候选比较中，稳健选择没有显示出对普通均值选择的稳定显著优势。应区分可证明的条件命题与有限数据中的效果。</p></div>
-      <p class="source"><a href="https://arxiv.org/html/2608.23416v2#S8" target="_blank" rel="noopener noreferrer">§8，部署风险</a><a href="https://arxiv.org/html/2608.23416v2#A2.SS3" target="_blank" rel="noopener noreferrer">附录 B.3，实证比较</a></p>
+      <p class="eyebrow">08 / 给变化划一条边界</p>
+      <h2 id="title-8">假想未来 8 天，每种天气最多占 4 天。</h2>
+      <p class="lead">原比例下，晴、阴、小雨、大雨各有 2 天。现在允许某种天气变多，但先规定：任何一种都不能超过 4 天。</p>
+      <div class="card highlight">
+        <h3>这次检查遵守三条规则</h3>
+        <ol class="steps"><li>只从原来的四张天气卡中选。</li><li>每种天气可以占 0 到 4 天。</li><li>最后必须凑满 8 天，不能多也不能少。</li></ol>
+      </div>
+      <p class="tagline">我们声明的是“这次检查允许变化到哪里”。这个上限并不是从旧记录里得到的未来保证。</p>
+      <p>允许某种天气占 0 天，只是为了检查极端排法。我们不能操纵天气，这个 8 天安排也不是天气预报。</p>
+      <p class="source">教学类比：用有限的情景配比，帮助理解原文<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">状态、机制与覆盖的假设</a>。</p>
     </section>
 
     <section class="slide" aria-labelledby="title-9" tabindex="-1">
-      <p class="eyebrow">09 / 反例 · 机制在哪失效</p>
-      <h2 id="title-9">历史配比再怎么改，也混不出没见过的 20。</h2>
-      <div class="grid"><article class="card"><h3>历史块损失</h3><p class="big-number">[1, 1, 1, 9]</p><p>任何非负、总和为 1 的混合，平均损失都不超过 9。</p><p>即使 Λ = 4，把权重全放在坏块上，仍只能得到 9。</p></article><article class="card warning"><h3>未被覆盖的新状态</h3><p class="big-number" style="color:var(--warm)">20</p><p>若未来真实平均损失变成 20，它不能由上述历史块混合表示。</p><p>这时 recurrence 假设不成立，原来的条件保证不能直接沿用。</p></article></div>
-      <p class="tagline">Λ 允许历史坏状态变得更常见；它不会自动创造对未知状态的保护。</p>
-      <p class="muted">此反例给的是简化模型下的未来平均损失；有限样本里的单次大损失，不能仅凭这一个数就判定理论假设被推翻。</p>
-      <p class="source">反例数字是教学构造。假设与适用范围：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4</a><a href="https://arxiv.org/html/2608.23416v2#S13" target="_blank" rel="noopener noreferrer">§13</a></p>
+      <p class="eyebrow">09 / 一步一步排最坏的 8 天</p>
+      <h2 id="title-9">先填等待最长的天气，填满上限再继续。</h2>
+      <ol class="steps"><li><strong>先放 4 个大雨天。</strong>大雨让两站都等得最久，4 天已经达到上限。</li><li><strong>还剩 4 天。</strong>其他三种天气在同一站里等得一样久，任选一种填进去；这里选晴天。</li></ol>
+      <div class="calendar" aria-label="教学安排：4天大雨，4天晴天"><span class="rain">大雨<small>第 1 天</small></span><span class="rain">大雨<small>第 2 天</small></span><span class="rain">大雨<small>第 3 天</small></span><span class="rain">大雨<small>第 4 天</small></span><span>晴天<small>第 5 天</small></span><span>晴天<small>第 6 天</small></span><span>晴天<small>第 7 天</small></span><span>晴天<small>第 8 天</small></span></div>
+      <div class="grid"><div><h3>A 站</h3><p>4 天各等 9 分钟，4 天各等 1 分钟。<br>总共 40 分钟，分给 8 天。</p><p class="big-number">平均 5 分钟</p></div><div><h3>B 站</h3><p>4 天各等 4 分钟，4 天各等 3 分钟。<br>总共 28 分钟，分给 8 天。</p><p class="big-number">平均 3.5 分钟</p></div></div>
+      <p class="source">这是允许范围内的最坏平均等待，不是预测值。把最后 4 天换成阴天或小雨，平均等待不变。</p>
     </section>
 
-    <section class="slide" aria-labelledby="title-10" tabindex="-1">
-      <p class="eyebrow">10 / 轮到你 · 理解待验证</p>
-      <h2 id="title-10">先预测，再回到滑块验证。</h2>
-      <div class="card highlight"><p class="question">把 Λ 从 1 提高到 2，最坏平均损失会变小吗？为什么？</p></div>
-      <p class="lead" style="margin-top:28px">先用一两句话解释你的判断。你可以引用权重约束，也可以沿四块算例推理。</p>
-      <p>收到你的实际回答后，再检查推理、解释卡点并继续下一步。</p>
-      <p class="muted">材料已准备不等于你已掌握；本页不预填你的回答，也不记录未经验证的学习结论。</p>
-      <p class="source">需要自学核对时，参考答案位于<a href="answers.html">独立答案页</a>。建议完成解释后再打开。</p>
+    <section class="slide" id="calculator" aria-labelledby="title-10" tabindex="-1">
+      <p class="eyebrow">10 / 亲手试一次</p>
+      <h2 id="title-10">每种天气允许占更多天，会发生什么？</h2>
+      <p>拖动上限。程序先排等得最久的天气，再依次填剩余天数；四种天气安排的天数始终加起来等于 8。</p>
+      <div class="control-panel">
+        <label for="days-cap">假想 8 天里，每种天气最多出现几天</label>
+        <output id="days-cap-value" for="days-cap">4 天</output>
+        <div class="range"><input id="days-cap" type="range" min="2" max="8" step="1" value="4" aria-describedby="days-details"><div class="range-labels"><span>2 天</span><span>8 天</span></div><div class="presets" aria-label="快速选择天气上限"><button type="button" data-cap="2" aria-pressed="false">最多 2 天</button><button type="button" data-cap="4" aria-pressed="true">最多 4 天</button><button type="button" data-cap="8" aria-pressed="false">最多 8 天</button></div></div>
+        <p id="days-details" style="grid-column:1/-1;margin:0">先放 4 天大雨，还剩 4 天，再填给等得同样久的其他天气。</p>
+      </div>
+      <div class="grid">
+        <article class="card"><div class="toy-heading"><h3>A 站 · 最坏平均等待</h3><div><output class="big-number" id="risk-a" aria-label="A站最坏平均等待分钟">5</output><span class="unit"> 分钟</span></div></div><table class="toy-table"><caption>每种天气占几天、贡献多少等待</caption><thead><tr><th scope="col">天气</th><th scope="col">安排</th><th scope="col">每次等</th><th scope="col">总分钟</th></tr></thead><tbody id="weights-a"></tbody></table><p class="result-line" id="totals-a">共 8 天，合计 40 分钟，再除以 8。</p></article>
+        <article class="card"><div class="toy-heading"><h3>B 站 · 最坏平均等待</h3><div><output class="big-number" id="risk-b" aria-label="B站最坏平均等待分钟">3.5</output><span class="unit"> 分钟</span></div></div><table class="toy-table"><caption>每种天气占几天、贡献多少等待</caption><thead><tr><th scope="col">天气</th><th scope="col">安排</th><th scope="col">每次等</th><th scope="col">总分钟</th></tr></thead><tbody id="weights-b"></tbody></table><p class="result-line" id="totals-b">共 8 天，合计 28 分钟，再除以 8。</p></article>
+      </div>
+      <p class="toy-result" id="toy-result" role="status" aria-live="polite" aria-atomic="true">每种最多 4 天：A 站最坏平均等 5 分钟，B 站等 3.5 分钟。</p>
+      <p class="source">全为人为构造的等待时间，没有真实乘车、市场数据或交易。并列时按“晴、阴、小雨、大雨”的原顺序填；横条表示安排天数占 8 天的比例。</p>
     </section>
 
     <section class="slide" aria-labelledby="title-11" tabindex="-1">
-      <p class="eyebrow">11 / 回到原文</p>
-      <h2 id="title-11">带着一个具体问题，查一处原文。</h2>
-      <ul class="source-list"><li><a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4：五条公理</a> —— 检查 A2 与 A3 分别限制了什么。</li><li><a href="https://arxiv.org/html/2608.23416v2#S6" target="_blank" rel="noopener noreferrer">§6：Theorem 6.2</a> —— 将权重约束与上尾 CVaR 对上。</li><li><a href="https://arxiv.org/html/2608.23416v2#S8" target="_blank" rel="noopener noreferrer">§8：部署风险</a> —— 找出经验评估到实际风险之间还差哪些误差项。</li><li><a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">§10：五阶段标准形</a> —— 把今天的评估机制接回整体。</li><li><a href="https://arxiv.org/html/2608.23416v2#A2.SS3" target="_blank" rel="noopener noreferrer">附录 B.3：实证比较</a> —— 检查条件理论与实证效果之间的距离。</li><li><a href="https://arxiv.org/html/2608.23416v2#S13" target="_blank" rel="noopener noreferrer">§13：讨论与边界</a> —— 回看假设、可证伪性和解释范围。</li></ul>
-      <p><a href="notes.html">继续阅读笔记</a> · <a href="./">返回完整学习包</a></p>
-      <p class="source">所有原文链接固定到 v2。本课研究方法、假设与证据；玩具损失没有实际收益含义。打印本页可输出全部 11 张幻灯片。</p>
+      <p class="eyebrow">11 / 算懂以后，再记两个名字</p>
+      <h2 id="title-11">刚才的做法，在论文里叫什么？</h2>
+      <div class="card highlight">
+        <h3>放大倍数 Λ（读作 lambda）</h3>
+        <p>原来每种天气占 2 天。最多允许 4 天，就是最多放大到原来的 2 倍，所以这个例子里 Λ = 2。</p>
+        <p>最多 2 天，对应 1 倍；最多 8 天，对应 4 倍。这个倍数是我们先声明的检查边界。</p>
+      </div>
+      <h3 style="margin-top:28px">CVaR：给表现最差的一部分取平均</h3>
+      <p>允许放大到 2 倍时，刚才的结果也等于：从原来四张卡里取等待最长的一半，再算平均。</p>
+      <p>A 站取 9 和任意一个 1，平均是 5；B 站取 4 和任意一个 3，平均是 3.5。<strong>这不是只看最坏的一天。</strong></p>
+      <p class="muted">选到边界时，一张卡可以只参与一部分。原文记作 CVaR<sub>1/Λ</sub>：下标说的是取最差的多大比例，不是预测有多少把握。</p>
+      <p class="source">作者证明的对应关系：<a href="https://arxiv.org/html/2608.23416v2#S6" target="_blank" rel="noopener noreferrer">最坏重加权的计算</a> 完整条件与公式可在<a href="notes.html">详细讲解</a>中展开。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-12" tabindex="-1">
+      <p class="eyebrow">12 / 第 3 步 · 把公交算例接回真实评估</p>
+      <h2 id="title-12">真实验证要保留连续时段，还要防止偷看答案。</h2>
+
+      <p>“回测”是在旧资料中模拟运行规则：每个时点只使用当时已经知道的信息。它不能知道真实未来，也不是一次实际交易。</p>
+      <dl class="definitions">
+        <dt>拿到什么</dt><dd>候选方法在一段段连续历史时段上的表现。可以把表现差记成较大的“损失分数”，它不一定等于亏掉的人民币。</dd>
+        <dt>做什么</dt><dd>按预先说明的尺度分块，不随意打散时间顺序；去掉与验证答案重叠的训练资料，并留出隔离间隔；然后按允许的比例变化，检查坏时段的平均损失。</dd>
+        <dt>交出什么</dt><dd>每个候选方法在这组假设下的压力分数，而不是未来表现的预报。</dd>
+      </dl>
+      <p class="reading-note">四种天气不是四笔交易。原文处理连续历史时段的状态分布；类比省略了时间依赖、观测噪声、交易成本和反复挑选规则的偏差。真实块分数也只是估计值。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S6" target="_blank" rel="noopener noreferrer">连续块与最坏重加权</a> · <a href="https://arxiv.org/html/2608.23416v2#S8.SS1" target="_blank" rel="noopener noreferrer">验证隔离与风险误差</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-13" tabindex="-1">
+      <p class="eyebrow">13 / 第 4 步 · 为尝试过的所有方案付账</p>
+      <h2 id="title-13">试得越多，越容易挑中一个碰巧好看的结果。</h2>
+
+      <p class="lead">想象把公交排法、时间窗口和评分方式换了很多遍，最后只展示最支持 A 站的那一遍。成绩可能好看，但证据并没有因此更强。</p>
+      <dl class="definitions">
+        <dt>拿到什么</dt><dd>候选清单、搜索过程、验证分数，以及真正有效的资料量。</dd>
+        <dt>做什么</dt><dd>预先限制尝试的规模，记下整个过程，并扣掉“只因为试得多而挑中幸运值”的部分。边看结果边改变搜索方向时，不能只数最后留下的几个方案。</dd>
+        <dt>交出什么</dt><dd>经过筛选偏差校正的候选，以及它还剩多少可相信的优势。</dd>
+      </dl>
+      <p>把评分更偏向少见的坏时段，也需要更多证据。同一批资料不能免费同时支持更多候选和更严格的稳健要求，这两项要一起算进研究预算。</p>
+      <p class="tagline">多次查看同一份保留资料，也会逐渐把它用成训练资料；不能一直把它当全新的考卷。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S7.SS3" target="_blank" rel="noopener noreferrer">搜索选择的代价</a> · <a href="https://arxiv.org/html/2608.23416v2#S8.SS2" target="_blank" rel="noopener noreferrer">自适应尝试与评估</a> · <a href="https://arxiv.org/html/2608.23416v2#S12" target="_blank" rel="noopener noreferrer">一次性审计</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-14" tabindex="-1">
+      <p class="eyebrow">14 / 第 5 步 · 把不确定性带进投入规模</p>
+      <h2 id="title-14">判断有一点优势，也不等于应该投入很多。</h2>
+
+      <dl class="definitions">
+        <dt>拿到什么</dt><dd>已经校正的优势、估计误差、坏环境的影响、优势可能随时间减弱的程度，以及交易成本。</dd>
+        <dt>做什么</dt><dd>先检查扣完这些因素后，还剩不剩可支持的优势；再根据不确定性缩小资金投入的规模。</dd>
+        <dt>交出什么</dt><dd>一个受约束的行动规模。证据不足时，结果可以是零。</dd>
+      </dl>
+      <p class="tagline">选对方向，和把规模控制得合适，是两件不同的事。过度相信一个不准确的估计，仍可能把行动放得太大。</p>
+      <p>找到的规律可能被环境消磨，执行也有费用。论文在特定近似下推导如何收缩，不意味着任何人都应固定投入一半；已经计算过的收缩或信号衰减，也不能再机械扣一次。</p>
+      <p class="reading-note">这一页说明研究方法，不根据论文替读者制定个人交易操作。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S9" target="_blank" rel="noopener noreferrer">不确定性与规模选择</a> · <a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">五步衔接</a> · <a href="https://arxiv.org/html/2608.23416v2#S11.Thmtheorem4" target="_blank" rel="noopener noreferrer">优势衰减与成本</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-15" tabindex="-1">
+      <p class="eyebrow">15 / 扩展到多个投资对象</p>
+      <h2 id="title-15">对象更多，不一定经历了更多种坏环境。</h2>
+
+      <p class="lead">同时研究很多投资对象，可能帮助平均掉各自独有的噪声。但它们可能被同一场危机一起影响。</p>
+      <p>用公交继续作类比：多看几条线路，能分散某一辆车偶发延误的影响；同一场暴雨仍可能让所有线路同时变慢。</p>
+      <div class="card highlight"><h3>数量和独立信息，要分开数。</h3><p>100 个一起涨跌的投资对象，不等于 100 段互相独立的市场历史。论文讨论的是它们真正增加了多少有效信息。</p></div>
+      <p class="tagline">这会回到第 2 步的学习容量，也会影响后面评估误差的大小。</p>
+      <p class="reading-note">公交线路只是教学类比。增加对象能带来的好处，受到共同环境风险和实际相关性的限制。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S7.SS5" target="_blank" rel="noopener noreferrer">跨对象的信息与共同环境</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-16" tabindex="-1">
+      <p class="eyebrow">16 / 让整套假设可以被检查</p>
+      <h2 id="title-16">做一张研究账单，再允许资料反驳它。</h2>
+
+      <h3>先把花掉的信息记在同一张账上</h3>
+      <p>记录模型有多灵活、资料怎样重叠、收缩多少、整个研究试过多少方案，再把学习、筛选和坏时段估计的代价放到一起。换几组事先说明的假设，检查结论有多敏感。</p>
+      <h3 style="margin-top:24px">再用保留资料检查自己的声明</h3>
+      <p>相同状态下的规律是否已经变了？相关性持续得是否比声明更久？旧窗口里的状态比例变化是否已经超过自称的上限？发现矛盾，就应修正或放弃对应声明。</p>
+      <p class="tagline">算得出一张账单，不代表这张账单已被实证验证；这次检验没否定，也不代表未来必定成立。</p>
+      <p>还可以把整个研究截到一个更早的时间点重新运行，检查后来的成绩是否受过偷看。作者也建议展示随比例上限变化的整条曲线，而不是只留下一个最好看的分数。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#S11" target="_blank" rel="noopener noreferrer">把各项代价放到同一账上</a> · <a href="https://arxiv.org/html/2608.23416v2#S12" target="_blank" rel="noopener noreferrer">反驳、审计与敏感性检查</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-17" tabindex="-1">
+      <p class="eyebrow">17 / 论文真的验证了多少</p>
+      <h2 id="title-17">实证结果是混合的，不能说整套方法已被验证有效。</h2>
+
+      <ol class="plain-steps">
+        <li><strong>对坏时段更保守地评分，没有被证明普遍选得更好。</strong>论文比较了普通均值选择与多种稳健排序；某些设置下，后者甚至更差。</li>
+        <li><strong>关于过度复杂、反复筛选后表现衰减的预测，得到部分支持。</strong>部分衰减规模与预测相符，但不构成全流程的普遍保证。</li>
+        <li><strong>真正增加有效信息的多个对象，可能支持更复杂的学习。</strong>这一方向得到部分支持，同时仍受共同环境影响。</li>
+        <li><strong>有些结论还看不清，有些尚未检验。</strong>噪声和信号随时间减弱限制了部分检验；关于最终投入比例的一项预测尚未测试。</li>
+      </ol>
+      <p class="reading-note">把“理论在条件下成立”“某项预测得到部分支持”和“整体在真实市场更好”分开，才能准确理解作者的证据。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#A2.SS3" target="_blank" rel="noopener noreferrer">选择准则的比较</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS6" target="_blank" rel="noopener noreferrer">后续表现的衰减</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS7" target="_blank" rel="noopener noreferrer">多个对象的检验</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS8" target="_blank" rel="noopener noreferrer">预测检验总览</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-18" tabindex="-1">
+      <p class="eyebrow">18 / 完整流程可能交出的结果</p>
+      <h2 id="title-18">作者把五步接起来后，一次测试得到了“暂不投入”。</h2>
+
+      <p class="lead">在论文的一组实验里，作者在预先声明的连续时段尺度上，允许未来对历史状态的偏重最多放大到 4 倍，并按事先承诺的方式计算惩罚。</p>
+      <div class="card highlight"><h3>扣完不确定性与成本后，所有候选都没达到它的投入条件。</h3><p>于是这组数据和这些声明下，流程的输出是零投入。</p></div>
+      <p class="tagline">评估流程的用途包括拒绝证据不足的方案，而不只是从候选里强行挑一个。</p>
+      <p>这个结果不代表任何投资都不行，也不代表“放大到 4 倍”是对所有人的正确设置。它展示的是：具体资料与具体假设，会共同决定流程能支持什么结论。</p>
+      <p class="reading-note">公交滑块只验证第 3 步的算术；它没有重做这项完整金融实验，更没有验证其余四步。</p>
+<p class="source">原文：<a href="https://arxiv.org/html/2608.23416v2#A2.SS5" target="_blank" rel="noopener noreferrer">把五步接起来的完整实验</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-19" tabindex="-1">
+      <p class="eyebrow">19 / 这套检查照顾不到什么</p>
+      <h2 id="title-19">从没见过的“停运”，不能靠多排几个雨天补出来。</h2>
+      <p class="lead">四张旧卡里，A 站最长只写了 9 分钟。现在出现一张新卡：停运，只能等接驳车，固定要 20 分钟。</p>
+      <div class="grid"><div class="card"><h3>只改变旧卡的比例</h3><p>就算假想 8 天全是大雨，每天仍只等 9 分钟。</p><p class="big-number">最多 9 分钟</p></div><div class="card warning"><h3>出现未覆盖的新状态</h3><p>停运卡根本不在原来的四张卡中。</p><p class="big-number" style="color:var(--warm)">20 分钟</p></div></div>
+      <p class="tagline">旧情景的比例变大，和出现旧情景之外的新状态，是两种不同的问题。</p>
+      <p>真实等待时间也会波动。这里把每张卡写成固定分钟，是为了讲清覆盖边界；现实里偶然等到一次 20 分钟，不能单凭一次观察就判断整个假设失败。</p>
+      <p class="source">此反例仅为教学构造，针对原文关于历史状态覆盖未来的假设：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">状态、机制与覆盖的假设</a><a href="https://arxiv.org/html/2608.23416v2#S13" target="_blank" rel="noopener noreferrer">讨论与边界</a>。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-20" tabindex="-1">
+      <p class="eyebrow">20 / 用自己的话解释</p>
+      <h2 id="title-20">不写公式，也能检查理解。</h2>
+      <div class="card highlight"><p class="question">如果未来大雨天变多，过去平均等待更短的 A 站，就一定仍比 B 站好吗？请不用公式解释。</p></div>
+      <p class="lead" style="margin-top:28px">先说说你的理由。可以谈天气出现的次数，也可以谈两个车站各自怕什么天气。</p>
+      <p>这一篇的全部讲解与实践已经提供，无需等你作答才能继续阅读。你的回答只用于获得反馈；理解程度仍待验证。</p>
+      <p>你也可以回到第 10 页，把上限改成 3 天再试；然后沿第 2 页的五步地图，解释每一步防止了哪一种误判。</p>
+      <p class="source"><a href="notes.html">详细讲解</a> · <a href="answers.html">独立参考答案</a> · <a href="./">本篇总览</a><br>建议先回答，再看参考答案。打印本页会输出全部 20 张幻灯片。</p>
     </section>
   </main>
-  <footer class="controls" aria-label="翻页控制"><button type="button" id="previous" aria-label="上一页">← 上一页</button><div class="page-count"><span id="counter" role="status" aria-live="polite" aria-atomic="true">1 / 11</span><div class="keyboard-hint">← → 翻页 · Home / End</div></div><button type="button" id="next" aria-label="下一页">下一页 →</button></footer>
+  <footer class="controls" aria-label="翻页控制"><button type="button" id="previous" aria-label="上一页">← 上一页</button><div class="page-count"><span id="counter" role="status" aria-live="polite" aria-atomic="true">1 / 20</span><div class="keyboard-hint">← → 翻页 · Home / End</div></div><button type="button" id="next" aria-label="下一页">下一页 →</button></footer>
   <script>
     (() => {
       "use strict";
@@ -248,6 +460,7 @@
       let current = 0;
 
       function hashIndex() {
+        if (window.location.hash === "#calculator") return slides.findIndex((slide) => slide.querySelector("#days-cap"));
         const match = /^#([1-9]\d*)$/.exec(window.location.hash);
         return match ? Math.min(Number(match[1]) - 1, slides.length - 1) : 0;
       }
@@ -257,7 +470,7 @@
         slides.forEach((slide, position) => { slide.hidden = position !== current; });
         previous.disabled = current === 0;
         next.disabled = current === slides.length - 1;
-        counter.textContent = `${current + 1} / ${slides.length}`;
+        counter.textContent = (current + 1) + " / " + slides.length;
         if (focus) {
           slides[current].focus({ preventScroll: true });
           window.scrollTo({ top: 0, behavior: "auto" });
@@ -267,7 +480,7 @@
       function navigate(index) {
         const destination = Math.max(0, Math.min(index, slides.length - 1));
         if (destination !== current) {
-          history.pushState(null, "", `#${destination + 1}`);
+          history.pushState(null, "", slides[destination].id === "calculator" ? "#calculator" : "#" + (destination + 1));
           show(destination, true);
         }
       }
@@ -286,67 +499,83 @@
         }
       });
 
-      const lambdaInput = document.querySelector("#lambda");
+      const daysInput = document.querySelector("#days-cap");
+      const weather = ["晴天", "阴天", "小雨", "大雨"];
       const format = (value) => Number(value.toFixed(4)).toString();
-      const percent = (value) => `${format(value * 100)}%`;
 
-      function worstMix(losses, lambda) {
-        const weights = losses.map(() => 0);
-        const order = losses.map((loss, index) => ({ loss, index }))
-          .sort((left, right) => right.loss - left.loss || left.index - right.index);
-        const cap = lambda / losses.length;
-        let remaining = 1;
-        for (const block of order) {
-          if (remaining <= 1e-12) break;
-          weights[block.index] = Math.min(cap, remaining);
-          remaining -= weights[block.index];
+      function worstArrangement(waits, daysCap) {
+        if (!Number.isInteger(daysCap) || daysCap < 2 || daysCap > 8) {
+          throw new RangeError("Each weather may occupy between 2 and 8 days.");
         }
-        return { weights, risk: losses.reduce((sum, loss, index) => sum + loss * weights[index], 0) };
+        const days = waits.map(() => 0);
+        const order = waits.map((wait, index) => ({ wait, index }))
+          .sort((left, right) => right.wait - left.wait || left.index - right.index);
+        let remaining = 8;
+        for (const scene of order) {
+          if (remaining === 0) break;
+          days[scene.index] = Math.min(daysCap, remaining);
+          remaining -= days[scene.index];
+        }
+        if (remaining !== 0) throw new Error("The arrangement must contain exactly 8 days.");
+        const totalMinutes = waits.reduce((sum, wait, index) => sum + wait * days[index], 0);
+        return { days, totalMinutes, average: totalMinutes / 8, lambda: daysCap / 2 };
       }
 
-      function drawCandidate(name, losses, lambda) {
-        const result = worstMix(losses, lambda);
-        document.querySelector(`#risk-${name}`).textContent = format(result.risk);
-        const rows = losses.map((loss, index) => {
+      function drawStop(name, waits, daysCap) {
+        const result = worstArrangement(waits, daysCap);
+        document.querySelector("#risk-" + name).textContent = format(result.average);
+        const rows = waits.map((wait, index) => {
           const row = document.createElement("tr");
           const label = document.createElement("th");
           label.scope = "row";
-          label.textContent = String(index + 1);
-          const lossCell = document.createElement("td");
-          lossCell.textContent = String(loss);
-          const weightCell = document.createElement("td");
-          weightCell.textContent = percent(result.weights[index]);
+          label.textContent = weather[index];
+          const dayCell = document.createElement("td");
+          dayCell.textContent = result.days[index] + " 天";
           const track = document.createElement("div");
           track.className = "bar-track";
           track.setAttribute("aria-hidden", "true");
           const bar = document.createElement("div");
           bar.className = "bar";
-          bar.style.width = percent(result.weights[index]);
+          bar.style.width = (result.days[index] / 8 * 100) + "%";
           track.append(bar);
-          weightCell.append(track);
-          const contribution = document.createElement("td");
-          contribution.textContent = format(loss * result.weights[index]);
-          row.append(label, lossCell, weightCell, contribution);
+          dayCell.append(track);
+          const waitCell = document.createElement("td");
+          waitCell.textContent = wait + " 分";
+          const totalCell = document.createElement("td");
+          totalCell.textContent = format(wait * result.days[index]);
+          row.append(label, dayCell, waitCell, totalCell);
           return row;
         });
-        document.querySelector(`#weights-${name}`).replaceChildren(...rows);
+        document.querySelector("#weights-" + name).replaceChildren(...rows);
+        document.querySelector("#totals-" + name).textContent = "共 " + result.days.reduce((sum, days) => sum + days, 0) + " 天，合计 " + format(result.totalMinutes) + " 分钟，再除以 8。";
         return result;
       }
 
       function updateToy() {
-        const lambda = Number(lambdaInput.value);
-        document.querySelector("#lambda-value").textContent = format(lambda);
-        document.querySelector("#lambda-details").textContent = `每块权重上限 ${percent(lambda / 4)}；上尾比例 ${percent(1 / lambda)}。`;
-        const a = drawCandidate("a", [1, 1, 1, 9], lambda);
-        const b = drawCandidate("b", [3, 3, 3, 4], lambda);
-        const comparison = Math.abs(a.risk - b.risk) < 1e-10 ? "两者的最坏平均损失相同" : `${a.risk < b.risk ? "A" : "B"} 的最坏平均损失较低`;
-        document.querySelector("#toy-result").textContent = `Λ = ${format(lambda)}：A 为 ${format(a.risk)}，B 为 ${format(b.risk)}；本算例中${comparison}。`;
+        const daysCap = Number(daysInput.value);
+        document.querySelector("#days-cap-value").textContent = daysCap + " 天";
+        document.querySelector("#days-details").textContent = daysCap === 8
+          ? "8 天全排成大雨，已经凑满 8 天，不再填其他天气。"
+          : "先放 " + daysCap + " 天大雨，还剩 " + (8 - daysCap) + " 天，再依次填给等得同样久的其他天气，每种仍不能超过 " + daysCap + " 天。";
+        const a = drawStop("a", [1, 1, 1, 9], daysCap);
+        const b = drawStop("b", [3, 3, 3, 4], daysCap);
+        document.querySelector("#toy-result").textContent = "每种最多 " + daysCap + " 天：A 站最坏平均等 " + format(a.average) + " 分钟，B 站等 " + format(b.average) + " 分钟。这是压力检查中的最坏排法，不是天气预报。";
+        document.querySelectorAll("[data-cap]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(Number(button.dataset.cap) === daysCap));
+        });
       }
 
-      lambdaInput.addEventListener("input", updateToy);
+      daysInput.addEventListener("input", updateToy);
+      document.querySelectorAll("[data-cap]").forEach((button) => {
+        button.addEventListener("click", () => {
+          daysInput.value = button.dataset.cap;
+          updateToy();
+        });
+      });
       updateToy();
       show(hashIndex());
     })();
   </script>
+  <script src="../assets/mermaid/renderer.js" defer></script>
 </body>
 </html>

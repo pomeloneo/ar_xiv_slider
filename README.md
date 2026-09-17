@@ -7,13 +7,45 @@
 仓库保持公开，以使用 GitHub Free 的 Pages 静态托管；学习材料和站点均可公开访问。
 每篇学习包按日期存放在 `YYYY-MM-DD/`，由首页论文清单链接进入。
 
+## 读者从哪里开始
+
+打开当天的「本篇总览」，选择「图解全文」或「详细讲解」。
+图解全文（Slider）是可翻页的完整讲解，详细讲解（阅读笔记）是同一篇论文的文章版，任选一种即可，不必重复读两遍。
+学习包指这两种阅读形式，加上可选的算例、练习答案与图源码，不是第三篇必读材料。
+每篇一次提供完整主线，不拆成几天，不以回答练习作为解锁条件。
+
+作者与每日任务需遵循 [内容与阅读体验规范](docs/AUTHORING.md)。
+
+## 共享 Mermaid 图表
+
+笔记和课件使用本地共享的 Mermaid 渲染脚本，无需运行时访问外部 CDN。
+图表可以缩放，保留可编辑源码，加载失败时仍可阅读图注和正文。
+页面接入格式见 [内容与阅读体验规范](docs/AUTHORING.md)。
+
+修改渲染逻辑或依赖时，在仓库根目录运行：
+
+```bash
+npm ci
+npm run build:mermaid
+```
+
+生成的 `site/assets/mermaid/` 和第三方许可证一同提交，各篇共享一次下载；不要手动编辑生成的脚本。
+依赖版本由 `package.json` 和生成的 `package-lock.json` 固定。
+需要在本地学习包中通过相同相对路径打开图表时，可额外提供明确的镜像目录：
+
+```bash
+npm run build:mermaid -- /path/to/arxiv-daily/assets/mermaid
+```
+
+构建语法目标为 Chrome 100 / Safari 15.4；实际渲染须在目标浏览器检查，语法目标不等于已在所有浏览器实测。
+
 ## 发布一天的学习包
 
 每日学习材料先生成到本地目录，再运行：
 
 ```bash
 python3 scripts/publish-day.py \
-  --source /data00/home/limantang.neo/learning/arxiv-daily/YYYY-MM-DD \
+  --source /path/to/arxiv-daily/YYYY-MM-DD \
   --date YYYY-MM-DD \
   --title "Paper title" \
   --arxiv-id "0000.00000v1" \

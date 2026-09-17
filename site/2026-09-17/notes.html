@@ -1,93 +1,241 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>第一篇｜平均回测成绩为何不够？— The Axiomatic Trader</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>过去表现好，未来就可靠吗？｜The Axiomatic Trader 完整讲解</title>
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#203047;background:#f4f6f9;line-height:1.85}*{box-sizing:border-box}body{max-width:1000px;margin:auto;padding:44px 22px 80px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.25;letter-spacing:-.035em}h2{margin-top:2.3em;line-height:1.4}h3{line-height:1.5}p,li{font-size:18px}a{color:#175fb1;text-underline-offset:.2em}a:focus-visible{outline:3px solid #d67916;outline-offset:4px}.eyebrow{color:#526576;font-size:14px;letter-spacing:.12em}.card{background:white;padding:24px;border:1px solid #dce3eb;border-radius:14px;margin:20px 0}.meta{font-size:15px;color:#526576}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.flow div{padding:12px;border-radius:8px;background:#edf2f7;font-size:15px}.flow .focus{background:#d5e9ff;border:2px solid #175fb1}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:10px;border-bottom:1px solid #dce3eb;text-align:left}th{background:#edf2f7}.scroll{overflow:auto}.formula,pre{background:#122337;color:#e7f1ff;padding:20px;border-radius:10px;overflow:auto;line-height:1.65}.tag{font-size:14px;padding:3px 8px;border-radius:5px;background:#eaf1fa;color:#245277}code{font-family:ui-monospace,monospace}.note{border-left:4px solid #cd8c29;padding-left:16px}.links{display:flex;flex-wrap:wrap;gap:18px}footer{margin-top:55px;color:#526576;font-size:14px}@media(max-width:650px){.flow{grid-template-columns:1fr}.card{padding:18px}body{padding:26px 16px 60px}th,td{padding:8px}p,li{font-size:17px}}@media print{body{background:white;padding:0}.card{break-inside:avoid}.links{display:none}}
+:root{color-scheme:light;--ink:#20343d;--muted:#5a6b73;--green:#006f65;--line:#d7e1dd;--paper:#f7f7f2;--soft:#eaf3ee}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.95 system-ui,-apple-system,"Segoe UI",sans-serif}
+main,header,footer{max-width:980px;margin:auto;padding:28px 32px}header{padding-top:42px;border-bottom:1px solid var(--line)}nav{display:flex;flex-wrap:wrap;gap:12px 24px;font-size:16px}a{color:var(--green);text-underline-offset:.2em}a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid #b76800;outline-offset:4px}
+h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.3;letter-spacing:-.04em;margin:24px 0 18px}h2{font-size:1.7rem;line-height:1.45;margin:0 0 20px}h3{font-size:1.28rem;line-height:1.5;margin:32px 0 14px}p{margin:14px 0}section{padding:40px 0;border-bottom:1px solid var(--line)}.lead{font-size:1.15rem}.muted,.caption,figcaption{color:var(--muted);font-size:.9rem}.intro{font-size:15px;color:var(--muted)}.callout{background:var(--soft);border-left:4px solid var(--green);padding:18px 24px;margin:24px 0}.callout p:first-child{margin-top:0}.callout p:last-child{margin-bottom:0}
+details{border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:24px 0;background:#fff}summary{cursor:pointer;font-size:16px;font-weight:600}details p{font-size:16px}.toc ol{columns:2;column-gap:36px;padding-left:24px;font-size:16px}.toc li{break-inside:avoid;margin:8px 0}ul,ol{padding-left:26px}li{margin:8px 0}strong{font-weight:650}.table-wrap{max-width:100%;overflow-x:auto;margin:22px 0}table{border-collapse:collapse;width:100%;font-size:16px;background:#fff}th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}thead{background:#eaf1ed}caption{text-align:left;color:var(--muted);padding-bottom:10px;font-size:15px}
+.ref{font-size:.68em;vertical-align:super;line-height:0;text-decoration:none;color:#5c7379;padding:0 .2em}.ref:hover{text-decoration:underline}.sources{font-size:15px}.sources li{margin:14px 0}.sources a{overflow-wrap:anywhere}.formula,pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2ef;border-radius:8px;padding:18px;font:15px/1.8 ui-monospace,monospace}code{font-size:.88em}.step{margin:22px 0;padding:20px 24px;border:1px solid var(--line);border-radius:12px;background:#fff}.step h3{margin-top:0}.step p:last-child{margin-bottom:0}.small{font-size:15px}
+figure{margin:24px 0;padding:20px;border:1px solid var(--line);background:#fff;border-radius:12px;max-width:100%;min-width:0}[data-mermaid-output]{overflow:auto;max-width:100%;min-width:0}[data-mermaid-output] svg{display:block;margin:auto}[data-mermaid-status]{font-size:14px;color:var(--muted)}figcaption{margin-top:14px}figure details{margin-bottom:0}.paper-title{overflow-wrap:anywhere}
+@media(max-width:620px){body{font-size:17px;line-height:1.9}main,header,footer{padding:24px 18px}h2{font-size:1.45rem}.toc ol{columns:1}section{padding:30px 0}.step,.callout,figure{padding:16px}th,td{padding:10px}.table-wrap table{min-width:340px}}
+@media print{nav,.toc,button{display:none}details{display:block}body{background:white}section{break-inside:auto}a{color:inherit}.ref{color:inherit}}
 </style>
+<script defer src="../assets/mermaid/renderer.js"></script>
 </head>
 <body>
-<nav class="links" aria-label="学习导航"><a href="../">所有论文</a><a href="slides.html">打开幻灯片</a><a href="map.mmd">Mermaid 源码</a></nav>
-<p class="eyebrow">每日 arXiv 带读 · 2026-09-17 · 金融</p>
-<h1>平均回测成绩更好，<br>为什么还可能选错？</h1>
-<p>今天学会一件事：把“未来会更多重复某些历史阶段”变成一个可计算的约束，并解释它为什么导向尾部平均损失 CVaR。</p>
-<section class="card" aria-labelledby="paper-title">
-<h2 id="paper-title" style="margin-top:0;font-size:1.2rem">The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</h2>
-<p class="meta">作者：Jiayu Li · arXiv：2608.23416 · 阅读版本：v2<br>首次提交：2026-08-24；v2 修订：2026-09-02。arXiv 分类为 cs.LG / q-fin.PM，本课按研究问题归入金融方向，没有给交叉论文优先权。</p>
-<p class="meta"><a href="https://arxiv.org/abs/2608.23416v2">论文信息</a> · <a href="https://arxiv.org/html/2608.23416v2">原文 HTML</a> · <a href="https://arxiv.org/pdf/2608.23416v2">原文 PDF</a></p>
-<p><span class="tag">研究问题</span> 如果历史规律只能在明确的复现、依赖与弱信号假设下延续，量化系统的模型选择、验证、搜索和风险配置应受到哪些限制？</p>
-<p class="meta">阅读范围：原文 §3、§4 的 A1–A3、§6、§10、§13，以及附录 B 的相关实验和表格；聚焦定理 6.2。论文共 97 页，本学习包不宣称独立复核了所有证明，也没有重跑作者的市场实证。</p>
+<header>
+<nav aria-label="本篇阅读入口"><a href="index.html">本篇总览</a><a href="slides.html">图解全文</a><a href="#contents" aria-current="page">详细讲解</a></nav>
+<p class="intro">金融 · 零专业基础也能读 · 一篇论文的完整讲解</p>
+<h1>过去表现好，<br>未来就可靠吗？</h1>
+<p class="lead">一条规则在过去看起来很聪明，可能是它真的有用，也可能只是过去恰好照顾了它。怎样把这两种情况尽量分开？这篇论文尝试给出一套从“相信什么”到“怎样验证、投入多少”的完整检查流程。</p>
+<div class="callout"><p><strong>你不需要先学金融，也不需要先看公式。</strong>我们先用两个公交站的等待时间把关键问题算清楚，再把它放回论文的五个步骤。五步、实验结果和局限都在这一篇里，不留到下一天。</p></div>
+<p class="small">喜欢逐页看图，就从<a href="slides.html">图解全文</a>开始；喜欢读文章，继续往下即可。两种形式覆盖同一篇论文，不需要各读一遍。“本篇总览”只是入口和文件目录，不是第三份必读材料。算例、源码和自测是按需使用的补充。</p>
+<details id="paper-details"><summary>论文信息与讲解范围</summary>
+<p class="paper-title"><strong>The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</strong><br>作者：Jiayu Li · arXiv:2608.23416v2 · 主分类 cs.LG，另属 q-fin.PM；本篇按主要学习问题归为金融。</p>
+<p>首次提交：2026-08-24；本文所读 v2 修订于 2026-09-02。<a href="https://arxiv.org/abs/2608.23416v2">论文信息</a> · <a href="https://arxiv.org/html/2608.23416v2">原文 HTML</a> · <a href="https://arxiv.org/pdf/2608.23416v2">原文 PDF</a></p>
+<p>讲解覆盖研究问题、五条假设、五阶段方法、主要理论结论、附录 B 的实证与限制。“完整讲解”不是逐行重证 97 页中的每个证明，也不是重跑作者的市场实验。公式和技术条件放在选读层，正文不要求你提前懂这些符号。</p>
+</details>
+</header>
+<main>
+<details class="toc" id="contents" open><summary>本文目录：整篇内容都在这里</summary>
+<ol><li><a href="#question">作者到底在问什么？</a></li><li><a href="#overview">整篇论文的路线图</a></li><li><a href="#assumptions">先说清楚：哪些事被假定成立？</a></li><li><a href="#stage-1">第一步：规定看什么、相信什么</a></li><li><a href="#stage-2">第二步：别让规则比证据更复杂</a></li><li><a href="#stage-3">第三步：把坏日子变多，再检查一次</a></li><li><a href="#stage-4">第四步：别把试出来的冠军当真本事</a></li><li><a href="#stage-5">第五步：不确定越大，投入越克制</a></li><li><a href="#audit">整套研究怎样自查？</a></li><li><a href="#evidence">论文实际证明、测到了什么？</a></li><li><a href="#limits">哪些地方仍不能保证？</a></li><li><a href="#practice">动手验证与自测</a></li><li><a href="#sources">来源与技术选读</a></li></ol>
+</details>
+
+<section id="question">
+<h2>1. 作者到底在问什么？</h2>
+<p>先把“投资系统”想成一套事先写好的决策规则：看到什么信息时采取什么行动。规则可能很简单，也可能由机器学习模型产生。我们把它放回过去，模拟如果当时照做，会赚多少、亏多少，这叫<strong>回测</strong>。</p>
+<p>问题在于：回测是在已发生的世界里考试。以后遇到的情况，出现次数可能不同；规则也可能把历史中的巧合记住了。更麻烦的是，如果你试过很多规则，再只拿成绩最好的一个出来，成绩还可能被进一步美化。</p>
+<p>作者问的不是“哪只股票明天会涨”，而是：<strong>如果我们只能有限地相信历史规律，那么研究、挑选和使用规则时，必须加上哪些约束？</strong>他的回答是，把关于未来的信念先写清楚，再让规则复杂度、验证方式、试错次数和投入规模都受到这些信念与证据的约束。<a class="ref" href="#ref-1" aria-label="参考资料1">1</a></p>
+<p>读完后，你应当能用自己的话回答三个问题：为什么平均成绩好不等于可靠？为什么越复杂、试得越多，越要警惕？为什么挑出一个看起来不错的规则后，仍不能直接押上全部资源？</p>
 </section>
 
-<h2>先看全景：今天讲的是哪一环？</h2>
-<div class="flow" role="list" aria-label="论文的五阶段框架">
-<div role="listitem">S1<br>声明状态表示与假设</div><div role="listitem">S2<br>限制模型容量并收缩、集成</div><div class="focus" role="listitem">S3 · 本课重点<br>连续块验证与尾部聚合</div><div role="listitem">S4<br>限制搜索并扣除选择偏差</div><div role="listitem">S5<br>计入不确定性后配置风险</div>
-</div>
-<p><span class="tag">作者主张</span> 在论文的公理体系中，逐一省略这些阶段，都存在一个更差的情形。作者明确区分“阶段的必要性”和“所有好系统都必须分解成这五步”；后者并未证明。<a href="https://arxiv.org/html/2608.23416v2#S10">出处：§10</a></p>
-<p>本课只拆五个依赖相连的知识点：历史片段的比例 → 比例的上限 Λ → 最坏加权损失 → CVaR → 估计误差与覆盖边界。</p>
-
-<h2>1. 起点：平均值悄悄固定了比例</h2>
-<p><span class="tag">教学算例</span> 两个候选模型在四个等长历史时间块上，损失记分分别如下。数值完全人为构造，越小越好，不是收益率，也不是作者实验数据。</p>
-<div class="scroll"><table><thead><tr><th>候选</th><th>块 1</th><th>块 2</th><th>块 3</th><th>块 4</th><th>历史平均</th></tr></thead><tbody><tr><th>A</th><td>1</td><td>1</td><td>1</td><td>9</td><td>3</td></tr><tr><th>B</th><td>3</td><td>3</td><td>3</td><td>4</td><td>3.25</td></tr></tbody></table></div>
-<p>直接平均时，每块占 25%，A 胜出。但这个比较还没有回答：如果块 4 这种阶段以后出现得更频繁，A 的优势还在吗？</p>
-<p><span class="tag">教学类比</span> 可以把四个时间块想成四种历史路况，损失是车辆在其中的表现；平均分默认每种路况占四分之一。类比到此为止：真实时间块混合了潜在状态，还可能有时间依赖，不是四次独立抽样。</p>
-
-<h2>2. Λ：先声明未来可以偏到什么程度</h2>
-<p>输入是四个块的风险与一个声明的 Λ。输出不是预测概率，而是一组允许的未来比例。Λ=2 的意思是：每块原占 25%，未来最多占 50%，所有块的比例仍须加起来为 100%。</p>
-<pre class="formula" aria-label="四块的权重约束">w₁ + w₂ + w₃ + w₄ = 1
-每个 wⱼ ≥ 0；每个 wⱼ ≤ Λ / 4</pre>
-<p><span class="tag">作者假设</span> A3 在事先声明的块长度 b 上约束未来状态占比；A2 要求同一状态下的机制不变，或把偏离写成单独的误差项。今天先取机制偏差为零。Λ 与块长度都要先说清楚，不能看完结果再把 Λ 调成有利数值。<a href="https://arxiv.org/html/2608.23416v2#Thmaxiom3">出处：A3</a></p>
-<p class="note">Λ 不能靠历史数据估出一个对未来必然成立的值。历史可以反驳某些过强声明，却不能担保未来仍在这个范围里。稳定的市场机制也不意味着有限时间窗里的占比完全不变。<a href="https://arxiv.org/html/2608.23416v2#S5">出处：§5</a></p>
-
-<h2>3. 怎么找最坏情况：把权重搬向较差的块</h2>
-<p>固定 Λ=2。每块最多放 0.5 的权重；为了得到最坏损失，先给损失最大的块放满，再给次差的块，直到总权重达到 1。</p>
-<ol><li>A 的最差块是块 4，损失 9，放入权重 0.5。</li><li>还剩 0.5，放到损失为 1 的任意一个块；demo 在同分时按原顺序选择块 1。</li><li>最终权重是 [0.5, 0, 0, 0.5]，损失为 0.5×1 + 0.5×9 = 5。</li><li>B 同样得到 [0.5, 0, 0, 0.5]，损失为 0.5×3 + 0.5×4 = 3.5。</li></ol>
-<p>于是平均记分选择 A，受约束的最坏情况比较选择 B。这说明两种目标可以改变排序；不意味着每一组数据都一定会改变排序。</p>
-<p><span class="tag">最小推导</span> 如果较差的块还没装满，而较好的块上仍有权重，把少量权重从较好块搬到较差块，只会提高或保持损失。不断搬到不能再搬，就得到上述贪心解。模型各自取自己的最坏权重，比较的是各自的最坏风险，而不是在断言未来真的选择了这个权重。</p>
-
-<h2>4. 这就是本论文记号里的 CVaR</h2>
-<pre class="formula">R⁺(h) ≤ max Σⱼ wⱼ Rⱼ(h) = CVaR₁/Λ(R₁,…,Rᴮ)
-            w ≥ 0, Σw = 1, wⱼ ≤ Λ/B
-
-等价的有限情形：minₜ [t + (Λ/B) Σⱼ max(Rⱼ − t, 0)]</pre>
-<p><span class="tag">原文结果</span> 在 A2、A3 下，定理 6.2 把未来的条件期望风险上界写成上述最坏加权风险，且此上界能在允许的未来中达到。我们演示的是它的四个等权原子版本。<a href="https://arxiv.org/html/2608.23416v2#S6.Thmtheorem2">出处：定理 6.2</a></p>
-<p>这里 CVaR 的下标 1/Λ 是“最差尾部所占的比例”：Λ=2 就看最差一半。它不同于把 95% 当作置信水平的另一种常见记号。尾部包含不到整数个块时，边界块只取一部分权重，不要直接向上取整后平均。Λ=1 回到平均；四块算例在 Λ=4 就到达最差单块。</p>
-
-<h2>5. 把概念写成一个可执行的小需求</h2>
-<section class="card">
-<p><strong>问题：</strong>验证有权重上限的最坏加权损失，是否等于上尾平均，以及何时改变候选排序。</p>
-<p><strong>输入与假设：</strong>人工损失数组 A/B；四块等权；Λ≥1；损失视作已知的理论块风险；只改变已有块的权重。</p>
-<p><strong>输出：</strong>每步分配的权重、加权损失和排序；正常例 Λ=2、边界例 Λ=1 与 Λ=4，以及未见状态反例。</p>
-<p><strong>正确性依据：</strong>权重非负、总和为 1、不超过 Λ/4；另用枚举可行多面体顶点的独立解法核对最优值。</p>
-<p><strong>有意省略：</strong>模型拟合、真实行情、交易成本、purge/embargo、有限样本与搜索误差、实际仓位。它只验证一个确定性的数学机制。</p>
+<section id="overview">
+<h2>2. 整篇论文其实是在防五种“被骗”</h2>
+<p>先看完整地图，再逐一展开。图中的五个步骤是论文讨论的同一条研究流程，不是五天的课程。</p>
+<figure data-mermaid>
+<div data-mermaid-output></div>
+<p data-mermaid-status role="status">若关系图尚未显示，可先看图注、展开源码，或继续阅读下方逐步讲解；也可尝试用新版浏览器刷新。</p>
+<details><summary>查看可编辑图源码</summary><pre data-mermaid-source>flowchart TD
+    accTitle: 从历史成绩到谨慎决策
+    accDescr: 研究问题经过五个必要检查，最后连接作者的实验结果和方法边界。
+    question["历史成绩好，未来就可靠吗？"] --> scope["第一步：规定看什么、相信什么"]
+    scope --> capacity["第二步：别让规则比证据更复杂"]
+    capacity --> evaluation["第三步：让坏日子变多，再检查"]
+    evaluation --> search["第四步：把试错次数算进去"]
+    search --> sizing["第五步：按不确定程度限制投入"]
+    sizing --> evidence["核查：作者证明和实验支持什么"]
+    evidence --> limits["边界：不等于保证盈利或覆盖新情况"]</pre></details>
+<figcaption>每一步防一种错误：事后改口、记住巧合、忽略坏阶段、挑中运气冠军、过度投入。图可缩放；<a href="map.mmd">下载 Mermaid 源码</a>。</figcaption>
+<noscript><p>当前浏览器没有启用 JavaScript，关系图无法绘制。下面的五步正文包含相同内容。</p></noscript>
+</figure>
+<p>作者在自己的假设框架内，给出了“省略某一步就可能失败”的论证。这里要分清两个说法：“这些检查各有必要”不等于“做完五步就一定成功”，也不等于所有好系统都只能长成同一种样子。<a class="ref" href="#ref-2" aria-label="参考资料2">2</a></p>
 </section>
-<pre>python3 demo.py
-python3 demo.py --lambda 1.5
-python3 -m unittest -v test_demo.py</pre>
-<p><a href="demo.py">下载 demo.py</a> · <a href="test_demo.py">下载独立核对测试</a> · <a href="demo-output.txt">查看实际运行输出</a>。Python 3 标准库即可；课件里的滑块也能演示同一计算。</p>
-<div class="scroll"><table><thead><tr><th>Λ</th><th>A 的最坏损失</th><th>B 的最坏损失</th><th>较小者</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>3.25</td><td>A</td></tr><tr><td>1.5</td><td>4</td><td>3.375</td><td>B</td></tr><tr><td>2</td><td>5</td><td>3.5</td><td>B</td></tr><tr><td>4</td><td>9</td><td>4</td><td>B</td></tr></tbody></table></div>
-<p><span class="tag">已运行</span> 表中结果已由 Python 实际运行核对；8 项测试通过，其中包括 20 个独立顶点枚举子案例。这是算例正确性的证据，不是学习者已掌握的证据。</p>
 
-<h2>6. 两个必须守住的边界</h2>
-<p><strong>未见状态：</strong>假设未来出现一个从没出现在历史中的状态，损失为 20。怎样重新分配历史 [1,1,1,9] 的权重，都造不出这个状态。把 Λ 提到 4 只会算出 9，覆盖假设已经失败；更保守的权重不能补回缺失的历史支持。</p>
-<p><strong>理论风险 ≠ 实测块分数：</strong>定理里的 Rⱼ 是潜在状态下的条件期望风险，实际回测只能拿到含噪声的块损失估计。挑最差尾部还可能挑中了噪声。有限样本、依赖、状态表示误差和多次搜索都要另付误差代价，不能把 demo 的精确等式直接变成真实收益保证。<a href="https://arxiv.org/html/2608.23416v2#S8.SS4">出处：§8.4</a>、<a href="https://arxiv.org/html/2608.23416v2#S13.SS2">§13.2</a></p>
+<section id="assumptions">
+<h2>3. 推理之前，先说清楚相信了什么</h2>
+<p>数学能把“如果……那么……”推得很严密，但不能替你保证那个“如果”在真实市场里成立。这篇论文先列了五条假设。你先记住白话含义，不必记编号。</p>
+<ol>
+<li><strong>不能偷看未来。</strong>某天作出的决定，只能使用那天已经知道的信息。把明天的结果放进今天的输入，回测再好也没有意义。</li>
+<li><strong>在同一种已声明的状态下，生成结果的规律大体相同。</strong>表面行情变了，作者用未必能直接看见的“状态”来解释其中一部分变化。这里说的是规律或分布相同，不是每次结果必须一样；允许多大偏差也要先声明。</li>
+<li><strong>未来不能无限偏离历史覆盖过的情况。</strong>某些历史阶段以后可以更常见，但要有事先说好的上限。没有见过的新情况，并不能靠给旧情况加权自动补出来。</li>
+<li><strong>状态会延续一阵，但影响不能永远不消退。</strong>相邻日子可能高度相似，所以一百条记录不一定等于一百份独立证据。论文并不把某一种固定的指数衰减速度当作这条假设本身。</li>
+<li><strong>真正能提前预测的部分很弱。</strong>价格变化中有大量不可预测的波动。不能因为过去拟合得漂亮，就默认未来也有很强的可预测性。</li>
+</ol>
+<p>这些是作者搭建推理的前提，不是五条已被所有市场普遍验证的自然定律。尤其“未来与过去能差多远”的边界，不能仅凭历史就保证它以后一定成立。<a class="ref" href="#ref-3" aria-label="参考资料3">3</a></p>
+<details><summary>选读：怎样对应原文的符号？</summary>
+<p>以上依次对应 A1–A5。原文进一步声明机制偏差 ε₀、重现上限 Λ、连续块尺度 b、状态相干时间 ℓ、弱信号上限 ρ，以及状态相关信号比例 κ 等量。它们各约束不同问题，不能合并成一个“安全系数”。这份材料不会要求你先记住它们，再开始理解故事。</p>
+</details>
+</section>
 
-<h2>7. 作者拿出了什么证据，又没有证明什么？</h2>
-<div class="scroll"><table><thead><tr><th>原文证据</th><th>应当怎样读</th></tr></thead><tbody>
-<tr><td>附录 B.3：合并的 752 个股票相关候选、19 个样本外年份中，挑选单条最优规则的均值法 Sharpe 为 0.51，五种稳健排序准则为 0.12–0.39；相应比较未达到 |t|=2。</td><td>不能据此说 CVaR 普遍提高真实收益；这个表反而要求我们警惕更窄尾部的估计噪声。</td></tr>
-<tr><td>附录 B.5：作者把五阶段走了一遍；在声明 Λ=4、按其承诺的惩罚方式计算时，没有候选剩下可支持的仓位。图 1 展示候选优势随 Λ 消失。</td><td>这是框架对记录作出的严格审计结果，不是盈利系统复现，更不是让读者按其结果下单。</td></tr>
-<tr><td>附录 B.8：预算饱和与实际 Kelly 比例的预测（P5）未作实证检验。</td><td>不能把理论推导或行业说法写成这篇论文已测得的事实。</td></tr>
-</tbody></table></div>
-<p class="meta">来源：<a href="https://arxiv.org/html/2608.23416v2#A2.SS3">B.3</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS5">B.5</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.F1">原文图 1</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS8">B.8</a>。</p>
-<p><span class="tag">我的教学判断</span> 这篇论文值得作为“如何把回测的前提说清楚”的练习；它并未提供一套经过独立复现、可直接用于交易的方案。尤其要区分数学恒等式、作者的建模假设和有限样本中的实际表现。</p>
+<section id="stage-1">
+<h2>4. 第一步：先规定看什么、相信什么</h2>
+<p>假设你想比较两个公交站。你先决定：按什么情况比较？晴天和雨天要不要分开？只记录等车时间，还是把步行时间也算进去？这些选择一变，“哪个更好”也可能跟着变。</p>
+<p>投资研究也一样。把原始信息整理成规则可以使用的输入，叫作<strong>表示</strong>：例如你选择哪些当时可知的信息、用多长的历史窗口、怎样描述环境。作者要求这些选择与相关假设先被声明，而不是看见一个失败结果后，随手改一种分类把它解释掉。</p>
+<div class="step"><h3>这一步怎样工作？</h3><p><strong>输入：</strong>原始历史信息，以及你允许研究使用的信息范围。<br><strong>动作：</strong>规定信息如何变成模型输入、按什么尺度看历史、愿意接受多大的环境变化。<br><strong>输出：</strong>一份可核查的研究设定，后面每一步都按同一套设定进行。</p></div>
+<p>少了它，后面的“验证”可能不断更换考卷和评分标准。需要注意：把状态写下来，不代表真实状态已经被完整观察到了；写清假设是让别人能够质疑它，不是让它自动变真。<a class="ref" href="#ref-2" aria-label="参考资料2">2</a></p>
+</section>
 
-<h2>8. 现在轮到你</h2>
-<p><strong>今天只需回答这一题：</strong>其他条件不变，把 Λ 从 1 提高到 2，最坏平均损失会变小吗？请从“允许选择的权重范围”解释。</p>
-<p>你可以直接回复这道题。其他自测题留作后续：① 为何普通随机 k-fold 可能破坏本课想保留的信息？② 只取最差 ⌈4/Λ⌉ 个块再直接平均，在哪里可能出错？③ 把这个方法迁移到服务器故障压力测试时，怎样描述“未见状态”的边界？</p>
-<p><a href="answers.html">单独打开参考答案（先作答再看）</a>。所有题目当前均为待回答；没有依据把你的状态标为“已掌握”。</p>
+<section id="stage-2">
+<h2>5. 第二步：别让规则比证据更复杂</h2>
+<p>想象你只记了四天的等车时间，却总结出这样的秘诀：“周二、穿蓝外套、走北门时选 A，其他情况再分三种……”你很可能只是为这四天编了一个解释，而不是找到了以后也有用的规律。</p>
+<p>模型也会这样。可调整的地方越多，它越容易贴合历史里的偶然波动。这叫<strong>过拟合</strong>，可以先理解成“把过去的噪声当成了规律”。作者把弱信号和有限证据转成对模型复杂度的约束。</p>
+<p>论文还包含两种配套处理：一是<strong>收缩</strong>，不要原封不动相信一份不稳定的强预测，把它拉回更保守的基准；二是<strong>集成</strong>，固定同一种模型与设置，让训练所用的记录子集或训练中的随机步骤略有变化，再平均所得预测，减少估计不稳的影响。这里不是免费地尝试许多不同模型后再挑着组合；那种额外选择仍需记入搜索的账。</p>
+<p>限制复杂度也不等于简单地数“参数有几个”。可以把参数想成可调整的旋钮：旋钮虽然很多，如果大多受到很强的约束，真正能自由改变规则的空间仍可能很小。因此作者并不是笼统地说大模型一定不好。</p>
+<div class="step"><h3>这一步怎样工作？</h3><p><strong>输入：</strong>已声明的输入表示、历史样本、允许的信号强弱范围。<br><strong>动作：</strong>限制规则能有多复杂，削弱不可靠的估计，合理组合候选。<br><strong>输出：</strong>一批没有过度透支证据的候选预测，交给下一步检验。</p></div>
+<p>作者还区分“用于拟合的证据数量”和“用于给候选排序的有效证据数量”。我们这里只抓住共同直觉：记录很多，不代表有同样多份独立证据；但不能据此擅自把所有样本都统一除以某个状态持续时间。<a class="ref" href="#ref-4" aria-label="参考资料4">4</a></p>
+</section>
 
-<h2>选题与可追溯性</h2>
-<p class="meta">本次恢复本会话早先的抽取：金融方向，364 条检索候选中零基索引 137，对应本篇。当前已核对原文标题、作者、版本和正文可读性，未重新抽签。早先候选池只有元数据过滤，不能追认成“364 篇均已逐一完成正文资格核验”；该首次试运行的流程缺口已保留在 <a href="selection.md">选题审计说明</a>。不声称从 arXiv 全库均匀抽样。</p>
-<footer>材料已准备 ≠ 学习者已掌握。本站讲解与算例是学习材料；金融主题围绕假设、方法与证据，不提供个性化交易指令。</footer>
-</body></html>
+<section id="stage-3">
+<h2>6. 第三步：把坏日子变多，再检查一次</h2>
+<p>这一步最适合亲手算，所以我们多花一点篇幅。以下是虚构的教学账本，不是实测公交数据，也不是作者的投资实验。</p>
+<h3>先看过去：平均值没有算错</h3>
+<p>假设有四张情景卡，每张卡写着在这种天气下等车需要的分钟数。为了只研究“出现次数”的作用，我们暂时假定同一种天气下的等候时间固定。</p>
+<div class="table-wrap"><table><caption>教学情景卡；时间越短越好，过去四种情况各占四分之一。</caption><thead><tr><th scope="col">天气</th><th scope="col">A 站</th><th scope="col">B 站</th></tr></thead><tbody><tr><th scope="row">晴天</th><td>1 分钟</td><td>3 分钟</td></tr><tr><th scope="row">阴天</th><td>1 分钟</td><td>3 分钟</td></tr><tr><th scope="row">小雨</th><td>1 分钟</td><td>3 分钟</td></tr><tr><th scope="row">大雨</th><td>9 分钟</td><td>4 分钟</td></tr></tbody></table></div>
+<p>A 的过去平均是 (1＋1＋1＋9) ÷ 4＝<strong>3 分钟</strong>；B 是 (3＋3＋3＋4) ÷ 4＝<strong>3.25 分钟</strong>。按这个平均，A 更快。</p>
+<p>平均数没有骗人。真正需要警惕的是下一步推断：<strong>把过去的平均直接拿来判断未来，相当于沿用了过去的情景比例。</strong>如果大雨以后变多，A 的劣势就可能更经常出现。</p>
+
+<h3>现在检查变化：给未来拼一份“假想日历”</h3>
+<p>我们不预测明天的天气，只问一个压力测试问题：在未来的假想 8 天里，如果每种天气最多出现 4 天，哪个站最坏会等多久？</p>
+<p>8 天仍然要凑满；任意一种天气都不能超过 4 天。过去等比例的安排是每种 2 天，因此这个检查允许某种天气的占比最多翻倍。它是一条人为声明的检查边界，不是气象预报，更不是人可以控制天气。</p>
+<ol>
+<li><strong>先放最慢的情况：</strong>对 A 来说，大雨最慢。先放 4 个大雨天，已经等了 4×9＝36 分钟；大雨名额用完。</li>
+<li><strong>再填剩下 4 天：</strong>另外三种天气都只等 1 分钟，放哪一种都一样。选晴天填满，增加 4×1＝4 分钟。</li>
+<li><strong>最后求平均：</strong>总共 40 分钟分给 8 天，A 最坏平均等 <strong>5 分钟</strong>。</li>
+</ol>
+<p>对 B 重新做同样的检查：4 个大雨天各等 4 分钟，其余 4 天各等 3 分钟。总共 28 分钟，平均 <strong>3.5 分钟</strong>。在这条明确的压力范围下，B 的最坏平均更短。</p>
+<div class="callout"><p>这里改变的是<strong>评分方式</strong>：从“照过去的比例平均”，换成“在允许的变化里，寻找最不利的平均”。不是改写过去的数据，也不是证明 B 在所有可能未来里都更好。</p></div>
+<p>假想日历里有的天气出现 0 天，是这个检查允许的极端组合，不是断言它真的不会出现。我们分别为 A、B 找各自的最坏组合；本例组合碰巧一样，一般问题里不一定如此。</p>
+<p><a href="slides.html#calculator">去课件的计算器动手试试</a>：把“每种天气最多几天”改成 2、3、4 或 8，看看假想日历和平均时间怎样变化。你不需要写代码。</p>
+
+<h3>算懂之后，再认识两个名字</h3>
+<p>“某种情况最多能比过去常见几倍”，原文用希腊字母 <strong>Λ</strong> 表示，读作 Lambda。我们的 2 倍检查就是 Λ＝2。Λ＝1 时不能改变旧比例；足够大时，则可以把全部比重都压在一个最差的旧情景上。</p>
+<p>“最差的一部分情况的平均损失”叫 <strong>CVaR</strong>。它不是只盯着最坏的那一天。这个四张等权卡片的例子里，2 倍检查得到的是“较差一半情景的平均”：A 是 (9＋1) ÷ 2＝5，B 是 (4＋3) ÷ 2＝3.5。</p>
+<p>作者证明，在已经声明的覆盖和机制条件下，“允许比例改变后的最坏加权平均”与相应尾部比例的 CVaR 对应。这里有一个推导结论，不只是两种指标碰巧算出一样的数。<a class="ref" href="#ref-5" aria-label="参考资料5">5</a></p>
+
+<h3>回到投资：为什么不能把历史随便打散？</h3>
+<p>论文不是把天气卡片当成四笔交易，而是保留连续的历史时段，考察这些时段对应的状态分布和风险。这样才能讨论：如果以后某些不利阶段出现得更多，会发生什么。</p>
+<p>训练和验证之间还要防止信息“串门”。例如，一个训练标签用了接下来几天的结果，就可能碰到验证区间。论文讨论剔除重叠样本、留出间隔等措施；直觉就是别把考试答案的碎片混进复习资料里。</p>
+<p>实际市场中，每段的真实风险并不是一个直接可见的固定数字。你拿到的是有限记录，里面有噪声。因而公交算例只展示重加权的计算；它没有验证真实市场符合这些假设，也没有解决时间依赖、成本或估计误差。<a class="ref" href="#ref-6" aria-label="参考资料6">6</a></p>
+<details><summary>选读：把刚才的过程写成公式</summary>
+<p>把每段的真实平均损失记作 Rᵢ，未来占比记作 wᵢ，历史共有 B 个等权段。权重就是占比：不能为负，加起来为 1，每段不超过 Λ/B。</p>
+<div class="formula">在 wᵢ ≥ 0、Σwᵢ = 1、wᵢ ≤ Λ/B 下，最大化 ΣwᵢRᵢ。
+这个最大值 = CVaR₁/Λ(R)。</div>
+<p>此处下标 1/Λ 指的是“最差尾部占多少”，不是某些软件所用的置信度写法。遇到非整数边界，需要只取边界情景的一部分权重，不能把几个最差值随便取整后平均。程序保留了这个机制。</p>
+<p>在 8 天展示中，每种天气最多 c 天，对应 Λ＝c/2。c＝3 时，最坏日历可放 3 个大雨天、3 个晴天和 2 个阴天；A 平均 4 分钟，B 平均 3.375 分钟。</p>
+</details>
+</section>
+
+<section id="stage-4">
+<h2>7. 第四步：别把“试出来的冠军”当真本事</h2>
+<p>现在假设你比较的不是两个公交方案，而是一万种：换站点、换出门时间、换绕路方式。即使方案大多没有真正优势，也很可能有一个碰巧特别适合过去那一小段记录。</p>
+<p>所以，候选的好成绩还要回答一个问题：<strong>为了找到它，你到底试了多少次？</strong>只公布冠军，却不承认背后试过的所有版本，容易把运气当成规律。这也叫选择偏差。</p>
+<p>作者把搜索过程当成会消耗证据的活动：预先设置搜索预算，再对多次尝试带来的乐观偏差作扣除。这里的“预算”主要是信息与统计意义上的限制，不是你付给电脑的电费，也不是越有钱就能买到无限可靠的历史证据。</p>
+<p>还有一笔不能漏掉的账：更严格地关注坏阶段，本身也需要付出估计代价。盯着更少的极端情景，评分往往更不稳定；所以同一批资料，不能既支持无限多次尝试，又免费支持越来越严的稳健要求。作者把这种尾部评分的额外代价也接进同一份预算。</p>
+<div class="step"><h3>这一步怎样工作？</h3><p><strong>输入：</strong>候选的验证得分、实际的试错过程和事先声明的搜索范围。<br><strong>动作：</strong>把反复尝试的代价算进去，降低对筛选后最好成绩的信任。<br><strong>输出：</strong>经过搜索偏差校正的证据；扣完之后，也可能没有任何候选值得继续使用。</p></div>
+<p>这并不是“永远不要试新想法”。它要求你在报告“我发现了一个好规则”时，同时交代发现过程，不能无限复用同一段历史却每次都当作新证据。<a class="ref" href="#ref-7" aria-label="参考资料7">7</a></p>
+</section>
+
+<section id="stage-5">
+<h2>8. 第五步：有一点优势，也不等于可以全力投入</h2>
+<p>最后，即使一个候选经过了前面的检查，“要不要用”和“用多大”仍是两个问题。对结果估计得越不准，过大的投入越可能把一次估计错误放大成难以承受的损失。</p>
+<p>作者讨论的 Kelly 思路，是一种按估计优势和风险来决定投入规模、追求长期复利增长的数学方法。你不用先会它的公式：这里要抓住的是，<strong>估计出来的优势并不等于确定的优势，所以投入要计入估计误差。</strong></p>
+<p>论文由此得到一种“分数 Kelly”：把理想条件下的投入比例再缩小。缩小多少与估计的不确定性、信息预算使用程度有关，不是给所有人一条统一的“永远投一半”规则。</p>
+<div class="step"><h3>这一步怎样工作？</h3><p><strong>输入：</strong>前面留下的优势估计，以及它有多不确定。<br><strong>动作：</strong>在风险分配里扣除不确定性，避免把不稳的估计放大。<br><strong>输出：</strong>受到约束的投入规模；在优势不足时，也可以是零。</p></div>
+<p>这个结论仍依赖具体的分布假设和近似，不能直接变成现实交易指令。还有一个容易重复扣减的地方：前面如果已经对同一份预测做过收缩，不能又不加区分地机械“减半”。<a class="ref" href="#ref-8" aria-label="参考资料8">8</a></p>
+<details><summary>选读：为什么有人会提到 half-Kelly？</summary>
+<p>在论文相应条件下，预算利用率达到 1 时，Kelly 分数有不超过 1/2 的上界。它不是所有市场的普遍定律，也不意味着每个策略的最优值恰好为一半。作者附录里的相关成熟流程预测尚未做实证检验。</p>
+<p>其局部推导使用高斯边际估计以及小收益下对对数增长的近似；公式里的分数 f＝s²/(s²＋τ²) 会随着估计误差 τ² 的增大而缩小。脱离这些条件，不能只摘出一个“半仓”数字。这里不提供任何个人投资比例建议。</p>
+</details>
+</section>
+
+<section id="audit">
+<h2>9. 真正使用时，怎样检查自己有没有骗自己？</h2>
+<p>作者没有把五步流程画完就停下来。他还要求把整项研究整理成一份可复算的“账单”：用了哪些信息，有多少可靠证据，尝试过多少候选，为不确定性和环境变化扣了多少余量。只交一张漂亮的收益曲线，不够别人审查这笔账。</p>
+<p>接着做敏感性检查：把“未来能偏离多远”等声明换成不同值，整套流程重新计算。如果条件稍微变严，优势就立刻消失，那么结果强烈依赖那条声明，这本身就是应报告的信息。</p>
+<p>还可以把研究起点挪到历史上一个更早的日期：截断后面的信息，连同候选搜索与选择过程一起重跑，再用后来的数据做事先约定的审计。不能拿事后已经挑好的冠军，假装自己当年就会选中它。</p>
+<p>历史数据能反驳某些过强的声明，但一次检验没有拒绝某条声明，仍不能保证未来服从它。论文也讨论了策略优势可能随时间减弱、执行有成本；这些损耗应计入同一份账，而不是忽略掉，或在不同阶段对同一种损耗重复扣除。<a class="ref" href="#ref-9" aria-label="参考资料9">9</a></p>
+</section>
+
+<section id="evidence">
+<h2>10. 讲完整个流程后，论文的证据到底有多强？</h2>
+<p>要把三件事分开看：作者提出什么、在假设下证明什么、在真实数据上观察到什么。前两者不能代替第三者。</p>
+<h3>理论部分：把一些研究习惯串成有条件的结论</h3>
+<p>论文的主要价值，是把“历史规律会延续”拆成可讨论的声明，再连接到复杂度限制、连续块验证、搜索校正和风险配置。CVaR、收缩和 Kelly 并不是本文新发明的工具；作者主要尝试把它们接进同一个模型，说明每一步的条件、代价和边界。其中重加权与 CVaR 的对应是一个清晰的核心机制；五阶段的必要性则通过各类缺失某一步会失败的情形来支持。</p>
+<p>但“条件成立时结论成立”不等于这些条件已被证明适用于所有未来。作者也没有证明所有好的投资系统必然有唯一的五阶段分解。<a class="ref" href="#ref-2" aria-label="参考资料2">2</a></p>
+<h3>实证部分：并没有给出“换上它就能赚更多”的答案</h3>
+<ul>
+<li><strong>股票候选比较：</strong>作者检查了很多候选在未参与选择的年份中的表现。几种更稳健的排序办法，没有表现出相对普通均值排序的稳定、显著优势。这提醒我们：更关注坏阶段，也可能更受有限样本噪声影响。</li>
+<li><strong>把完整流程走一遍：</strong>在作者声明的 Λ＝4 和相应误差计量方式下，没有候选得到足够证据支持实际投入。白话说，这一轮检查给出的不是“找到了神奇策略”，而是“目前证据不足以支持投入”。</li>
+<li><strong>也有局部吻合的证据：</strong>规则离开开发它的旧记录后，成绩下降的量级，与用于拟合的资料量及搜索次数之间，在部分可检验设定下符合理论的数量级；多种投资对象提供了多少不重复的信息，与这些信息能够支持多复杂的模型，也有局部对应。某些比较只能给出上界，这不是所有市场上的普遍验证。</li>
+<li><strong>有些检验仍受限制：</strong>关于“更关注坏尾部究竟多花多少估计代价”的预测，作者只得到部分可辨别的证据；在某些已发表候选库里，检验受到原有筛选和优势衰减等因素干扰。</li>
+<li><strong>部分预测仍未测试：</strong>关于信息预算饱和后实际 Kelly 比例的预测，并没有在这些实验中完成检验。</li>
+</ul>
+<p>原文还做了常数与块尺度、有效样本、样本外变化和其他资产上的检查。这些实验用于探查声明是否站得住，并不把所有假设变成已被证实的事实。作者报告的证据也否定了一些过强的具体设定；“暂未被推翻”与“已经证明正确”不是一回事。<a class="ref" href="#ref-9" aria-label="参考资料9">9</a></p>
+<details><summary>选读：具体数值与原图怎么看？</summary>
+<p>附录 B.3 合并了 752 个股票相关候选、19 个样本外年份。选单个最佳候选时，普通均值排序的 Sharpe 为 0.51，五种稳健排序准则为 0.12–0.39，相应比较未达到 |t|＝2。Sharpe 是把收益与波动联系起来的指标；这里保留数值供核查，不要求你靠记住这个指标来理解结论。这个范围也不能全都叫作 CVaR 的结果。</p>
+<p>附录 B.5 的图 1 中，作者把环境偏离上限逐渐放大，候选的剩余优势下降；到所声明的 Λ＝4 时，图中均已低于零。图已按原图核查。你可以<a href="https://arxiv.org/html/2608.23416v2#A2.F1">打开作者的图 1</a>，重点看曲线与零线的关系，而不是把它读成已经实现的交易收益。</p>
+</details>
+</section>
+
+<section id="limits">
+<h2>11. 哪些事，这套方法仍然保证不了？</h2>
+<p><strong>第一，没见过的新情况。</strong>如果公交车发生从未记录过的故障，等了 20 分钟，旧卡片里最慢只有 9 分钟。无论怎样增加旧卡片的出现次数，都造不出这个新结果。市场出现超出历史覆盖的新状态，也有同样的根本问题。</p>
+<p><strong>第二，旧情况也未必测得准。</strong>我们为了教学给每种天气写了一个固定分钟数；现实里同样天气也会有不同结果。论文中的真实状态还可能看不见，因此用有限记录估算每段风险，本身就会产生误差。</p>
+<p>专挑“看起来最糟”的历史段，还可能更容易挑中被测量误差夸大的一段。单靠积累更多短段，未必自动消除这种偏差；把每段拉长，又可能把本来不同的环境平均掉。这是论文明确分析的取舍，不是调一个参数就能同时解决所有问题。</p>
+<p>同样，研究很多只资产也不等于见过很多次独立环境变化：十只资产一起经历同一场危机，不能简单当成经历了十场不同的危机。更多资产能帮助平均个体噪声，却不一定消除共同环境的影响。<a class="ref" href="#ref-4" aria-label="参考资料4">4</a></p>
+<p><strong>第三，变化上限并不是未来的保证书。</strong>你可以声明“最多翻倍”，但真实世界没有义务服从。作者的理论能说明声明带来什么后果，却不能只用过去的数据替你保证声明以后成立。</p>
+<p><strong>第四，数学适用范围有边界。</strong>论文对损失范围、状态持续性、估计分布等使用了具体限制或近似。极端损失、厚尾、结构变化以及实际交易成本，都不能在教学算例里被默认解决。<a class="ref" href="#ref-10" aria-label="参考资料10">10</a></p>
+<div class="callout"><p>整篇最值得带走的不是“某个指标一定更好”，而是：<strong>先把自己相信的条件说清楚，再让模型复杂度、验证、试错和投入都与证据相称。</strong>没有通过检查，也是一种有信息量的研究结果。</p></div>
+</section>
+
+<section id="practice">
+<h2>12. 动手一下，再检查自己是否真的理解</h2>
+<p>最小实践的任务是：输入四张固定等候卡片和“每种天气在假想 8 天里最多几天”，输出最坏日历、总等待时间和平均时间。程序先填最慢的情景，再填次慢的情景，直到凑满 8 天。</p>
+<p>它刻意不模拟真实天气预测、投资训练、市场交易或费用，只验证这一段计算。上限为 2 天是保留原比例的边界；上限为 8 天可以全部落在最慢旧情景；20 分钟的新故障用来暴露覆盖失败。</p>
+<p><a href="slides.html#calculator">打开无需编程的计算器</a>。愿意看代码，再下载 <a href="demo.py">Python 算例</a>与<a href="test_demo.py">独立核对测试</a>。</p>
+<details><summary>可选：在电脑上运行</summary><pre>python3 demo.py
+python3 demo.py --days-cap 3
+python3 -m unittest -v test_demo.py</pre><p>只用 Python 标准库。<a href="demo-output.txt">实际运行输出</a>单独保存；自动测试与独立顶点枚举用另一条计算路径核对结果。程序跑对了，不代表你已经掌握。</p></details>
+<h3>先做一道不用公式的题</h3>
+<p><strong>如果未来大雨天变多，过去平均等待更短的 A 站，就一定仍比 B 站好吗？请不用公式解释。</strong></p>
+<h3>还想检查整篇理解，可以再问自己</h3>
+<ol start="2"><li>只记录四天，却写出二十条分情况的规则，可能出了什么问题？</li><li>从一万条候选里挑出历史冠军，为什么要报告试过多少条？</li><li>已经找到一个看起来有优势的规则，为什么还要单独考虑投入规模？</li><li>遇到此前没出现过的故障，为什么增大旧情景的比例仍然不够？</li><li>请用一句话分别说明五个步骤各防什么错误。</li></ol>
+<p>先自己尝试，再打开<a href="answers.html">独立参考答案</a>。所有讲解已经提供，不需要答对才能解锁后续内容；实际作答只用于发现卡点。你的掌握状态目前仍待验证。</p>
+</section>
+
+<section id="sources">
+<h2>资料与核查说明</h2>
+<p class="small">正文小号数字只负责把相应论断连回原文。公交站、天气卡和 8 天日历是这里设计的教学类比，不是作者做过的实验。</p>
+<ol class="sources">
+<li id="ref-1">研究动机与论文问题：原文导言与设置。<a href="https://arxiv.org/html/2608.23416v2#S1">阅读导言</a> · <a href="https://arxiv.org/html/2608.23416v2#S3">阅读问题设置</a>。</li>
+<li id="ref-2">五阶段标准形及必要性论证；不能扩张为所有好系统的唯一分解。<a href="https://arxiv.org/html/2608.23416v2#S10">阅读完整流程</a>。</li>
+<li id="ref-3">五条假设与没有覆盖约束时的困难。<a href="https://arxiv.org/html/2608.23416v2#S4">阅读假设</a> · <a href="https://arxiv.org/html/2608.23416v2#S5">阅读不可能性与声明边界</a>。</li>
+<li id="ref-4">有限信息、模型复杂度与不同有效样本数。<a href="https://arxiv.org/html/2608.23416v2#S7">阅读信息与容量限制</a>。</li>
+<li id="ref-5">有界重加权与上尾 CVaR 的对应。<a href="https://arxiv.org/html/2608.23416v2#S6">阅读核心定理</a> · <a href="https://arxiv.org/html/2608.23416v2#A1.6">阅读证明</a>。</li>
+<li id="ref-6">部署风险、实际块分数噪声及验证要求。<a href="https://arxiv.org/html/2608.23416v2#S8">阅读风险分解</a> · <a href="https://arxiv.org/html/2608.23416v2#S10">阅读验证阶段</a>。</li>
+<li id="ref-7">候选搜索、信息预算与选择偏差扣除。<a href="https://arxiv.org/html/2608.23416v2#S8">阅读搜索与风险</a> · <a href="https://arxiv.org/html/2608.23416v2#S10">阅读搜索阶段</a>。</li>
+<li id="ref-8">不确定性下的风险配置与分数 Kelly；注意局部近似和重复收缩。<a href="https://arxiv.org/html/2608.23416v2#S9">阅读配置推导</a>。</li>
+<li id="ref-9">研究账单、敏感性、审计与实证依据。<a href="https://arxiv.org/html/2608.23416v2#S11">研究账单与损耗</a> · <a href="https://arxiv.org/html/2608.23416v2#S12">如何尝试反驳声明</a> · <a href="https://arxiv.org/html/2608.23416v2#A2">实验附录</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS3">股票候选比较</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS5">完整流程案例</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS8">未完成的预测检验</a>。</li>
+<li id="ref-10">假设、厚尾、状态表示和估计误差等限制。<a href="https://arxiv.org/html/2608.23416v2#S13">阅读讨论与局限</a>。</li>
+</ol>
+<details><summary>本学习包的透明记录</summary><p>沿用此前已经抽中的同一篇论文，没有因用户反馈重新选题。此前抽签没有完成对全部候选的抽前全文可读性与适读性审核，缺口保留在<a href="selection.md">选题记录</a>中，不将它描述成完全预审合格池抽样。此次改写解决讲解深度、完整性、导航、图形渲染和引用可读性，不改变原文实验结论。</p></details>
+</section>
+</main>
+<footer><p>本文用于理解研究方法、条件与证据，不构成个人交易建议。<a href="index.html">返回本篇总览</a> · <a href="slides.html">换成图解全文</a></p></footer>
+</body>
+</html>

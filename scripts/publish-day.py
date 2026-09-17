@@ -151,68 +151,101 @@ def load_manifest(path: Path) -> list[dict[str, str]]:
 
 
 def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
-    artifact_links = []
+    labels = {
+        "notes.html": "详细讲解（文章版）",
+        "answers.html": "自测参考答案（先尝试再看）",
+        "demo.py": "Python 算例源码（可选）",
+        "test_demo.py": "算例核对测试（可选）",
+        "demo-output.txt": "算例的实际运行输出",
+        "map.mmd": "Mermaid 关系图源码",
+        "map.md": "关系图 Markdown 源文档",
+        "selection.md": "选题与抽签记录",
+    }
+    links = []
     for name in artifact_names:
         if name == "index.html":
             continue
-        escaped_name = html.escape(name)
-        artifact_links.append(f'<li><a href="{quote(name)}">{escaped_name}</a></li>')
-
-    links_markup = "\n".join(artifact_links)
+        label = "图解全文（课件）" if name == entry["slides"] else labels.get(name, name)
+        links.append(f'<li><a href="{quote(name)}">{html.escape(label)}</a></li>')
+    links_markup = "\n".join(links)
+    notes_route = ""
+    if "notes.html" in artifact_names:
+        notes_route = """
+        <section class="route">
+          <h2>喜欢读文章？</h2>
+          <p>详细讲解沿着同一条主线，把背景、每一步的原因、实验与局限展开；技术公式放在选读区域。</p>
+          <a class="secondary" href="notes.html">读详细讲解</a>
+        </section>"""
     return f"""<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>{html.escape(entry["title"])}</title>
+  <title>本篇总览 · {html.escape(entry["title"])}</title>
   <style>
-    :root {{
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #18212f;
-      background: #f3f6fb;
-    }}
-    body {{ max-width: 880px; margin: 0 auto; padding: 64px 24px; line-height: 1.7; }}
-    a {{ color: #2563eb; }}
-    .card {{
-      padding: 30px;
-      border: 1px solid #dbe3ee;
-      border-radius: 18px;
-      background: #fff;
-      box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
-    }}
-    .meta {{ color: #607086; }}
-    .primary {{
-      display: inline-block;
-      margin: 16px 0 8px;
-      padding: 10px 16px;
-      border-radius: 10px;
-      color: #fff;
-      background: #2563eb;
-      text-decoration: none;
-      font-weight: 650;
-    }}
-    @media (prefers-color-scheme: dark) {{
-      :root {{ color: #eef4ff; background: #0e1420; }}
-      .card {{ border-color: #263247; background: #141c2a; }}
-      .meta {{ color: #a9b7ca; }}
-      a {{ color: #8ab4ff; }}
-      .primary {{ color: #fff; }}
+    * {{ box-sizing: border-box; }}
+    :root {{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #20343d; background: #f7f7f2; }}
+    body {{ max-width: 1000px; margin: 0 auto; padding: 44px 26px 72px; line-height: 1.85; font-size: 18px; }}
+    a {{ color: #006f65; text-underline-offset: .18em; }}
+    a:focus-visible, summary:focus-visible {{ outline: 3px solid #b76800; outline-offset: 4px; }}
+    h1 {{ font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.3; letter-spacing: -.03em; }}
+    h2 {{ font-size: 1.25rem; line-height: 1.45; }}
+    .meta {{ color: #586e76; font-size: 15px; }}
+    .value {{ font-size: 1.15rem; max-width: 46em; }}
+    .guide {{ border-left: 4px solid #006f65; background: #eaf3ee; padding: 16px 22px; margin: 28px 0; }}
+    .routes {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 22px; }}
+    .route {{ padding: 26px; border: 1px solid #d7e1dd; border-radius: 14px; background: #fff; }}
+    .route h2 {{ margin-top: 0; }}
+    .primary, .secondary {{ display: inline-block; padding: 10px 18px; border-radius: 9px; text-decoration: none; font-weight: 650; }}
+    .primary {{ color: #fff; background: #006f65; }}
+    .secondary {{ border: 1px solid #006f65; }}
+    details {{ margin: 28px 0; padding: 18px 22px; border: 1px solid #d7e1dd; border-radius: 12px; }}
+    summary {{ cursor: pointer; font-weight: 600; }}
+    details p, details li {{ font-size: 16px; overflow-wrap: anywhere; }}
+    li {{ margin: 9px 0; }}
+    @media(max-width: 600px) {{ body {{ padding: 28px 18px 48px; font-size: 17px; }} .route {{ padding: 20px; }} }}
+    @media(prefers-color-scheme: dark) {{
+      :root {{ color: #e9f2ee; background: #152320; }}
+      a {{ color: #91d7c9; }} .meta {{ color: #afc3bc; }}
+      .route {{ background: #20312c; border-color: #435d53; }}
+      details {{ border-color: #435d53; }} .guide {{ background: #244038; }}
+      .primary {{ color: white; }} .secondary {{ border-color: #91d7c9; }}
     }}
   </style>
 </head>
 <body>
-  <p><a href="../">← 返回论文列表</a></p>
-  <article class="card">
+  <nav aria-label="站点导航"><a href="../">← 返回论文列表</a></nav>
+  <main>
     <p class="meta">{html.escape(entry["date"])} · {html.escape(entry["direction"])} · arXiv:{html.escape(entry["arxiv_id"])}</p>
-    <h1>{html.escape(entry["title"])}</h1>
-    <p>{html.escape(entry["summary"])}</p>
-    <p><a class="primary" href="{quote(entry["slides"], safe="/")}">打开 HTML 幻灯片</a></p>
-    <h2>学习包文件</h2>
-    <ul>
-      {links_markup}
-    </ul>
-  </article>
+    <h1>从这里开始读这一篇</h1>
+    <p class="value">{html.escape(entry["summary"])}</p>
+    <div class="guide">
+      <strong>这只是总入口，不是第三份必读材料。</strong><br>
+      图解全文和详细讲解是同一篇论文的两种阅读方式，不需要重复读两遍。
+      整篇内容一次提供，不按天拆讲，也不需要先回答问题才能继续。
+    </div>
+    <div class="routes">
+      <section class="route">
+        <h2>第一次读，推荐从这里开始</h2>
+        <p>按页看图，从具体问题一路读到完整方法、实验结果和局限。遇到想深究的地方，再查详细讲解。</p>
+        <a class="primary" href="{quote(entry["slides"], safe="/")}">开始图解全文</a>
+      </section>
+{notes_route}
+    </div>
+    <h2>读懂之后，再动手和自测</h2>
+    <p>先用课件里的小实验改变条件、观察结果，再尝试用自己的话解释。代码和公式都是选读，不是进入这篇论文的门槛。</p>
+    <details>
+      <summary>论文信息</summary>
+      <p>{html.escape(entry["title"])}</p>
+      <p><a href="https://arxiv.org/abs/{quote(entry["arxiv_id"], safe="")}">查看 arXiv 原文信息</a></p>
+    </details>
+    <details>
+      <summary>可选资料与文件</summary>
+      <p>这是资料归档，不是阅读清单；关系图会在正文和课件中直接显示，源码只用于修改或复用。</p>
+      <ul>{links_markup}</ul>
+    </details>
+  </main>
 </body>
 </html>
 """

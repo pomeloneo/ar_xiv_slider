@@ -4,7 +4,7 @@
     "title": "The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System",
     "arxiv_id": "2608.23416v2",
     "direction": "金融",
-    "summary": "用四个历史阶段的可运行算例，理解未来占比变化如何把平均回测变成 CVaR 压力测试，并认清覆盖假设的边界。",
+    "summary": "从两个公交站的等待时间出发，读懂论文完整的五步研究流程、真实证据与适用边界。",
     "path": "2026-09-17/",
     "slides": "slides.html"
   }

@@ -2,3 +2,4 @@ __pycache__/
 *.py[cod]
 .publish-backup-*/
 .publish-stage-*/
+node_modules/
