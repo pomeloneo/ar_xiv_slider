@@ -1,0 +1,6 @@
+persistent selling, adaptive=False: inventory=8, marked_PnL=-32.00, fills=8
+persistent selling, adaptive=True: inventory=3, marked_PnL=-19.50, fills=3
+reversal, adaptive=False: inventory=0, marked_PnL=0.00, fills=8
+reversal, adaptive=True: inventory=0, marked_PnL=-3.00, fills=6
+PASS: a spread capture is not net profit when inventory is repriced.
+Boundary: pausing quotes also changes participation; this hand-coded rule does not reproduce RLMM or prove robust profitability.

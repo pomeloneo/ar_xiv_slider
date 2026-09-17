@@ -1,0 +1,8 @@
+post shock: pretrend gap=0, DID=0, own-trend effect=8, discordance=8
+  M=0: teaching identified range=[0, 0]
+  M=0.5: teaching identified range=[-4, 4]
+  M=1: teaching identified range=[-8, 8]
+no shock: pretrend gap=0, DID=8, own-trend effect=8, discordance=0
+  M=0: teaching identified range=[8, 8]
+  M=0.5: teaching identified range=[8, 8]
+  M=1: teaching identified range=[8, 8]

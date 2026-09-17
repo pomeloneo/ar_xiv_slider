@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="把注意力看成既能卖广告、也能奖励创作的资源，理解平台为什么不只最大化每次匹配。">
+<title>详细讲解 · 社交媒体平台上的算法注意力与内容创作</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.15573v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.15573v1</p>
+<h1>社交媒体平台上的算法注意力与内容创作</h1><p class="original" lang="en">Algorithmic Attention and Content Creation on Social Media Platforms</p>
+<p class="lead">把注意力看成既能卖广告、也能奖励创作的资源，理解平台为什么不只最大化每次匹配。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">推荐没猜中，还是平台在做别的取舍？</a><a href="#section-1">全景：观众和作者会互相影响</a><a href="#section-2">为什么不能把一次观看的价值算成全部？</a><a href="#section-3">沿着一个小数值看推荐如何翻转</a><a href="#section-4">不是所有创作者都应得到更多曝光</a><a href="#section-5">不知道类型时，还要防止错误申报</a><a href="#section-6">这套规则怎样变成信息流？</a><a href="#section-7">能直接付钱时，为什么还要送流量？</a><a href="#section-8">作者的证据与未解决问题</a><a href="#section-9">下一次看到推荐偏差，可以问什么？</a><a href="#section-10">动手验证：需求、运行与结果</a><a href="#section-11">自测：解释、预测与迁移</a><a href="#section-12">资料与证据</a></nav><section id="section-0"><h2>推荐没猜中，还是平台在做别的取舍？</h2><p>你爱看做饭视频，却偶尔刷到并不感兴趣的内容。可能是算法误判，也可能存在另一种经济动机：曝光会奖励创作者、刺激未来投入。论文研究后一种机制，不能据此断言某条真实推荐一定有这种目的。</p><p>读完你应能说清平台面对的三件事：观看消耗时间，广告能赚钱，创作者需要激励。理解它们的关系，有助于区分推荐预测是否准确，与平台目标究竟优化什么。本文主要是理论模型，不是某家平台内部算法揭秘。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[有限且有成本的注意力] --&gt; B[广告变现]
+A --&gt; C[创作者曝光]
+C --&gt; D[努力与内容质量]
+D --&gt; E[观众参与和停留]
+E --&gt; A
+E --&gt; F[局部收益加网络效应]
+F --&gt; G[类型私有时的激励约束]
+G --&gt; H[曝光规则与停止观看实现]
+H --&gt; I[现金支付扩展]
+I --&gt; J[边界：模型利润非实测福利]</pre></details>
+</figure></section><section id="section-1"><h2>全景：观众和作者会互相影响</h2><p>观众看内容得到价值，也付出时间成本；创作者投入精力提高质量，并从曝光中获得收益。平台决定内容、广告和不同作者分别得到多少注意力。作者因预期曝光改变努力，内容质量又影响观众愿意停留多久。</p><p>这条循环叫双边互补：一侧的变化会反馈到另一侧。论文先假定平台完全知道双方类型，建立基准；再加入创作能力和观看偏好的私人信息；最后允许平台直接支付创作者，并分析曝光奖励与现金奖励如何替代。</p></section><section id="section-2"><h2>为什么不能把一次观看的价值算成全部？</h2><p>假设你花一分钟看了一个自己不喜欢的视频，直接净价值为负。但这次曝光可能鼓励作者继续投入，让另一批真正喜欢该主题的人看到更高质量的内容。评价总体系时，需要把这类外部影响加进来。</p><p>原文把局部观看收益与网络效应相加。局部收益是观众得到的内容价值减去注意力成本；网络效应是新增曝光经由创作激励，对相关观众产生的边际收益。‘外部’指影响落到其他人，不是说平台一定有公益目标。</p></section><section id="section-3"><h2>沿着一个小数值看推荐如何翻转</h2><p>教学设定：跨类别观众看这条内容没有直接价值，注意力成本为1，因此局部收益−1。若一份新增曝光能通过作者努力为其他观众带来2的边际收益，总比较值变为+1。只看当前观众会拒绝，考虑反馈则可能推荐。</p><p>如果作者能力较低，其他条件固定，网络收益只有0.4，总比较值就是−0.6，推荐仍不合算。demo按正文完整信息下的边际表达式计算这三种情形，包括网络效应为零的边界，不把教学参数叫平台测量数据。</p></section><section id="section-4"><h2>不是所有创作者都应得到更多曝光</h2><p>完整信息基准中，能力很低的作者可能被排除，因为让他们产生有价值内容所需的曝光太多。中等能力作者主要从自身类别获得曝光；较高能力作者可能获得跨类别观众；足够高时达到可用注意力的上限。</p><p>论文命题1刻画这些门槛。这里的能力是模型中的投入生产率：同样努力能产生多少质量，不等于现实创作者的人格价值。也不能从真实曝光低反推出作者能力低，现实还有新号识别、随机波动和平台政策等因素。</p></section><section id="section-5"><h2>不知道类型时，还要防止错误申报</h2><p>平台可能看得到内容质量，却分不清质量来自高能力还是高努力；也不完全知道每个观众有多看重质量。此时规则要使不同类型自愿作出相应选择，不能简单照完全知道类型的名单分发。</p><p>论文用激励约束刻画这种私人信息代价，给出命题2中的注意力门槛。在所列条件下，相比完整信息，参与和跨类别扩展门槛提高，努力与参与会受到影响。双方互补使一侧的信息问题传播到另一侧，不只影响被隐藏信息的本人。</p></section><section id="section-6"><h2>这套规则怎样变成信息流？</h2><p>作者给出两侧实现方式：对创作者，根据已经实现的内容质量承诺总曝光，从而诱导相应投入；对观众，可以用同类别的一条有序内容与广告流，让他们通过什么时候停止观看自我选择。</p><p>这不是说现实所有无限滚动列表都在执行该公式。它说明抽象分配在模型条件下可以用一种可理解的交互实现。实现环节很关键：仅仅算出理想分配，还不够说明参与者会按设计者希望的方式行动。</p></section><section id="section-7"><h2>能直接付钱时，为什么还要送流量？</h2><p>现金与曝光都能奖励作者，但曝光占用本可卖给广告的注意力。第5节允许支付后，一般可以混用两种方式；在额外条件下出现门槛结构，较高能力作者的追加激励更多转为现金，而非不断扩大曝光。</p><p>当每单位广告更赚钱时，注意力机会成本上升，模型可能更倾向付钱并减少跨类别曝光。这是条件性比较静态，不是本文测得某次广告涨价导致推荐准确率提高的实验。监管与隐私讨论也应保留这种证据层级。</p></section><section id="section-8"><h2>作者的证据与未解决问题</h2><p>支撑主要来自第3—5节的机制设计推导、命题与实现构造。本包核对完整信息边际公式、两种信息情形的门槛，以及创作者和观众实现命题。没有重新训练推荐模型，也没有作者真实平台效果提升可供我们复现。</p><p>模型中平台是单一平台，内容按类别区分，作者重视总注意力，观众注意力有成本。跨类别内容价值在基准里归零，现实兴趣交叉、广告本身可能有用、多平台竞争、长期信任等都会改变结论，不能把模型目标直接视为社会最优。</p></section><section id="section-9"><h2>下一次看到推荐偏差，可以问什么？</h2><p>先拆开：是预测偏差，还是目标权衡，或是可观察信息不够？如果猜测属于激励性曝光，还需要观察作者投入是否真的响应、受益观众是谁、失配成本多大。没有这些数据，机制只能提供可能解释。</p><p>读者可以用本包的边际算例找出反例：一旦曝光无法提高创作质量，额外网络收益消失，跨类别观看只剩成本。这样我们学到的是一条可被否定的机制，而不是任何糟糕推荐都能套用的万能理由。</p></section><section id="section-10"><h2>动手验证：需求、运行与结果</h2><p>按正文式7计算跨类别一次边际曝光的局部收益与网络收益。固定注意力成本1、曝光效用边际0.2、相关观众规模10、加权匹配价值1，改变能力θ和网络反馈开关。只检查边际表达式，不求解整体机制。</p><p>运行方式：下载同目录的 <a href='demo.py'>demo.py</a>，执行 <code>python3 demo.py</code>。仅使用 Python 标准库。</p><pre><code>ability=1, network=True: local=-1.0, external=2.0, total=1.0, positive=True
+ability=0.2, network=True: local=-1.0, external=0.4, total=-0.6, positive=False
+ability=1, network=False: local=-1.0, external=0.0, total=-1.0, positive=False
+</code></pre><p>同一条跨类别曝光，只改创作反馈强度，边际判断可由正转负。输入完全自设；输出既非平台推荐准确率，也非最优算法的全局求解。</p></section><section id="section-11"><h2>自测：解释、预测与迁移</h2><ol><li>局部观众不喜欢，为什么模型仍可能推荐？</li><li>如果曝光不能改变创作投入，机制中的哪一项消失？</li><li>平台能做到利润最优，能否推出每位用户都更满意？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><section id="section-12"><h2>资料与证据</h2><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.15573v1'>Algorithmic Attention and Content Creation on Social Media Platforms</a>；2609.15573v1；提交日期 2026-09-14。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2节环境与注意力成本；第3节定义1式7、命题1；第4节命题2—4；第5节现金支付；第6节结论。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Algorithmic Attention and Content Creation on Social Media Platforms</p><p>Yi Chen、Fei Li、Marcel Preuss</p>
+<p>arXiv:2609.15573v1 · 发布日期：2026-09-14 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.15573v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.15573v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

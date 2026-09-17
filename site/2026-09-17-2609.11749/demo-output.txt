@@ -1,0 +1,10 @@
+gamma=0, penalty=0: support=(0, 1, 2), weights=[0.1385, 0.1247, 0.077], cash=0.6598
+ worst_excess_return=0.03000, variance=0.002078, objective=0.002078
+gamma=0, penalty=0.002: support=(0, 1), weights=[0.1863, 0.1677, 0], cash=0.6460
+ worst_excess_return=0.03000, variance=0.002795, objective=0.006795
+gamma=0.2, penalty=0.002: support=(0, 1, 2), weights=[0.199, 0.1791, 0.1106], cash=0.5113
+ worst_excess_return=0.03000, variance=0.004288, objective=0.010288
+gamma=0.3, penalty=0.002: support=(0, 1, 2), weights=[0.2546, 0.2291, 0.1414], cash=0.3749
+ worst_excess_return=0.03000, variance=0.007018, objective=0.013018
+Boundary: singleton A with gamma=0.4 cannot meet positive robust target.
+PASS: enumerated all 7 supports; each feasible solution satisfies the robust target exactly.

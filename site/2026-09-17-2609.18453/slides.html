@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用一位永远说“五成把握”的答题者，区分总体校准和真的检查了推理。">
+<title>图解全文 · 校准置信度的幻象：视觉语言模型口头置信度对推理轨迹的独立性</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18453v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 16 · AI</p><h1 tabindex="-1">校准置信度的幻象：视觉语言模型口头置信度对推理轨迹的独立性</h1><p class="lead">用一位永远说“五成把握”的答题者，区分总体校准和真的检查了推理。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 16 · AI</p><h1 tabindex="-1">为什么“我很确定”值得单独检查</h1><p>你让 AI 看一张图做题，它中途说“等等，我再检查一下”，最后给错答案，却仍声称九成把握。问题不只是它会答错，而是它的信心是否随着证据变化。若改掉关键推理后信心纹丝不动，这个数字可能主要来自固定表达习惯。</p><p>这篇论文研究视觉语言模型的口头置信度。读完你应能区分两件事：一群回答总体上有多准，以及同一个问题的推理被破坏后，模型能否降低信心。二者相关，却不是同一个指标。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 16 · AI</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[同一图片和问题] --&gt; B[视觉描述 推理 答案]
+B --&gt; C[替换一处或屏蔽轨迹]
+B --&gt; D[原始置信度]
+C --&gt; E[干预后置信度]
+D --&gt; F[比较ECE与TGS]
+E --&gt; F
+F --&gt; G[总体校准不保证过程敏感]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 16 · AI</p><h1 tabindex="-1">先看整体关系</h1><div class="mermaid">flowchart TD
+A[同一图片和问题] --&gt; B[视觉描述 推理 答案]
+B --&gt; C[替换一处或屏蔽轨迹]
+B --&gt; D[原始置信度]
+C --&gt; E[干预后置信度]
+D --&gt; F[比较ECE与TGS]
+E --&gt; F
+F --&gt; G[总体校准不保证过程敏感]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 16 · AI</p><h1 tabindex="-1">先用天气预报理解校准</h1><p>若某预报员在许多声称“50%会下雨”的日子里，恰好一半下雨，他在这个概率档上是校准的。模型的 ECE，也就是期望校准误差，比较的也是各置信度分组中“说得多自信”和“实际多正确”之间的差距。</p><p>但一个答题者每题都报50%，恰好整体答对一半，也能在这个单一分组上得到零误差。他仍不能指出哪一道题错，更不必真的查看解题过程。校准是群体频率性质，不能直接当成逐题检查证据的证明。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 16 · AI</p><h1 tabindex="-1">把一次回答分成三部分</h1><p>论文把轨迹拆成视觉描述、推理链和最终答案。例如看图得知长方形长4宽3；推理用面积等于长乘宽；答案12。模型随后生成一个0到10的置信度分值。</p><p>输入还包括原图和问题。研究者一次只改变一个轨迹部分，保留其余内容，让比较更容易解释。把长4改成5，是视觉信息错误；把乘法写成加法，是推理错误；只把最后12改成13，是答案错误。它们可能导致同样的错答，却是不同检查能力。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 16 · AI</p><h1 tabindex="-1">实验一：把过程改坏，看信心动不动</h1><p>若模型真在评估眼前的过程，把正确步骤换成错误步骤，信心应有合乎质量的变化。论文先比较替换前后的置信度分布，并用分布距离衡量是否几乎不动。</p><p>这里不能只看“有没有变化”。信心也可能朝错误方向变化。因此作者进一步提出有方向的差值指标，专门看好轨迹是否比坏轨迹得到更高信心。教学上可先把复杂分布放一边：同一道题，唯一一处错误，分值是否降低？</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 16 · AI</p><h1 tabindex="-1">实验二：遮住自己的推理</h1><p>TGS-self 比较模型能看见自己完整轨迹时的平均信心，与完全屏蔽该轨迹时的信心，取前者减后者。正值、接近零、负值分别描述不同方向和强度的影响。注意这里是注意力级屏蔽，不只是把文字涂成黑色让人看不见。</p><p>论文观察到，移除全部轨迹后信心可能反而升高。我们的审读提醒是：单个平均差值不能证明模型怎样理解了过程，正值也可能来自非语义线索；它是诊断工具，需要和轨迹质量对照结合，而不是新的万能可信度证书。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 16 · AI</p><h1 tabindex="-1">实验三：用好坏成对轨迹检验方向</h1><p>TGS-pair 的直觉公式是“好轨迹的信心减坏轨迹的信心”，分别沿视觉、推理、答案三条轴计算，再汇总。正值表示在这种对照里更信任好过程，零表示不区分，负值表示方向反了。</p><p>推理轴对照刻意保持最终答案相同，只在中间加入一个错误。因此只盯最后答案是否正确的检查器会看不出差别。这是一个很有用的实验设计：通过控制其他部分，把“检查答案”与“阅读过程”分开。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 16 · AI</p><h1 tabindex="-1">论文表 2 展示的反直觉结果</h1><p>在十个基准的汇总中，4B 模型经 VL-Calibration 后，ECE 从0.432降到0.116，但 TGS-pair 从0.059降到0.053；8B 的 ECE 从0.402降到0.081，TGS-pair 却从0.084降到0.065。总体概率更准，没有自动带来更好的过程敏感性。</p><p>这不是说校准训练毫无价值。论文反对的是把一个维度上的进步当成全部可信性的进步。两类指标共同看，才能区分“它整体知道自己有多常答对”和“它能看出这次过程哪儿不可靠”。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 16 · AI</p><h1 tabindex="-1">语气上的犹豫，不等于可靠自省</h1><p>作者还分析模型说“等等”“我犯错了”等犹豫词前后的信心，未发现稳定降低。对普通读者而言，这意味着流畅的自我修正叙述只是输出文字，不能代替独立验证。</p><p>同样，不应从本文推导“所有推理文字都没用”。研究对象是特定模型、特定置信度方法与受控任务，结论针对信心是否依赖轨迹。它并没有测量世界上每个模型，也没有证明模型从来不利用中间步骤求解。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 16 · AI</p><h1 tabindex="-1">局限：轨迹也由其他模型制作</h1><p>好坏轨迹的构造依赖外部模型，可能带有生成器偏差。论文做不同生成器规模的敏感性分析，也补充跨视觉架构测试，但主要仍围绕 Qwen 系列语言骨干，任务以可核对答案的数学和推理题为主。</p><p>我们的推断是，开放式写作、长期代理决策中的信心还需要单独验证。另一个边界是平均差值会隐藏个体差异：某些题目正向敏感、某些负向敏感，平均接近零并不等于每题都完全没反应，最好同时查看分布和具体案例。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 16 · AI</p><h1 tabindex="-1">一份两道题的最小反例</h1><p>设两题一对一错，系统都报50%。总体正确率也是50%，所以单分组校准误差为零；但将其中任一道的推理换坏，仍报50%，好坏差值就是零。这在逻辑上足以说明“校准好”不蕴含“区分好坏过程”。</p><p>再设计一个会区分的教学系统，好过程报90%，坏过程报10%，差值为0.8。我们没有运行任何视觉模型，两个系统的分值都由人设定。小程序只核算指标之间的关系，不提供真实模型排行榜，也不把两题算例当成统计研究。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 16 · AI</p><h1 tabindex="-1">最小实践：运行、观察与边界</h1><p>需求：构造总体校准但不区分推理好坏的反例，计算单分组 ECE 与成对信心差；再展示平均值抵消的边界。保持分值来源透明，不用教学结果声称重现论文表2。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>两题一对一错，始终报50%：单分组ECE=0.00
+轨迹不敏感的教学系统：好坏差=0.00
+会区分轨迹的教学系统：好坏差=0.80
+边界：两题差值+0.4/-0.4相互抵消，平均=0.00
+分值均为手工设定，没有调用或评测真实视觉语言模型。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-15" aria-label="第 15 页"><p class="eyebrow">15 / 16 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>模型每题都说50%，总体答对一半，是否说明它知道哪题错了？</li><li>为什么推理轴对照要保留同样最终答案？</li><li>TGS平均为零，是否说明每一道题的信心都完全没变化？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section class="slide" id="slide-16" aria-label="第 16 页"><p class="eyebrow">16 / 16 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18453v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18453v1">元数据与版本</a></p><p>已读取第3—6节、Limitations，核对图3屏蔽实验、图5 TGS结构和表2主要结果。指标公式均基于正文定义；教学算例仅验证逻辑区别。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 校准置信度的幻象：视觉语言模型口头置信度对推理轨迹的独立性</option><option value="2">2. 为什么“我很确定”值得单独检查</option><option value="3">3. 把整篇串起来</option><option value="4">4. 先看整体关系</option><option value="5">5. 先用天气预报理解校准</option><option value="6">6. 把一次回答分成三部分</option><option value="7">7. 实验一：把过程改坏，看信心动不动</option><option value="8">8. 实验二：遮住自己的推理</option><option value="9">9. 实验三：用好坏成对轨迹检验方向</option><option value="10">10. 论文表 2 展示的反直觉结果</option><option value="11">11. 语气上的犹豫，不等于可靠自省</option><option value="12">12. 局限：轨迹也由其他模型制作</option><option value="13">13. 一份两道题的最小反例</option><option value="14">14. 最小实践：运行、观察与边界</option><option value="15">15. 先自己试着解释</option><option value="16">16. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">The Mirage of Calibrated Confidence: Trajectory-Independence of Verbalized Confidence in Vision-Language Models</p><p>Yang, Jisoo、Han, Jaeho、Pham, Trung X.、Kim, Junyeong</p>
+<p>arXiv:2609.18453v1 · 发布日期：2026-09-16 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18453v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18453v1">论文正文</a></p></details><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18453v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18453v1">元数据与版本</a></p><p>已读取第3—6节、Limitations，核对图3屏蔽实验、图5 TGS结构和表2主要结果。指标公式均基于正文定义；教学算例仅验证逻辑区别。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="沿原始数据、特征与决策前表示三个检查点，找到信息在哪一步丢了。">
+<title>详细讲解 · TRIPROBE：超越分类准确率，探测任务可分性以解释模型瓶颈</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18525v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">AI · arXiv:2609.18525v1</p>
+<h1>TRIPROBE：超越分类准确率，探测任务可分性以解释模型瓶颈</h1><p class="original" lang="en">TRIPROBE: Probing Task Separability Beyond Classification for XAI</p>
+<p class="lead">沿原始数据、特征与决策前表示三个检查点，找到信息在哪一步丢了。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">像检查一张复印坏了的照片</a><a href="#section-1">先看整体关系</a><a href="#section-2">先把多分类拆成两两比较</a><a href="#section-3">第一站：原始信息能分开吗</a><a href="#section-4">第二站：压缩后的表示保留什么</a><a href="#section-5">第三站：分类前最后一层还分得开吗</a><a href="#section-6">一条能手算的尺：均值差与波动</a><a href="#section-7">原文实验真正诊断了哪里</a><a href="#section-8">最小算例：把正负号扔掉</a><a href="#section-9">反例：单个方向看不出组合规则</a><a href="#section-10">把诊断变成可验证的行动</a><a href="#section-11">最小实践：运行、观察与边界</a><a href="#section-12">先自己试着解释</a><a href="#section-13">原文与阅读范围</a></nav><section id="section-0"><h2>像检查一张复印坏了的照片</h2><p>你交给系统一张能看清文字的照片，最后却识别错了。原因可能是原图模糊，也可能是压缩把字抹掉，或最后分类器用了错误线索。只看最终准确率，不能知道该换相机、换压缩方式还是改分类器。</p><p>TriProbe 提议在三个位置检查两类样本有多容易区分。读完你应能沿着同一对类别，指出可分性在哪一步下降，并能举出“这个指标看不出区别，但实际上仍可分类”的反例。这样既会用工具，也知道工具的局限。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart LR
+A[同一类别对的输入] --&gt; B[原始与人工特征探针]
+B --&gt; C[编码器表示探针]
+C --&gt; D[最后决策前探针]
+D --&gt; E[定位分离信息丢失的位置]
+E --&gt; F[改动后用保留数据验证]
+D --&gt; G[非线性关系可能被逐维指标遗漏]</pre></details>
+</figure></section><section id="section-1"><h2>先看整体关系</h2><div class="mermaid">flowchart LR
+A[同一类别对的输入] --&gt; B[原始与人工特征探针]
+B --&gt; C[编码器表示探针]
+C --&gt; D[最后决策前探针]
+D --&gt; E[定位分离信息丢失的位置]
+E --&gt; F[改动后用保留数据验证]
+D --&gt; G[非线性关系可能被逐维指标遗漏]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section id="section-2"><h2>先把多分类拆成两两比较</h2><p>如果任务有石头、布、剪刀三个手势，总准确率可能掩盖某一对特别难。论文先看石头对布、石头对剪刀、布对剪刀，让每次检查聚焦同一个二分类问题。</p><p>输入是一批带真实类别的数据；输出不是新的预测模型，而是一张按类别对和处理阶段排列的诊断表。中间比较必须尽量保持样本和类别定义一致，否则看到分数改变，可能只是换了一批更难的样本，而不是处理阶段造成。</p></section><section id="section-3"><h2>第一站：原始信息能分开吗</h2><p>Foundational Probe 检查原始输入及人工提取的特征。比如信号的能量、变化速度或频率成分。若两类在这些特征上几乎重叠，后面的网络可能面临信息不足或当前特征不合适的问题。</p><p>这不是说任何低分都证明原始数据绝对无法分类。它首先说明所用检查方式没找到明显分离。生活类比里，平均亮度分不开两张照片，不代表照片上的文字也相同；其他方向或更复杂组合可能仍携带有效信息。</p></section><section id="section-4"><h2>第二站：压缩后的表示保留什么</h2><p>Latent Probe 看特征提取器产生的内部表示。论文用自编码器：把输入压缩成较短向量，再尝试重建原输入。重建训练不直接以分类标签为目标，有助于观察一般表示的特点。</p><p>关键中间状态是编码器输出。输入里原本明显的线索可能被压缩丢掉，也可能被重组得更清晰。自编码器重建得像，不等于恰好保留分类所需的信息；背景占大部分像素时，重建背景很好，却可能忽略一个很小的关键符号。</p></section><section id="section-5"><h2>第三站：分类前最后一层还分得开吗</h2><p>Final Probe 放在最后决策层之前，观察网络主体准备出的表示。若上一站两类分得很清楚，这里却挤到一起，就提示问题可能出在中间的处理，而不是再去收更多同样数据。</p><p>论文用普通多层感知机作为分类主体，以避免依赖非常专门的架构。学习重点不是记住层数，而是三个检查点的职责：输入能提供什么、表示保留什么、最后决策拿到什么。定位后仍需要真正修改并验证，诊断图本身不会自动修好模型。</p></section><section id="section-6"><h2>一条能手算的尺：均值差与波动</h2><p>论文使用 Maximum Fisher’s Discriminant Ratio，文中缩写 F1。它不是常见的精确率与召回率调和平均 F1-score。对一个特征，计算“两类均值差的平方”，再除以“两类内部方差之和”；最后挑各特征中最高的值。</p><p>直觉是两群人站得越远、每群越紧，越容易分开。比如一类数值为-3、-2、-1，另一类为1、2、3，均值差4，类内方差各2/3，分数为12。分母为零时要单独约定：同常数可视为无法分，不同常数是理想分离，不能盲目除零。</p></section><section id="section-7"><h2>原文实验真正诊断了哪里</h2><p>论文在 Roshambo 表面肌电手势数据上演示，信号来自手环的多个通道。图2比较三个阶段、各类别对的分数和表示图，图3再对照混淆矩阵。作者发现布与剪刀通常最难区分；石头与剪刀在潜在表示处较好，最后阶段却退化。</p><p>这支持“不同瓶颈发生在不同阶段”的方法价值。它没有展示替换架构后最终准确率一定提升，也没有大规模覆盖所有模态。把建议下一步改哪里与已经实验证明改好了分开，是理解诊断型论文的重要习惯。</p></section><section id="section-8"><h2>最小算例：把正负号扔掉</h2><p>仍用刚才两组三个数。原始数值容易用正负区分；若特征提取器只保留绝对值，两组都变成1、2、3。中间处理虽然保留大小，却丢掉了本任务最关键的符号。</p><p>这时再把网络末端做复杂，也无法从相同的输入恢复已经丢掉的区别。教学脚本会算出分数从12变成0。这里的数据、变换都由我们设计，没有训练自编码器，目的是展示信息在哪一步失去，而不是重现肌电实验数值。</p></section><section id="section-9"><h2>反例：单个方向看不出组合规则</h2><p>考虑四个二维点。一类是(-1,-1)与(1,1)，另一类是(-1,1)与(1,-1)。两类在横坐标、纵坐标上的均值都为零，因此逐维 Fisher 分数都是零；但看两坐标乘积是否为正，可以完美区分。</p><p>这是我们的教学反例，说明低逐维分数不是不可分类的数学证明。非线性关系、坐标旋转和分布形状都可能让它漏掉有效线索。报告中应把它当诊断信号，与可视化、分类性能及额外探针一起解释。</p></section><section id="section-10"><h2>把诊断变成可验证的行动</h2><p>若早期表示已经缺关键输入，可补更合适的数据或测量；若中间压缩丢线索，可改编码目标或特征；若最后阶段退化，可检查训练、网络主体与标签。但这些都是待验证假设，不是凭一张图直接下结论。</p><p>还要检查数据划分、受试者差异和窗口重叠等评估细节。原文的设置文字对裁剪后窗口长度等细节并不完全清晰，实际复现应核对代码。我们的算例没有这些采集环节，因此不能替原文解决它们，只保留最清楚的三阶段诊断逻辑。</p></section><section id="section-11"><h2>最小实践：运行、观察与边界</h2><p>需求：计算同一对类别在原始与丢掉符号后表示的可分性；再用二维异或式关系测试指标边界。显示实际中间数值与断言，遇到零方差有明确处理。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>原始表示 Fisher=12.0
+取绝对值后 Fisher=0.0
+边界：逐维分数 [0.0, 0.0] ；乘积规则正确 4 /4
+Fisher比率不是分类任务的F1-score；未使用原论文肌电数据。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-12"><h2>先自己试着解释</h2><ol><li>原始分数很高、最后表示分数很低，下一步应优先检查什么？</li><li>逐维Fisher分数为零，能否断定任何分类器都无能为力？</li><li>为什么这篇的F1不能直接和分类报告中的F1-score比较？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section id="section-13"><h2>原文与阅读范围</h2><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18525v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18525v1">元数据与版本</a></p><p>已读取第II—V节，核对Fisher比率公式、图2三阶段诊断、表I自编码器及图3混淆矩阵。原文的样本裁剪/窗口描述存在需查实现细节，未把该设置复现为确定事实。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">TRIPROBE: Probing Task Separability Beyond Classification for XAI</p><p>Sadough, Amirhossein、Hens, Freek、Bokšan, Aleksa、Dehshibi, Mohammad Mahdi、Shahsavari, Mahyar</p>
+<p>arXiv:2609.18525v1 · 发布日期：2026-09-16 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18525v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18525v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

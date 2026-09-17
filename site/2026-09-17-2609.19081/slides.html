@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用两家店的销量说明：过去走势一致，仍可能在政策之后出现不同冲击，改变因果解释。">
+<title>图解全文 · 超越事前趋势：基于不一致程度的双重差分敏感性分析</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.19081v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 经济</p><h1 tabindex="-1">超越事前趋势：基于不一致程度的双重差分敏感性分析</h1><p class="lead">用两家店的销量说明：过去走势一致，仍可能在政策之后出现不同冲击，改变因果解释。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 经济</p><h1 tabindex="-1">销量涨了，究竟是不是优惠活动的功劳？</h1><p>甲店开展促销，月销量从102增到112。直接说促销增加10件，忽略了季节、商圈和其他变化。研究者通常找一家没促销的乙店：如果乙店也涨了，就把共同增长扣掉。这样的想法直观，但真正困难是乙店能不能代表甲店没促销时的变化。</p><p>论文关注这个判断的稳健性。读完你应能算双重差分、说清缺失的反事实是什么，并解释为什么‘政策前两组走得一样’仍不保证政策后的推断可靠。商店是教学情境，论文应用是南非历史劳动供给冲击与选举结果。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 经济</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[处理后的实际变化] --&gt; D[因果效果待推断]
+B[同期对照变化] --&gt; E[反事实填补一]
+C[本组过去变化] --&gt; F[反事实填补二]
+E --&gt; G{两种填补差多远}
+F --&gt; G
+G --&gt; H[允许平行趋势偏离的尺度]
+H --&gt; D
+D --&gt; I[敏感性范围与多期扩展]
+I --&gt; J[边界：一致也可能共同有偏]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 经济</p><h1 tabindex="-1">全景：为看不见的结果找替代线索</h1><p>实际只能观察甲店促销后的销量，不能同时观察同一家店同一个月不促销的销量。这个未发生但想比较的结果叫反事实。论文把寻找反事实理解为填一个缺失格子：可以借乙店同月的变化，也可以借甲店过去的变化。</p><p>两种填法各有软肋。乙店同月更贴近当前环境，却可能遭受甲店没有的冲击；甲店过去保持了对象相同，却可能跟不上时代变化。论文不是宣布第二种永远更好，而是用不同合理线索之间的分歧衡量结论依赖假设的程度。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 经济</p><h1 tabindex="-1">双重差分，两次减法就够了</h1><p>先对每家店算前后变化，再让甲店变化减去乙店变化。若甲涨10、乙涨2，估计的促销效果为8。第一次减法去掉两家店本来销量高低的差别，第二次减法尝试去掉共同时间变化。</p><p>这里的关键假设叫平行趋势：如果甲没有促销，它的变化应与乙相同。注意并不要求两家销量一样，也不要求政策后的实际曲线平行。政策本来就可能让甲的曲线改变；假设谈的是未观察到的无政策变化。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 经济</p><h1 tabindex="-1">政策前一模一样，政策后仍可能分叉</h1><p>设三个月销量为甲[100,102,112]、乙[80,82,92]。前两月两店都涨2，政策前趋势完全平行。最后一个月两店都涨10，所以双重差分为0。但如果以甲过去涨2作为反事实，估计效果却是8。</p><p>两种故事都能解释观察值。故事一：两店共同遭遇旺季，促销没用；故事二：只有乙店旁边新开地铁，乙额外涨8，而甲促销增加8。仅凭这三期销量，无法知道哪一个故事真实。完美的政策前走势不能代替对政策后冲击的判断。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 经济</p><h1 tabindex="-1">分歧量衡量的是什么？</h1><p>在这个例子里，同期对照变化是10，替代的历史变化是2，相差8。论文把可接受的替代填补与平行趋势填补之间的差异，作为敏感性分析的尺度。差异越大，结论越依赖采用哪条假设。</p><p>这不是说政策效果必定为8，也不是说大分歧证明对照组错误。分歧只是暴露：如果另一个假设也有一定可信度，结论可能大幅变化。读者应据背景知识判断哪些替代线索合理，不能把所有不相关群体和年代一股脑塞进来。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 经济</p><h1 tabindex="-1">从一个数，变成允许偏离的范围</h1><p>写成最简单的恒等式：真实处理效应=DID−政策后无政策趋势差。趋势差为零就是传统平行趋势。敏感性分析允许它不是零，并用一个可解释的尺度限制其大小。若允许偏离在±B内，效果区间就是[DID−B,DID+B]。</p><p>下面的demo把B设为M乘以两种填补的差距，观察M=0、0.5、1时区间怎样扩张。这是帮助理解边界的简化算例，没有抽样标准误、置信区间或多期相关结构。论文正式方法还论证替代假设的可信度权重与最坏分歧基准。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 经济</p><h1 tabindex="-1">为什么只盯政策前误差可能过于乐观</h1><p>有些敏感性方法把政策后最大偏离，设为政策前最大趋势差的某个倍数。教学例里政策前差为0，无论乘多大仍为0，得到一个看起来不动摇的结果。然而两条有理由考虑的反事实给出的答案相差8。</p><p>论文的贡献是把对照组政策后的走势变化纳入不一致程度。第4节图1展示前趋势相同但政策后对照发生变化的两种场景；第5节给出形式化依据。这并不否定所有既有方法，而是指出不同敏感性限制捕捉的是不同脆弱性。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 经济</p><h1 tabindex="-1">论文怎样支撑它的主张？</h1><p>正文先建立两组单一政策后期的框架，再比较既有前趋势限制，提出分歧限制及决策论解释，扩展到多个政策后期，最后重分析一个南非历史案例。证据包括代数关系、理论论证、示意图和应用敏感性结果。</p><p>本包不将历史应用改写为新的政治因果结论，也不编造本文没有重新计算的估计值。我们只抓住能够独立检查的核心机制：不同反事实填补的分歧，为‘平行趋势如果错了会怎样’提供另一把尺子。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 经济</p><h1 tabindex="-1">一致也不是无偏的保证</h1><p>若两种线索都涨2，它们可能碰巧一致，也可能共同受遗漏因素误导。论文强调一致性与假设可信度的关联，但不能由‘两种算法给同一数’推出真实因果已经找到。多个方法如果共享同一错误，互相印证也有限。</p><p>另外，需要处理提前反应、组间干扰、处理定义、样本变化与估计不确定性。我们的小例只操纵反事实趋势，不覆盖这些问题。把敏感性分析看成定位假设脆弱处的工具，比把它当成可靠性认证章更准确。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 经济</p><h1 tabindex="-1">把它用在工作指标上</h1><p>比较两个城市促销、两组业务规则或两批用户功能上线时，可以并列写出：采用同期对照的反事实是什么；采用对象自身历史的反事实是什么；两者差多少；哪种额外冲击能让它们分歧。先解释这些，才讨论估计数字。</p><p>这是本包的迁移练习，不是作者验证过的产品实验。如果已经随机分组，应先按随机实验的方法分析，不必为了使用新名词强行改成观察研究。合适的问题是‘结论靠哪条不可见的假设撑住’，而非‘套了什么公式’。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 经济</p><h1 tabindex="-1">最小实践的实际输出</h1><pre><code>post shock: pretrend gap=0, DID=0, own-trend effect=8, discordance=8
+  M=0: teaching identified range=[0, 0]
+  M=0.5: teaching identified range=[-4, 4]
+  M=1: teaching identified range=[-8, 8]
+no shock: pretrend gap=0, DID=8, own-trend effect=8, discordance=0
+  M=0: teaching identified range=[8, 8]
+  M=0.5: teaching identified range=[8, 8]
+  M=1: teaching identified range=[8, 8]
+</code></pre><p>两个案例前趋势差都为0；只有政策后冲击案例出现8的分歧。区间是自设敏感性约束下的教学识别范围，不是论文实证置信区间。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 经济</p><h1 tabindex="-1">检验理解</h1><ol><li>平行趋势是否要求两组政策前销量水平相同？</li><li>例子里的DID=0能否证明促销没用？</li><li>把M增大有什么含义？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 超越事前趋势：基于不一致程度的双重差分敏感性分析</option><option value="2">2. 销量涨了，究竟是不是优惠活动的功劳？</option><option value="3">3. 把整篇串起来</option><option value="4">4. 全景：为看不见的结果找替代线索</option><option value="5">5. 双重差分，两次减法就够了</option><option value="6">6. 政策前一模一样，政策后仍可能分叉</option><option value="7">7. 分歧量衡量的是什么？</option><option value="8">8. 从一个数，变成允许偏离的范围</option><option value="9">9. 为什么只盯政策前误差可能过于乐观</option><option value="10">10. 论文怎样支撑它的主张？</option><option value="11">11. 一致也不是无偏的保证</option><option value="12">12. 把它用在工作指标上</option><option value="13">13. 最小实践的实际输出</option><option value="14">14. 检验理解</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Beyond Pretrends: A Discordance-Based Sensitivity Analysis for Difference-in-Differences</p><p>Thomas Leavitt</p>
+<p>arXiv:2609.19081v1 · 发布日期：2026-09-16 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.19081v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.19081v1">论文正文</a></p></details><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.19081v1'>Beyond Pretrends: A Discordance-Based Sensitivity Analysis for Difference-in-Differences</a>；2609.19081v1；提交日期 2026-09-16。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2节ATT与DID关系；第3—4节前趋势限制及图1；第5节分歧敏感性；第6—8节扩展、应用与结论。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

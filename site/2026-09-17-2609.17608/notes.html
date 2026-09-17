@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="从两人合办活动出发，理解观察准备动作、保留修改机会，为什么能改变合作困局。">
+<title>详细讲解 · 计划行动与侦察下协调博弈的均衡选择</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.17608v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.17608v1</p>
+<h1>计划行动与侦察下协调博弈的均衡选择</h1><p class="original" lang="en">Equilibrium Selection in Coordination Games with Planned Actions and Scouting</p>
+<p class="lead">从两人合办活动出发，理解观察准备动作、保留修改机会，为什么能改变合作困局。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">为什么双方都想合作，最后却各做各的？</a><a href="#section-1">全景：决定并不是一个瞬间</a><a href="#section-2">先读懂收益表，再给均衡命名</a><a href="#section-3">线索的准确率，不是对方合作的概率</a><a href="#section-4">筛选策略：只在信号积极时执行</a><a href="#section-5">会赚钱的计划，还必须每一步都愿意做</a><a href="#section-6">作者到底证明了什么？</a><a href="#section-7">如果有人能强行启动，结论会改变</a><a href="#section-8">把模型搬到工作里，先核对边界</a><a href="#section-9">读完要能复述的整条链</a><a href="#section-10">动手验证：需求、运行与结果</a><a href="#section-11">自测：解释、预测与迁移</a><a href="#section-12">资料与证据</a></nav><section id="section-0"><h2>为什么双方都想合作，最后却各做各的？</h2><p>设想你和朋友要合办一场活动。两个人都认真准备，效果最好；只有你投入而对方没准备，你就白忙了。各自做小活动虽普通，却比较稳妥。这不是谁不善良，而是你的收益取决于另一个人接下来会做什么。论文把这种情境叫协调博弈。</p><p>读完你应能解释：为什么看见对方正在准备，比一句口头保证多一些信息；为什么能退出重来会改变决定；以及为什么再准确的观察也不能自动保证合作。活动故事是教学类比，原文研究的是抽象的两人博弈，不是活动现场实验。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[合作有风险] --&gt; B[先准备行动]
+B --&gt; C[接收有噪声的线索]
+C --&gt; D[结合先验更新判断]
+D --&gt; E{执行还是修改}
+E --&gt;|执行| F[双方行动产生收益]
+E --&gt;|修改且付出等待成本| B
+F --&gt; G[比较筛选价值与保守收益]
+G --&gt; H[命题证明与教学算例]
+H --&gt; I[边界：误判高或不能暂停]</pre></details>
+</figure></section><section id="section-1"><h2>全景：决定并不是一个瞬间</h2><p>整个机制是一条可以回头的链：选择准备什么 → 看到对方准备的线索 → 决定执行还是修改 → 两人都执行才得到收益。如果至少一人要求修改，双方回到准备阶段。每多等一次都付出时间成本，因此不能把重来想成免费。</p><p>论文先回顾普通协调博弈，再加入准备与侦察，随后检查原有均衡，考察少量意外合作如何使保守结果不稳定，最后讨论一方可以强制执行时会发生什么。后面的结论依赖前面的协议规则，规则不是可随意省去的背景。</p></section><section id="section-2"><h2>先读懂收益表，再给均衡命名</h2><p>用教学数字表示：双方合作各得10；我独自合作只得1；我保守而对方合作可得6；双方保守各得4。符合原文的排序10&gt;6&gt;4&gt;1。知道对方一定合作，我也合作；知道对方一定保守，我也保守。两种结果都可能让谁都不愿单独改主意。</p><p>这种互相稳定的组合叫均衡。‘稳定’不表示最好，双方各得4也是稳定的。若认为对方合作概率为x，我合作的期望收益为10x+1(1−x)，保守为6x+4(1−x)。前者更高需要x&gt;3/7。这是决策门槛，不是论文测得的真实人群比例。</p></section><section id="section-3"><h2>线索的准确率，不是对方合作的概率</h2><p>把侦察理解为远远看对方是否带齐设备。准确率p表示对方无论准备哪种行动，你看对的概率。它不等于‘看到合作线索后，对方会合作的概率’：后者还要看合作本来有多常见。</p><p>例如每100次准备只有10次合作，侦察准确率90%。平均会看到9个真正的合作线索，也会把90次保守中的9次错看成合作。因此18个积极线索中仅9个可靠，后验概率是50%。先前的10%叫先验，结合新线索后的50%叫后验。这是贝叶斯更新的直观含义。</p></section><section id="section-4"><h2>筛选策略：只在信号积极时执行</h2><p>论文检查一种偏离保守路线的策略：每轮都准备合作，但只在观察到积极线索时执行；否则修改并重来。输入是合作出现概率ε、观察准确率p、三种相关收益，以及等待折扣δ。中间状态是当前线索、更新后的合作概率、立即执行收益与继续等的价值。</p><p>δ=0.99表示晚一轮拿到的收益，今天只按99%计价。一次得到积极线索的概率γ=pε+(1−p)(1−ε)。策略价值V满足V=当轮执行收益的概率加权和+(1−γ)δV。把未来的同一个V移到左边，就能解出无限次重来的总价值，无需真的运行无穷多轮。</p></section><section id="section-5"><h2>会赚钱的计划，还必须每一步都愿意做</h2><p>只检查V比保守收益高是不够的。到了执行时，看到积极线索，要确实愿意执行；看到消极线索，要确实愿意等待。原文要求积极线索下的执行收益&gt;δV&gt;消极线索下的执行收益。这叫序贯理性：事前计划到事中仍站得住。</p><p>我们的demo同时计算V、两种后验以及这两条判断，避免出现‘总收益看起来高，但执行规则自己会反悔’的假成功。读到复杂博弈时，这是很实用的检查习惯：不要只问整体收益，也要问每个决策节点有没有改主意的理由。</p></section><section id="section-6"><h2>作者到底证明了什么？</h2><p>主文命题2说明，仅仅加入侦察，原来两种纯策略均衡仍可存在。命题3进一步固定一个大于零的意外合作概率，再让观察足够精确、重来足够便宜，构造一条有利可图且逐步合理的筛选偏离，因此保守结果不再稳固。</p><p>注意顺序：对每个固定ε存在足够好的精度与耐心门槛，不能理解成任何小ε、任何看似高的精度都够用。图1是均衡区域变化的示意图，不是从真实用户数据画出的统计结果。论文明确声明未使用数据，支撑主要来自数学构造与证明。</p></section><section id="section-7"><h2>如果有人能强行启动，结论会改变</h2><p>前面的策略依靠一人要求修改就能暂停。如果朋友可以无视你的请求强行开场，你就失去了筛选失败后安全重来的机会。论文第7节专门修改执行协议，并要求收益变化持续存在，观察到的准备才能传达对方未来还会怎样做。</p><p>在该扩展里，短暂的手误或一次性冲动不再足以支撑相同结论。持久的类型变化、足够高的信息精度和相应折扣门槛共同起作用。这提醒我们：现实中借用模型，首先核对退出权和执行权，而不是只摘取‘透明促进合作’一句话。</p></section><section id="section-8"><h2>把模型搬到工作里，先核对边界</h2><p>这个模型适合帮助思考联调、合办活动或共同投资前的准备观察，但不是这些场景的因果证明。真实线索可能被伪装，修改可能损害信誉，等待有截止日，双方的利益也未必具有猎鹿式收益排序。任何一项变化都可能使简单结论失效。</p><p>一个可检验的迁移想法是：把‘已准备好’改成可观察的具体材料，并保留低成本的重新协调机会。这里是基于模型的工作假设，不是作者做过的管理实验。应先观察误判率与重试成本，再决定这个类比是否有用。</p></section><section id="section-9"><h2>读完要能复述的整条链</h2><p>合作有风险，所以保守均衡可能持续。准备阶段留下线索，线索让人更新判断；可修改的协议把判断转成筛选；足够精确、足够便宜的筛选让偶尔出现的合作值得等待，从而可能动摇低收益结果。</p><p>这条链没有声称人们一定合作，也没有用模拟替代均衡证明。你可以先用下方算例改变精度与耐心，再解释哪一步失效。全文已在本页覆盖，练习只帮助发现卡点，不需要等明天才能获得后半篇内容。</p></section><section id="section-10"><h2>动手验证：需求、运行与结果</h2><p>需求：按命题3的筛选策略公式计算价值和逐步合理性。固定教学收益a=10、b=4、c=1、偶发合作ε=0.1；比较观察准且耐心、观察差、等待昂贵三种情况。省略双方完整均衡求解。正确依据是概率归一、价值递推恒等式，以及两种信号下的行动检查。</p><p>运行方式：下载同目录的 <a href='demo.py'>demo.py</a>，执行 <code>python3 demo.py</code>。仅使用 Python 标准库。</p><pre><code>p=0.99, delta=0.99: posterior=0.917, V=8.544, screening_viable=True
+p=0.60, delta=0.99: posterior=0.143, V=2.255, screening_viable=False
+p=0.99, delta=0.50: posterior=0.917, V=1.803, screening_viable=False
+</code></pre><p>第一行同时通过收益与执行检查；精度降低或等待变贵后失败。这里用的是论文公式和自设参数，验证数值算例；没有证明全部均衡，也不是现实合作效果的复现。</p></section><section id="section-11"><h2>自测：解释、预测与迁移</h2><ol><li>准确率90%的积极信号，为什么可能只有50%是真的？</li><li>δ从0.99降到0.5，哪个成本变高了？</li><li>如果一方能强制执行，为什么原筛选逻辑需要重做？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><section id="section-12"><h2>资料与证据</h2><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.17608v1'>Equilibrium Selection in Coordination Games with Planned Actions and Scouting</a>；2609.17608v1；提交日期 2026-09-14。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2—5节收益表、准备协议、命题2—3及价值公式；第6节图1；第7节命题4；第8节讨论。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Equilibrium Selection in Coordination Games with Planned Actions and Scouting</p><p>Wolfgang Kuhle</p>
+<p>arXiv:2609.17608v1 · 发布日期：2026-09-14 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.17608v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.17608v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

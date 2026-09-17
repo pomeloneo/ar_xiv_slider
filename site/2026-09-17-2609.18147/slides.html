@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="从两地共享维修名额出发，理解总效率提高，为什么仍可能有人不愿加入。">
+<title>图解全文 · 逝者器官分配中的动态共享与地区参与</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18147v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 经济</p><h1 tabindex="-1">逝者器官分配中的动态共享与地区参与</h1><p class="lead">从两地共享维修名额出发，理解总效率提高，为什么仍可能有人不愿加入。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 经济</p><h1 tabindex="-1">两地把名额合并，为什么还会有人反对？</h1><p>两处维修站每天各有一个临时维修名额。有时甲地没有需求而乙地排着两个人，如果名额不能共享，就一个闲置、一个人等不到。共享明显能减少这种错配。但若长期把甲的名额送去乙，甲的居民可能反而更难得到服务。</p><p>论文原问题是逝者器官分配，兼有稀缺、时效与匹配限制。本包用维修名额帮助理解经济机制，不提供临床或实际分配建议。读完你要区分‘总收益更大’、‘每个地区愿意参加’和‘每类人都不变差’这三个要求。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 经济</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[资源与需求随机到来] --&gt; B[分开时闲置和错配]
+B --&gt; C[共享队列降低浪费]
+C --&gt; D[总收益提高的空间]
+D --&gt; E{每地都达到独立基准吗}
+E --&gt;|否| F[调整优先权重]
+F --&gt; G[CPFS寻找政策混合]
+G --&gt; E
+E --&gt;|是| H[有参与保障的共享方案]
+H --&gt; I[理论与数值校准]
+I --&gt; J[边界：地区保障不等于每类保障]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 经济</p><h1 tabindex="-1">全景：供给和需求都在时间里到来</h1><p>模型不是把所有资源和申请者一次摆在桌上配对。资源和需求不断随机到来，等待者会退出，资源不能无限存放，匹配也未必成功。当前谁得到资源，会改变未来队列，因此必须研究长期表现。</p><p>论文先建多类别排队模型，证明一定条件下的优先级规则最优，再描述可达到的地区收益组合，展示单纯追求总收益的方案可能违反参与条件，最后给出带参与约束的搜索算法CPFS及数值比较。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 经济</p><h1 tabindex="-1">共享的第一份好处：抵消随机错配</h1><p>在最小教学例中，两地需求各自独立地是0或2，概率各一半，每地供给固定1。四种等可能情形是(0,0)、(0,2)、(2,0)、(2,2)。分开时服务量分别为0、1、1、2；共享时为0、2、2、2。</p><p>平均服务量从1变为1.5。没有增加一个名额，只是把恰好闲置的供给转给同时有需求的一边。原文还考虑跨时间等待和随机相容性，本例只隔离同一期风险汇集，不冒充动态器官模型仿真。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 经济</p><h1 tabindex="-1">匹配限制为什么也能产生共享收益</h1><p>原文给每个等待者一个共同的独立相容概率ρ。队列里候选者多一些，至少有人匹配成功的机会可能增大，资源被丢弃的概率下降。它与时点错配一起构成动态共享收益。</p><p>但现实器官相容不是所有人完全相同且相互独立。这个假设为了让模型可计算，不能把ρ直接解释成真实临床相容率。作者也要求对某些结果使用共同退出率；如果类别的退出速度不同，优先规则的条件需要单独检查。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 经济</p><h1 tabindex="-1">为什么用固定优先分数就有用？</h1><p>给每类等待者一个收益权重，论文将长期福利问题转化为等待成本问题。一定条件下，每次资源到来，从当时能匹配的类别里选优先分数最高者，就能得到相应加权目标的最优政策。</p><p>这里分数由权重、价值和到达率组成，并不等于简单先来先到。更重要的是，调整权重会产生不同地区收益组合。它提供一个高效的计算入口：不必对每一种队列状态凭空设计不同规则，也能探索一组有结构的政策。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 经济</p><h1 tabindex="-1">效率前沿并不保证每个地区都满意</h1><p>一个方案处于效率前沿，意思是想让某方更好就得让别处更差；但它仍可能让某地区比独立运作时更差。原文第6节的非对称例中，高供给地区可能向高需求地区转移过多资源，因而不愿加入。</p><p>参与约束就是给每地设底线：共享后的长期收益至少不低于单独运作。论文证明在其模型条件下存在共同改善的空间，但单纯最大化总收益不会自动选中它。‘改善方案存在’与‘你现在选的方案满足改善’不能交换。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 经济</p><h1 tabindex="-1">一个两点混合例，把公平约束算出来</h1><p>假设两个可行长期方案的地区收益分别为R=(0.9,0.4)、S=(0.4,1.1)，独立运作底线为(0.8,0.3)。S的总和1.5高于R的1.3，但甲只有0.4，远低于底线。</p><p>若用比例a混合R、1−a混合S，甲收益是0.4+0.5a。要求至少0.8，就有a≥0.8；在可行混合中，a=0.8得到(0.8,0.54)，总和1.34。教学例展示约束与取舍，不是从论文队列求出的真实政策向量。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 经济</p><h1 tabindex="-1">CPFS怎样避免枚举所有顺序？</h1><p>若有K类，优先顺序有K!种，逐一枚举很快变得不可行。CPFS利用前面的优先规则最优性：给参与不足的约束增加影子权重，再调用优先政策计算器，逐步缩小搜索范围，最后组合少量已找到的政策。</p><p>正式算法使用对偶搜索、误差控制与混合恢复，不等于我们在两点之间扫网格。定理2在共同退出率、严格可行等条件下保证目标接近最优且约束违反量可控制。它允许数值容差，不该被表述为有限计算下所有约束绝对零误差。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 经济</p><h1 tabindex="-1">图表支持什么，不能推出什么</h1><p>原文图2展示非对称时总收益导向方案与参与底线的冲突。表1比较CPFS与枚举：在其Case2中，枚举面对3,628,800个顺序，CPFS得到相同报告目标值6.2106而减少搜索。这个速度比较依赖作者实现和设定。</p><p>表2还区分地区参与与类别参与：地区整体不变差，某一类仍可能损失。表3是美国肾移植资料校准，显示单一名单与带约束策略的地区底线差异；它不是在真实医疗系统随机部署后的效果证据。本包没有重新执行该校准。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 经济</p><h1 tabindex="-1">把共享问题问完整</h1><p>共享会议室、仓储、维修或算力时，同样可以问：总收益来自新增能力还是减少错配？各方独立做的基准是多少？谁可能因规则而损失？底线保障到地区、团队，还是每一类使用者？这些是模型给我们的分析顺序。</p><p>迁移只是经济机制类比，真实项目还要考虑运输、治理、策略性不参与和测量误差。本文已完整交付从动态共享到参与约束再到算法的主线，小实践只验证两个最基础的可算环节。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 经济</p><h1 tabindex="-1">最小实践的实际输出</h1><pre><code>equal-probability demand states: separate=1.0, pooled=1.5
+unconstrained S: utilities=(0.4, 1.1), sum=1.5, region A below floor=True
+constrained mixture: share_R=0.800, utilities=(0.800,0.540), sum=1.340
+</code></pre><p>第一部分提升来自名额不再闲置；第二部分说明总收益最优可能违反参与底线。二者都是自设教学例，不能当作器官分配政策或CPFS复现。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 经济</p><h1 tabindex="-1">检验理解</h1><ol><li>共享为什么能在供给总量不变时提高服务量？</li><li>效率前沿上的点是否自动满足参与约束？</li><li>保护每个地区，是否就保护了地区内每类人？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 逝者器官分配中的动态共享与地区参与</option><option value="2">2. 两地把名额合并，为什么还会有人反对？</option><option value="3">3. 把整篇串起来</option><option value="4">4. 全景：供给和需求都在时间里到来</option><option value="5">5. 共享的第一份好处：抵消随机错配</option><option value="6">6. 匹配限制为什么也能产生共享收益</option><option value="7">7. 为什么用固定优先分数就有用？</option><option value="8">8. 效率前沿并不保证每个地区都满意</option><option value="9">9. 一个两点混合例，把公平约束算出来</option><option value="10">10. CPFS怎样避免枚举所有顺序？</option><option value="11">11. 图表支持什么，不能推出什么</option><option value="12">12. 把共享问题问完整</option><option value="13">13. 最小实践的实际输出</option><option value="14">14. 检验理解</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Dynamic Pooling and Regional Participation in Deceased-Donor Organ Allocation</p><p>Genta Okada</p>
+<p>arXiv:2609.18147v1 · 发布日期：2026-09-16 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.18147v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18147v1">论文正文</a></p></details><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.18147v1'>Dynamic Pooling and Regional Participation in Deceased-Donor Organ Allocation</a>；2609.18147v1；提交日期 2026-09-16。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第3节模型；第4节定理1；第5节命题1与观察1；第6节例6.2与图2；第7节定理2、表1—3。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

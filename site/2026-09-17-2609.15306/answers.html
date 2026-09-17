@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用两棵小树区分“到期价格分布相同”和“整条价格路径合法”，读懂论文如何修复一个定价模型。">
+<title>参考答案 · 偏斜布朗运动不应作为风险中性收益过程：一个适定的偏斜正态替代模型</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.15306v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><p>参考解释：到期价格分布只规定每个终点出现的比例，不规定看到今天状态后如何转移。程序里两套模型终点分布与执行价 100 的期权值都相同，但第二套在 S1=80 时的条件均值是 120，而不是 80，因此不能按同一风险中性鞅规则解释。</p><p>关键前提可举零利率及所检验的是风险中性转移概率。论文更强的连续时间套利结论还依赖它自己的过程、信息和交易假设。最小实践省略局部时与局部波动模型构造，只验证照片不能决定电影这一逻辑。</p><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

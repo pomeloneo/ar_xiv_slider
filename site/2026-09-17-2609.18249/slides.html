@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="在同一货架上，先把“我想要什么”讲清楚，再确认“这里有什么”。">
+<title>图解全文 · Re2A：基于评分准则的偏好推理与对齐，实现情境化对话推荐</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18249v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 16 · AI</p><h1 tabindex="-1">Re2A：基于评分准则的偏好推理与对齐，实现情境化对话推荐</h1><p class="lead">在同一货架上，先把“我想要什么”讲清楚，再确认“这里有什么”。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 16 · AI</p><h1 tabindex="-1">在货架前说一句“左边那件”</h1><p>你和店员看着同一排商品，说“想要红色的、左边那件，但不要超过一百”。这句话同时依赖视觉位置、颜色、价格和之前的对话。仅凭文字相似度，可能找到红色商品，却忽略左右或预算。</p><p>论文称这类任务为 situated conversational recommendation，即情境化对话推荐。读完你应能把模糊需求整理成明确偏好状态，区分“商品存在但不合心意”和“很合心意但根本不存在”，并解释为什么多一个推理步骤既有价值也会增加延迟。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 16 · AI</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[场景 商品 对话] --&gt; B[明确当前偏好状态]
+B --&gt; C[只在可见商品中匹配]
+C --&gt; D{有满足约束的商品吗}
+D --&gt;|有| E[锚定具体商品生成回答]
+D --&gt;|无| F[说明缺口并等待澄清]
+E --&gt; G[核对偏好和场景两类错误]
+F --&gt; B</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 16 · AI</p><h1 tabindex="-1">先看整体关系</h1><div class="mermaid">flowchart TD
+A[场景 商品 对话] --&gt; B[明确当前偏好状态]
+B --&gt; C[只在可见商品中匹配]
+C --&gt; D{有满足约束的商品吗}
+D --&gt;|有| E[锚定具体商品生成回答]
+D --&gt;|无| F[说明缺口并等待澄清]
+E --&gt; G[核对偏好和场景两类错误]
+F --&gt; B</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 16 · AI</p><h1 tabindex="-1">输入要同时包含三种证据</h1><p>系统输入有共同观察的场景、场景里真实候选商品和多轮对话。商品不只是名称，还可能带颜色、位置、价格等信息。输出包含选中的商品和向用户说的话。</p><p>中间最关键的是偏好状态：当前用户究竟约束了什么、哪些要求已经改变、哪些还不确定。把这份状态显式写出来，可以检查后续推荐是理解错需求，还是理解对了却选错商品；直接从长对话跳到一句推荐，往往更难定位。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 16 · AI</p><h1 tabindex="-1">第一步：把一句话变成可检查的偏好</h1><p>教学输入是“红色、左边、不超过100”。偏好状态可以是颜色=红、位置=左、最高价格=100。若用户下一轮说“右边也行”，只更新位置，不应该把预算和颜色一并忘掉。</p><p>论文的偏好推理模型会生成推理与结构化状态，但状态本身缺乏直接标注。作者因此使用 rubrics，也就是逐条评分准则，约束推理是否贴合画面、商品属性和对话历史。状态格式清楚有助于检查，却不保证内容天然正确。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 16 · AI</p><h1 tabindex="-1">第二步：每轮只选相关准则</h1><p>评分准则分为场景对应、商品相关、对话一致及辅助条件等方面。只问“左边那件”时，空间关系很关键；若又要求红色，则还要检查颜色。所有轮次都机械套同一大套清单，会引入无关监督。</p><p>作者让一个固定模型选择本轮相关准则，再由固定评审模型逐条判断候选推理是否满足，汇总成奖励。这里的“二元准则”不意味着判断完全由确定性代码完成：模型仍参与解释证据，因此也可能误判。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 16 · AI</p><h1 tabindex="-1">第三步：训练时比较多份推理</h1><p>模型对同一场景生成多份偏好推理，每份根据满足准则的比例得到奖励。再把同组奖励标准化，让相对较好的候选更受鼓励。论文使用 GRPO 做这种组内比较式训练。</p><p>普通读者不必先会强化学习：可以想成几份店员理解记录接受同一组检查，遗漏预算的得分低，颜色位置价格都对的得分高。但训练是否真的学会规则，要由未见过的场景验证，不能把训练中分数提高当成可靠性保证。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 16 · AI</p><h1 tabindex="-1">第四步：区分两种错误回答来训练</h1><p>一种负例推荐不存在的商品，违背场景；另一种商品确实在场景中，却违背用户偏好。作者针对这两种错误构造偏好对，先监督训练，再用 DPO 让好的回答相对这两类差回答更受偏好。</p><p>这样可以同时惩罚“编一件完美商品”和“随便推荐一件真实商品”。论文训练回答生成时使用真实目标商品作为锚，推理时则只能使用检索选中的商品。这种训练与使用时的差别，是理解下游错误传播的重要细节。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 16 · AI</p><h1 tabindex="-1">推理时沿一条明确链路走</h1><p>真正使用时先根据场景和对话生成偏好状态，再在可见候选中排序，选中具体商品，最后围绕该商品生成回答。论文中的训练期准则选择器和评审器不会每轮在线调用，在线额外成本主要来自偏好推理。</p><p>限制候选范围能减少凭空编商品，但若第一步把“不想要浅色”误读成“想要浅色”，后面仍可能非常一致地选错。一个清楚的中间状态既是改进点，也是错误可能被层层放大的位置，需要独立核对。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 16 · AI</p><h1 tabindex="-1">论文结果与延迟代价</h1><p>表3在 Qwen3-VL 和所测 SIMMC 2.1 设置下，ReGeS 的 Hit@1 为39.45%，Re2A 为48.12%；首位命中提升8.67个百分点。对应所报视觉幻觉率从15.2%到5.2%，是下降10个百分点，而不是只下降10%的相对比例。</p><p>同表每轮总延迟从1220.9毫秒增至2342.7毫秒。读这组结果要同时保留收益和成本。作者也明确说完整系统比较不能单独隔离训练目标与合成监督数据的贡献，附录另做对照；不能把所有提升都归功于一个小模块。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 16 · AI</p><h1 tabindex="-1">一个货架算例暴露无解情况</h1><p>设A是左边红色120，B是右边红色80，C是左边蓝色70。最初“红色、左边、≤100”没有任何商品同时满足。正确的处理应解释缺口或继续沟通，不能把A说成80，也不能假装B在左边。</p><p>当用户允许左右都可以，B才成为匹配项。这个中间状态变化由教学脚本明确实现，没有视觉识别或语言模型。它验证的是硬条件筛选及多轮更新逻辑，不是论文 GRPO、DPO 或真实推荐效果。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 16 · AI</p><h1 tabindex="-1">边界：偏好可以改变，场景也会改变</h1><p>论文主要使用静态视觉场景，现实商品可能被拿走、位置改变，旧画面不再有效；教师模型制作的准则和负例也可能把偏差带进训练。作者提出未来可用独立验证器检查偏好状态，必要时澄清。</p><p>我们的推断是，系统还应区别硬约束与可协商偏好，并记录用户何时修改了它们。预算上限与“最好在左边”未必具有同样优先级。本文的硬筛选例子刻意不替用户放宽条件，让你看清什么时候需要新的真实输入，而不是系统擅自猜测。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 16 · AI</p><h1 tabindex="-1">最小实践：运行、观察与边界</h1><p>需求：以三件手工商品为输入，显式保留颜色、位置与预算；第一轮无解，第二轮只更新位置后命中B；用断言保证预算不被无意遗忘。这里的字段是人为给定，不模拟从图片提取属性。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>第一轮偏好： {&#x27;color&#x27;: &#x27;red&#x27;, &#x27;side&#x27;: &#x27;left&#x27;, &#x27;budget&#x27;: 100} 匹配： []
+第二轮只放宽位置： {&#x27;color&#x27;: &#x27;red&#x27;, &#x27;side&#x27;: &#x27;either&#x27;, &#x27;budget&#x27;: 100} 匹配： [&#x27;B&#x27;]
+无匹配时应解释缺口；不能改写价格或编造商品。
+手工结构化商品示例，不是视觉模型训练复现。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-15" aria-label="第 15 页"><p class="eyebrow">15 / 16 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>A满足颜色和位置，为什么第一轮仍不能推荐为完全符合要求？</li><li>用户说左右都行，是否意味着预算也可忽略？</li><li>偏好状态写成JSON，能否自动保证推荐正确？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section class="slide" id="slide-16" aria-label="第 16 页"><p class="eyebrow">16 / 16 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18249v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18249v1">元数据与版本</a></p><p>已读取第2—5节及Limitations，核对图2流程、图3消融与表3性能/延迟。特别区分训练时真实锚与推理时检索锚，百分点与相对百分比。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. Re2A：基于评分准则的偏好推理与对齐，实现情境化对话推荐</option><option value="2">2. 在货架前说一句“左边那件”</option><option value="3">3. 把整篇串起来</option><option value="4">4. 先看整体关系</option><option value="5">5. 输入要同时包含三种证据</option><option value="6">6. 第一步：把一句话变成可检查的偏好</option><option value="7">7. 第二步：每轮只选相关准则</option><option value="8">8. 第三步：训练时比较多份推理</option><option value="9">9. 第四步：区分两种错误回答来训练</option><option value="10">10. 推理时沿一条明确链路走</option><option value="11">11. 论文结果与延迟代价</option><option value="12">12. 一个货架算例暴露无解情况</option><option value="13">13. 边界：偏好可以改变，场景也会改变</option><option value="14">14. 最小实践：运行、观察与边界</option><option value="15">15. 先自己试着解释</option><option value="16">16. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Re2A: Situated Conversational Recommendation via Rubric-based Preference Reasoning and Alignment</p><p>Lin, Dongding、Wang, Jian、Zhao, Xiaoyan、Li, Wenjie</p>
+<p>arXiv:2609.18249v1 · 发布日期：2026-09-16 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18249v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18249v1">论文正文</a></p></details><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18249v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18249v1">元数据与版本</a></p><p>已读取第2—5节及Limitations，核对图2流程、图3消融与表3性能/延迟。特别区分训练时真实锚与推理时检索锚，百分点与相对百分比。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

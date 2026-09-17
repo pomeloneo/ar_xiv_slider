@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用两个波动大小不同的资产，分清资金比例、单项风险和组合风险贡献，并检查均值怎样混进风险指标。">
+<title>参考答案 · 温和稳定收益分布下的熵风险价值平价</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.11905v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><p>各投一半不保证风险各一半，波动幅度与共同涨跌关系都会影响贡献。在互不相关的 10% 与 20% 例子中，后者的半仓方差贡献是前者的四倍。</p><p>只提高估计均值而保持其他分布参数和权重不变时，去均值 EVaR 不变；原始 EVaR 会减少，对应资产的原始贡献也减去 w_i×均值增量。关键假设是风险函数及其导数可用，正态特例不能替代论文厚尾模型实证。</p><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

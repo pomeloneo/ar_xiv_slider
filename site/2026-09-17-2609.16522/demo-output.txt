@@ -1,0 +1,4 @@
+cap=2: allocation=0.0, payment=0.0, utility=0.0
+cap=3: allocation=0.5, payment=1.5, utility=3.5
+cap=5: allocation=1.0, payment=4.0, utility=6.0
+boundary: 1.5 <= 2 but 1.5 / 0.5 = 3 > 2, so the half-allocation violates cap=2

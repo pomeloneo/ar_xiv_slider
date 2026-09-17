@@ -1,0 +1,8 @@
+mean=[0, 0]; weights=[0.6667, 0.3333]
+ volatility=0.094281; centered_EVaR=0.230776; contributions=[0.115388, 0.115388]
+ raw_EVaR=0.230776; raw_contributions=[0.115388, 0.115388]
+mean=[0.08, 0.01]; weights=[0.6667, 0.3333]
+ volatility=0.094281; centered_EVaR=0.230776; contributions=[0.115388, 0.115388]
+ raw_EVaR=0.174109; raw_contributions=[0.062055, 0.112055]
+boundary with unrealistically high mean: raw_EVaR=-0.769224; inverse-risk positivity must be checked
+PASS: centered Gaussian EVaR rescales volatility; raw EVaR includes the mean.

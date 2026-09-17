@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="把“把箱子送到B房间”拆成目标、动作和可达性，理解自然语言如何接上规划器。">
+<title>详细讲解 · 哪个大语言模型最擅长把自然语言目标翻译成 PDDL</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18731v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">AI · arXiv:2609.18731v1</p>
+<h1>哪个大语言模型最擅长把自然语言目标翻译成 PDDL</h1><p class="original" lang="en">Which LLM is Best for Translating Natural Language Goals to PDDL</p>
+<p class="lead">把“把箱子送到B房间”拆成目标、动作和可达性，理解自然语言如何接上规划器。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">一句人话与一台执行机器之间</a><a href="#section-1">先看整体关系</a><a href="#section-2">先认识世界状态</a><a href="#section-3">领域文件与问题文件各管什么</a><a href="#section-4">本篇输入输出究竟是什么</a><a href="#section-5">为什么输入上下文不是越多越好</a><a href="#section-6">最危险的错误常常语法完全正确</a><a href="#section-7">90个目标的实验告诉了我们什么</a><a href="#section-8">表达得出来，不代表做得到</a><a href="#section-9">跟着一条输入看中间状态</a><a href="#section-10">把研究用在日常工具接口</a><a href="#section-11">最小实践：运行、观察与边界</a><a href="#section-12">先自己试着解释</a><a href="#section-13">原文与阅读范围</a></nav><section id="section-0"><h2>一句人话与一台执行机器之间</h2><p>你对机器人说“把箱子送到B房间”，人通常能理解，但规划程序需要精确知道箱子、房间、动作和终点条件。一句自然语言可能漏掉对象，也可能要求系统根本没有表示能力的东西，例如“让箱子看起来更开心”。</p><p>论文评估语言模型能否把非专业人员写的目标翻成 PDDL。读完你应能区分“说清终点”“找到动作序列”“实际执行成功”，并能判断什么时候应该拒绝翻译或补充信息。语言模型在这里是接口，不是凭空拥有全部世界知识的规划器。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[自然语言目标] --&gt; B[领域规则与对象表]
+B --&gt; C{能否准确表达}
+C --&gt;|否| D[说明缺失或澄清]
+C --&gt;|是| E[形式化目标]
+E --&gt; F[规划器搜索动作序列]
+F --&gt; G{目标可达吗}
+G --&gt;|是| H[逐步执行并核对状态]
+G --&gt;|否| I[报告无可用计划]</pre></details>
+</figure></section><section id="section-1"><h2>先看整体关系</h2><div class="mermaid">flowchart TD
+A[自然语言目标] --&gt; B[领域规则与对象表]
+B --&gt; C{能否准确表达}
+C --&gt;|否| D[说明缺失或澄清]
+C --&gt;|是| E[形式化目标]
+E --&gt; F[规划器搜索动作序列]
+F --&gt; G{目标可达吗}
+G --&gt;|是| H[逐步执行并核对状态]
+G --&gt;|否| I[报告无可用计划]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section id="section-2"><h2>先认识世界状态</h2><p>一个状态可以写成一组成立的小事实：机器人在A、箱子在A、门已开。它们叫 predicates，可译为谓词；“机器人在A”是一个能判断真假的具体实例。</p><p>动作则有前提和结果。移动到B可能要求机器人在A且门已开；执行后删去“在A”，加入“在B”。经典规划通常假设世界完全可观察、动作结果确定、没有外部事件突然改变状态。现实机器未必满足这些前提，因此纸上规划正确不是现实执行必然成功。</p></section><section id="section-3"><h2>领域文件与问题文件各管什么</h2><p>PDDL 的领域文件描述规则和可用能力，如对象类型、谓词及动作。问题文件描述这一次具体有哪些对象、起始状态是什么、希望什么最终成立。前者像棋的规则，后者像某一盘棋的当前局面与任务。</p><p>语言模型不能自由发明不存在的谓词。若领域里只有位置和持有关系，用户要求“让房间温馨”，就需要新的表示或澄清，不能随手输出一个叫warm的条件并假装已经可执行。这是论文中特别重要的错误类型。</p></section><section id="section-4"><h2>本篇输入输出究竟是什么</h2><p>作者给模型领域定义、对象及类型列表、自然语言目标，期待可表达时输出简洁的目标子句，不可表达或过于模糊时明确说明。输出的主要对象是“终点条件”，不是逐条动作计划。</p><p>例如“机器人在B”可以变成一个位置谓词。随后规划器才负责寻找怎样从初态走到B。这两个组件各有责任：翻译器对语义和语法负责，规划器对给定规则下的动作路径负责；混在一起评分容易不知道究竟哪一步错了。</p></section><section id="section-5"><h2>为什么输入上下文不是越多越好</h2><p>作者早期把完整问题文件放进提示，观察到大初始状态文件下准确率下降，后来只保留任务所需的对象列表。论文把可能原因解释为长上下文中的信息利用困难，但这属于其解释，不是单独完成的因果证明。</p><p>教学迁移点是先明确翻译目标真正依赖哪些信息。若某要求必须知道初态才判断，就不能机械删掉初态；若只是把目标里的对象映射成已声明名称，大量无关状态可能增加干扰。取舍来自任务定义，而非“提示越短必然越好”。</p></section><section id="section-6"><h2>最危险的错误常常语法完全正确</h2><p>假阳性在此指本来不可表达，模型却硬给一份目标。假阴性是本来可表达却拒绝。另有语法错误和语义不符。一个括号工整的目标可能引用错误对象，或者把“所有”翻成“有一个”。</p><p>因此只用解析器检查括号不够。论文对可表达目标先与参考答案比，其他情况由 PDDL 专家审查语义；对不可表达目标主要检查是否表示无法建模，没有逐条人工评估拒绝理由的质量。不同分数背后的人工检查范围并不完全相同。</p></section><section id="section-7"><h2>90个目标的实验告诉了我们什么</h2><p>测试集来自八个领域，共90个自然语言目标，一半可表达，一半不可表达；其中既有规划竞赛领域，也有游戏相关领域。六种模型使用相同提示模板，表1给出正确率、响应时间及几类错误。</p><p>表中 Gemini 2.5 Flash 的正确率约0.96，GPT-4.1 的平均响应时间约1.61秒，论文是在这组特定目标和当时接口上比较。它不是今天所有语言、领域与部署环境的永久排名，也没有用90题证明某模型能可靠控制真实机器。</p></section><section id="section-8"><h2>表达得出来，不代表做得到</h2><p>“机器人在B”在词汇里完全合法，但若A与B之间没有可用动作，规划器仍找不到路径。不可表达是目标不在语言或领域的表示能力内；不可达是目标合法但从当前状态无法实现。</p><p>这是我们对应用流程的额外区分，避免把翻译通过误当任务成功。你可以先检查语义表达，再检查可达性，最后检查真实执行状态。论文关注第一步，不能把其高正确率借给后两步使用。</p></section><section id="section-9"><h2>跟着一条输入看中间状态</h2><p>教学初态是机器人在A、门关闭。目标“在B”通过对象和谓词检查；规划器尝试开门，状态增加“门开”；再尝试移动，状态从A改为B，最后验证目标成立。</p><p>边界例子取消开门动作：目标仍能写出来，但搜索结束找不到路径。另一个边界把目标换成“开心”，领域没有对应谓词，翻译阶段就拒绝。这两个失败发生在不同位置，输出不同原因会比统一报“AI失败”更有帮助。</p></section><section id="section-10"><h2>把研究用在日常工具接口</h2><p>不管是排日程、仓库搬运还是游戏测试，都可以先列出允许对象和动作，再让语言接口生成可检查的中间表示。这样错误有机会在真正执行前暴露，但前提是领域模型覆盖了真实限制。</p><p>当用户的话含糊时，清楚说明缺什么比生成一份看似正式的文本更好。下面的小程序手写有限词汇和搜索，不调用真实语言模型，也不是完整 PDDL 解析器；它演示的是翻译验证与规划搜索两道门为什么应分开。</p></section><section id="section-11"><h2>最小实践：运行、观察与边界</h2><p>需求：把目标词汇校验与可达性搜索分开；给同一合法目标两套动作能力，输出有计划或无计划；再测试一个未定义谓词。输入和状态空间都很小，因此可以用广度优先搜索完整检查。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>目标在B：词汇合法；可用开门动作时计划= [&#x27;开门&#x27;, &#x27;移动到B&#x27;]
+目标在B：词汇合法；没有开门动作时计划= None
+目标开心：谓词是否已定义？ False
+手写符号规划示例，不是六种LLM的翻译评测复现。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-12"><h2>先自己试着解释</h2><ol><li>目标语法正确，为什么还不能立刻执行？</li><li>“目标无法表达”和“目标不可达”的差别是什么？</li><li>论文90个目标的模型排序为什么不能当成普遍排名？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section id="section-13"><h2>原文与阅读范围</h2><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18731v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18731v1">元数据与版本</a></p><p>已读取Preliminaries、Prompt Template Design、Experimental Evaluation及Conclusion；核对图1完整提示、图2响应时间与表1六模型结果，区分论文翻译任务与教学规划演示。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Which LLM is Best for Translating Natural Language Goals to PDDL</p><p>Balyo, Tomas、Chrpa, Lukas、Youngblood, G. Michael</p>
+<p>arXiv:2609.18731v1 · 发布日期：2026-09-16 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18731v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18731v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

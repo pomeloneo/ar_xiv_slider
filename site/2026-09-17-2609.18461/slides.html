@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="把分散在多次聊天里的线索按当前问题重新连接，理解长期记忆为什么不只是搜索旧句子。">
+<title>图解全文 · 通过潜在神经符号推理解耦长期记忆</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18461v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 16 · AI</p><h1 tabindex="-1">通过潜在神经符号推理解耦长期记忆</h1><p class="lead">把分散在多次聊天里的线索按当前问题重新连接，理解长期记忆为什么不只是搜索旧句子。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 16 · AI</p><h1 tabindex="-1">记住很多句子，不等于记住一个人</h1><p>某人曾说临街房太吵，后来旅行选了安静的小旅馆，周末又倾向人少的公园。现在问住哪里，这些句子没有完全相同的关键词，却可能共同支持对安静环境的偏好。若只找最像当前问句的一句话，容易错过分散证据。</p><p>LGM 研究按当前问题组织长期记忆。读完你应能解释原始历史、稀疏概念、问题相关连接与紧凑记忆状态的关系，也能说明为什么推断出的偏好仍应保留证据和不确定性。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 16 · AI</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[长期互动历史] --&gt; B[潜在节点与稀疏概念]
+C[当前问题] --&gt; D[按问题重建连接]
+B --&gt; D
+D --&gt; E[消息聚合成记忆状态]
+E --&gt; F[少量潜在前缀]
+F --&gt; G[生成个性化回答]
+E --&gt; H[训练时重建支持证据]
+G --&gt; I[检查误推断与历史变化]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 16 · AI</p><h1 tabindex="-1">先看整体关系</h1><div class="mermaid">flowchart TD
+A[长期互动历史] --&gt; B[潜在节点与稀疏概念]
+C[当前问题] --&gt; D[按问题重建连接]
+B --&gt; D
+D --&gt; E[消息聚合成记忆状态]
+E --&gt; F[少量潜在前缀]
+F --&gt; G[生成个性化回答]
+E --&gt; H[训练时重建支持证据]
+G --&gt; I[检查误推断与历史变化]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 16 · AI</p><h1 tabindex="-1">输入与输出之间多了一份记忆状态</h1><p>输入是跨多轮的历史互动和当前问题；输出是一段符合相关历史的回答。论文不把全部历史原封不动塞进提示，而是先编码成潜在节点，再形成当前问题专属的记忆状态。</p><p>latent 可理解为内部数值表示，不是直接可读的摘要。“压成数值”并不自动让记忆更真实或更便宜：还要计算编码、训练关联与保持信息可恢复。论文的机制目标是让多个弱线索共同起作用，而不是仅节省几个字。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 16 · AI</p><h1 tabindex="-1">第一步：把一段话里的多件事拆开</h1><p>一句“上次出差的临街酒店吵得睡不好”包含旅行、噪声、睡眠和负面体验。一个稠密向量把这些因素混在一起。论文使用稀疏自编码器，让每条记忆只在较少概念维度上显著激活。</p><p>可以类比给记忆贴多枚标签，但真实概念由模型训练得到，不是预先手工定义的“安静”“旅行”词表。稀疏表示是希望解开纠缠的方法，不是每个维度都天然对应一个清晰人类概念的保证。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 16 · AI</p><h1 tabindex="-1">第二步：同一份历史，为不同问题重新连线</h1><p>问住宿时，旅行和安静相关的记忆应该联系更强；问视频会议设备时，工作和音频相关的记忆可能更重要。论文依据当前问题与记忆的概念重合来确定连接权重，形成 query-conditioned graph，即问题条件化的图。</p><p>图中的节点是内部表示，边表示本次问题下的信息关联。它与预先永久写死的一张知识图不同：历史没变，问题变了，聚合路径就变。这是“记忆按需推理”的主要含义，不能简化成存更多聊天记录。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 16 · AI</p><h1 tabindex="-1">第三步：让相关记忆交换信息</h1><p>图网络沿着连接聚合消息，更新节点状态，再汇总成紧凑的记忆状态。单条“选了公园”未必能说明偏好，结合“避开喧闹”“多次选安静地点”才可能形成更有依据的解释。</p><p>但多个线索不一定独立：它们可能来自同一次活动的重复叙述，也可能用户后来改变偏好。论文的方法着重表示与聚合；我们的迁移提醒是，时间、来源和冲突同样重要。不能把重复的三句话当成三次独立确认。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 16 · AI</p><h1 tabindex="-1">第四步：用少量潜在前缀影响回答</h1><p>汇总状态被投影成少量软前缀 token，加在当前问题前面，给语言模型提供历史相关信息。软前缀是数值向量，不必对应字典里能看见的词。论文默认采用16个这类前缀。</p><p>这条通道如果训练不好，模型可能干脆忽略它。于是作者除了训练最终回答，还要求同一潜在状态能重建支持证据的文字。这个证据重建任务相当于追问：你声称利用了记忆，能否把支撑材料还原出来？它帮助约束通道，不是绝对保证所有回答都有忠实解释。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 16 · AI</p><h1 tabindex="-1">把三类训练目标串起来</h1><p>生成目标让最终回答符合训练答案；重建目标让紧凑状态保留证据；稀疏自编码器目标让概念表示既能重建原表示，又保持稀疏。三者共同训练，而不是简单接一个搜索框就完成。</p><p>读者应区分“可迁移的设计思路”和“即插即用功能”。若现成模型不暴露内部状态或不能训练这条通道，不能直接照论文结构接上去。下面的标签算例只演示问题改变连接的直觉，不声称实现潜在前缀或神经图网络。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 16 · AI</p><h1 tabindex="-1">论文结果与比较口径</h1><p>表1在 Qwen2.5-7B 上所报四项平均分为72.28，MemCoE为61.08；Gemma3-4B上分别为66.16与54.46。这里是指定个性化基准上的成绩，不是用户满意度或“记忆准确度”的普遍常数。</p><p>表1带星号的部分基线取自 MemCoE，表2带符号的结果取自原基准报告，不能一概说所有系统都在作者同一环境重跑。图4消融显示去掉证据重建造成较大下降，支持这个设计的重要性，但仍只在所测模型、数据和训练条件中成立。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 16 · AI</p><h1 tabindex="-1">推断偏好与用户真实意愿之间</h1><p>选择安静旅馆可能因为工作、价格、同伴需求，并不一定是长期稳定偏好。这是教学例子对真实使用的提醒：历史行为为推断提供证据，却不是用户永远不会改变的标签。</p><p>论文主要围绕 PersonaMem、PrefEval 和隐含偏好设置评估。现实个性化还涉及忘记旧偏好、纠正误记、权限与来源范围。本文不自动收集读者个人信息，只用虚构的三条记忆展示结构；真正判断用户是否认同，应依赖其实际反馈。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 16 · AI</p><h1 tabindex="-1">把同一份记忆换两个问题试试</h1><p>教学脚本用手工概念集合表示三条虚构记忆。住宿问题包含旅行与安静，会议问题包含工作与音频。先逐条算与问题的重合，再列出被激活的证据；同一记忆池会呈现两种不同连接。</p><p>最后给一个与任何已知概念无交集的问题，输出“证据不足”，展示未知边界。它没有 SAE、消息传递训练或语言生成，不能重现论文成绩；但能让你亲眼检查当前问题到底启用了哪些证据，避免把个性化当成没有来由的猜测。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 16 · AI</p><h1 tabindex="-1">最小实践：运行、观察与边界</h1><p>需求：固定虚构记忆池，改变问题概念，显示逐条激活的证据与重合计数；无关联问题返回证据不足。这里的概念由人工指定，原文的潜在概念需要训练，二者不能混为一谈。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>住宿 [(&#x27;临街酒店太吵&#x27;, 2), (&#x27;周末选人少公园&#x27;, 1)]
+会议设备 [(&#x27;工作时常开线上会议&#x27;, 2)]
+园艺 证据不足
+手工概念集合仅模拟问题条件化连接，不是SAE、GNN或隐含偏好推断复现。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-15" aria-label="第 15 页"><p class="eyebrow">15 / 16 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么存下全部聊天，也可能答不好当前问题？</li><li>证据重建目标试图解决什么失败？</li><li>两次选择安静地点，是否能永久认定用户只喜欢安静？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section class="slide" id="slide-16" aria-label="第 16 页"><p class="eyebrow">16 / 16 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18461v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18461v1">元数据与版本</a></p><p>已读取第3—5节及算法相关定义，核对图2架构、表1/2来源符号、图4消融和图6前缀数量。教学仅模拟手工概念的查询连接，没有复现潜在网络。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 通过潜在神经符号推理解耦长期记忆</option><option value="2">2. 记住很多句子，不等于记住一个人</option><option value="3">3. 把整篇串起来</option><option value="4">4. 先看整体关系</option><option value="5">5. 输入与输出之间多了一份记忆状态</option><option value="6">6. 第一步：把一段话里的多件事拆开</option><option value="7">7. 第二步：同一份历史，为不同问题重新连线</option><option value="8">8. 第三步：让相关记忆交换信息</option><option value="9">9. 第四步：用少量潜在前缀影响回答</option><option value="10">10. 把三类训练目标串起来</option><option value="11">11. 论文结果与比较口径</option><option value="12">12. 推断偏好与用户真实意愿之间</option><option value="13">13. 把同一份记忆换两个问题试试</option><option value="14">14. 最小实践：运行、观察与边界</option><option value="15">15. 先自己试着解释</option><option value="16">16. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Disentangling Long-Term Memory via Latent Neuro-Symbolic Reasoning</p><p>Ke, Cai、Chen, Xinghao、Shen, Xiaoyu、Chen, Keyu、An, Siyu、Dong, Junnan、Xu, Ruifeng、Qiao, Ruizhi、Sun, Xing</p>
+<p>arXiv:2609.18461v1 · 发布日期：2026-09-16 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18461v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18461v1">论文正文</a></p></details><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18461v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18461v1">元数据与版本</a></p><p>已读取第3—5节及算法相关定义，核对图2架构、表1/2来源符号、图4消融和图6前缀数量。教学仅模拟手工概念的查询连接，没有复现潜在网络。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

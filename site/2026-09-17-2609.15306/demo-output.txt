@@ -1,0 +1,15 @@
+martingale coupling
+ terminal distribution: {60: 0.25, 100: 0.5, 140: 0.25}
+ S1=80: E[S2|S1]=80.0, conditional drift=+0.0
+ S1=120: E[S2|S1]=120.0, conditional drift=+0.0
+ call(K=80)=25.00
+ call(K=100)=10.00
+ call(K=120)=5.00
+non-martingale coupling
+ terminal distribution: {60: 0.25, 100: 0.5, 140: 0.25}
+ S1=80: E[S2|S1]=120.0, conditional drift=+40.0
+ S1=120: E[S2|S1]=80.0, conditional drift=-40.0
+ call(K=80)=25.00
+ call(K=100)=10.00
+ call(K=120)=5.00
+PASS: identical one-time marginals, different conditional martingale checks.

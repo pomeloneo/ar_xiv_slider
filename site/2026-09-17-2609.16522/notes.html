@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用广告位的小菜单，区分广告价值、付款金额和每份价值所能承受的价格。">
+<title>详细讲解 · 具有投资回报约束的竞标者的拍卖设计：真实性与收入最大化</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.16522v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.16522v1</p>
+<h1>具有投资回报约束的竞标者的拍卖设计：真实性与收入最大化</h1><p class="original" lang="en">Auction Design with ROI-Constrained Bidders: Truthfulness and Revenue Maximization</p>
+<p class="lead">用广告位的小菜单，区分广告价值、付款金额和每份价值所能承受的价格。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">一件东西值10元，为什么3元也不买？</a><a href="#section-1">全景：先划清可接受，再比较哪个划算</a><a href="#section-2">最有用的变量：可承受的单位价格</a><a href="#section-3">一个小菜单，完整走完决策</a><a href="#section-4">真实申报不是要求大家诚实自律</a><a href="#section-5">分配规则为什么会限制收费规则</a><a href="#section-6">多人竞价：收入保证说的是哪一类机制？</a><a href="#section-7">一个买方时，随机概率也可以定价</a><a href="#section-8">哪些假设不能悄悄删掉？</a><a href="#section-9">这篇论文的实际阅读收获</a><a href="#section-10">动手验证：需求、运行与结果</a><a href="#section-11">自测：解释、预测与迁移</a><a href="#section-12">资料与证据</a></nav><section id="section-0"><h2>一件东西值10元，为什么3元也不买？</h2><p>广告主估计一次展示带来的价值为10元，但公司规定价值至少是花费的5倍。虽然3元小于10元，付3元却不满足回报要求，因为10/3只有约3.33。经济学里‘买了仍有净收益’与‘符合内部回报约束’是两件事。</p><p>这篇论文研究卖方如何在这种情况下设计拍卖，并让买方没有谎报信息的好处。读完应能解释价值、回报要求、可承受单价的关系，以及为什么套用普通拍卖直觉可能出错。这里讨论机制，不是给你投放预算建议。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[私人价值v与回报r] --&gt; B[可承受单价c等于v除r]
+B --&gt; C[机制给出概率x与支付p]
+C --&gt; D{p不超过c乘x吗}
+D --&gt;|否| E[不可接受]
+D --&gt;|是| F[净收益vx减p]
+F --&gt; G[激励相容与参与条件]
+G --&gt; H[支付刻画]
+H --&gt; I[多人确定性机制与单人概率定价]
+I --&gt; J[边界：分布与单物品假设]</pre></details>
+</figure></section><section id="section-1"><h2>全景：先划清可接受，再比较哪个划算</h2><p>买方类型有两个私人数字：价值v和要求的回报比r。机制根据申报给出获配概率x及预期付款p。先检查付款是否满足p≤vx/r；满足后才比较净收益vx−p。不满足的结果在模型里被视为不可接受。</p><p>论文先用新坐标表达类型，再刻画真实申报需要的分配与支付条件；之后讨论多人确定性机制的收入界和逼近方法，最后研究单买方的概率定价。这不是一个现成广告平台接口，而是一组关于机制应具有什么结构的理论结果。</p></section><section id="section-2"><h2>最有用的变量：可承受的单位价格</h2><p>把c=v/r称为付款单价上限。若v=10、r=5，则c=2；若v=10、r=2，则c=5。两位广告主同样觉得展示值10元，但可以接受的价格不同。价值与上限不是独立随便取的数字，上限必须与价值、回报要求一致。</p><p>有概率分配时，要比较的是p/x与c，而不是p与c。例如一半概率拿到展示，付1.5元，单位价格是3元。c=2的人仍不能买，不能因为总付款只有1.5就说便宜。零分配对应零付款，避免用零作分母。</p></section><section id="section-3"><h2>一个小菜单，完整走完决策</h2><p>教学菜单有三项：不买(0,0)；一半概率拿到、付1.5；必定拿到、付4。价值10、上限3的买方，半份单位价格3刚好可接受，净收益5−1.5=3.5；整份单位价格4超上限，所以不考虑。</p><p>上限5的买方两项都买得起，整份净收益6高于半份3.5，因此选整份。上限2的买方两项都不合规，只能不买。沿同一个菜单改一个输入，能清楚看到约束如何改变选择，且不必先懂拍卖术语。</p></section><section id="section-4"><h2>真实申报不是要求大家诚实自律</h2><p>机制中的激励相容，是制度设计的要求：固定别人报告后，我报真实类型得到的收益不低于任何谎报。它不假设参与者品德好，而是让谎报不划算。个体理性则要求如实参与至少不比不参与差，并满足回报约束。</p><p>论文特别区分可支付的谎报与不可支付的谎报。报一个更高上限，并不保证结果真能被我的真实上限接受。验证时要始终用真实类型评价结果，不能拿假报的回报要求替自己开绿灯。demo只做真实类型的菜单选择，没有假装验证完整多买方策略空间。</p></section><section id="section-5"><h2>分配规则为什么会限制收费规则</h2><p>普通拍卖常通过分配概率随价值变化推导收费。本文的困难是类型有两维，不能直接只沿价值轴积分。作者先沿‘上限等于价值’的对角线，再沿‘上限固定’的方向，把整体变化拆成两段。</p><p>定理2给出支付恒等式：p(v,c)=v·x(v,c)−∫₀ᶜx(z,z)dz−∫ᶜᵛx(z,c)dz。暂不学积分也能把后两项理解成沿两条路径累积的分配量。定理3把相应单调性、这条恒等式和回报可行性合在一起，刻画真实机制；只有收费公式还不够。</p></section><section id="section-6"><h2>多人竞价：收入保证说的是哪一类机制？</h2><p>论文进一步研究确定性分配，即每个报告下要么分到、要么分不到。此时可承受单价成为核心排序对象。作者在相应分布正则条件下，用单价上限构造收入上界，并提出带小增量σ的机制去逼近。</p><p>σ趋向零时的渐近最优性针对确定性真实机制；与全部真实机制（含随机机制）比较时，保证是至少1/r̄的比例，r̄为允许的最大回报要求。不要把‘逼近一类的最优’误读为‘所有环境中的绝对最优’，也不能把渐近描述说成任意σ都达到上界。</p></section><section id="section-7"><h2>一个买方时，随机概率也可以定价</h2><p>单买方部分把分配概率看成可选商品数量：买多少概率，付多少钱。作者证明可用连续、凸、非递减的概率价格函数替代相应真实机制而不降低各类型支付，再研究价值公开或回报要求公开的特殊情况。</p><p>凸表示越往上增加获配概率，额外单位价格不会越来越便宜；这是支付菜单的形状，不能简单翻译成每一档总价都相同。教学菜单半份1.5、整份4，对应先半份每单位3、后半份每单位5，正好展示这一几何直觉，但不是作者求得的最优菜单。</p></section><section id="section-8"><h2>哪些假设不能悄悄删掉？</h2><p>模型研究单物品、风险中性、以预期分配与预期付款计算回报的买方。收入分析还用到公开已知的类型分布及相应独立性、正则性条件。真实广告有多次投放、预算、学习和归因误差，这些并未由本篇全部解决。</p><p>ROI这个缩写在商业里也有别的口径，有时指(收入−成本)/成本。本文r用的是价值/付款的倍数，不能混用两个定义。算例明确沿用论文定义；更换口径前必须换算，否则同一个数字会表示不同约束。</p></section><section id="section-9"><h2>这篇论文的实际阅读收获</h2><p>当有人说‘最高价值的人应该赢’时，可以追问他的回报约束是否允许支付；当有人说‘付款更少所以可接受’时，可以检查获配概率是否也变少。再进一步，想设计收费规则，必须同时考虑可接受、参与与不值得谎报。</p><p>支撑来自正文的支付刻画、确定性机制分析和单买方定价证明，没有作者平台A/B实验。下面的小菜单验证只演示约束筛选和净收益选择，让你能识别一个容易漏掉的中间步骤。</p></section><section id="section-10"><h2>动手验证：需求、运行与结果</h2><p>固定价值10与三档教学菜单，分别输入单价上限2、3、5。先按p≤cx过滤，再最大化vx−p。边界例为半份付款1.5虽低于上限2，但单位价3违规。省略最优收入机制和多买方均衡。</p><p>运行方式：下载同目录的 <a href='demo.py'>demo.py</a>，执行 <code>python3 demo.py</code>。仅使用 Python 标准库。</p><pre><code>cap=2: allocation=0.0, payment=0.0, utility=0.0
+cap=3: allocation=0.5, payment=1.5, utility=3.5
+cap=5: allocation=1.0, payment=4.0, utility=6.0
+boundary: 1.5 &lt;= 2 but 1.5 / 0.5 = 3 &gt; 2, so the half-allocation violates cap=2
+</code></pre><p>三种上限产生三个不同选择。输出证明这个菜单的可行性筛选按预期运作；没有证明它收入最优，也没有复现σ增量机制。</p></section><section id="section-11"><h2>自测：解释、预测与迁移</h2><ol><li>价值10且要求5倍回报，最高可承受单价是多少？</li><li>为什么半份付1.5不能只拿1.5与c比较？</li><li>机制激励相容是否意味着参与者不会想占便宜？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><section id="section-12"><h2>资料与证据</h2><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.16522v1'>Auction Design with ROI-Constrained Bidders: Truthfulness and Revenue Maximization</a>；2609.16522v1；提交日期 2026-09-15。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2节类型与ROI定义、图1；第3节定理1—3与支付恒等式；第4节σ增量机制；第5节概率定价。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Auction Design with ROI-Constrained Bidders: Truthfulness and Revenue Maximization</p><p>Zhiqiang Zhuang、Quan Yu、Yisong Wang、Kewen Wang、Zhe Wang</p>
+<p>arXiv:2609.16522v1 · 发布日期：2026-09-15 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.16522v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.16522v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

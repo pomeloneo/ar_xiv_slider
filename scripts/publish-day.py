@@ -6,11 +6,13 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
 import shutil
 import tempfile
 from datetime import date
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote
+from typing import Any
 
 
 PUBLIC_EXTENSIONS = {
@@ -20,7 +22,7 @@ PUBLIC_EXTENSIONS = {
 }
 PRIVATE_NAMES = {
     "config", "configuration", "credentials", "secrets", "tokens", "history",
-    "private", "logs", "auth", "agents", "skill",
+    "private", "logs", "auth", "agents", "skill", "sources", "rendered",
 }
 
 
@@ -31,6 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source", required=True, type=Path, help="Daily artifact directory")
     parser.add_argument("--date", required=True, help="Publication date in YYYY-MM-DD")
     parser.add_argument("--title", required=True, help="Paper title")
+    parser.add_argument("--title-zh", required=True, help="Accurate Chinese translation of the paper title")
     parser.add_argument("--arxiv-id", required=True, help="arXiv ID, optionally with version")
     parser.add_argument(
         "--direction",
@@ -39,6 +42,17 @@ def parse_args() -> argparse.Namespace:
         help="Primary learning direction",
     )
     parser.add_argument("--summary", required=True, help="One-sentence learning value")
+    parser.add_argument(
+        "--tag",
+        action="append",
+        dest="tags",
+        default=[],
+        help="Reader-facing Chinese topic tag; repeat for multiple tags",
+    )
+    parser.add_argument(
+        "--publication-key",
+        help="Unique single-directory site key; defaults to the publication date",
+    )
     parser.add_argument(
         "--slides",
         default="slides.html",
@@ -77,30 +91,63 @@ def validate_slide_path(value: str) -> None:
         raise SystemExit("--slides must be a normalized relative HTML path other than index.html")
 
 
+def validate_publication_key(value: str) -> None:
+    if value in {"assets", "index.html", "papers.json"} or not re.fullmatch(r"[0-9A-Za-z][0-9A-Za-z._-]{0,79}", value):
+        raise SystemExit(
+            "--publication-key must be one safe directory segment using letters, digits, dot, underscore, or hyphen"
+        )
+
+
+def normalize_tags(direction: str, tags: list[str]) -> list[str]:
+    normalized = []
+    for raw in [direction, *tags]:
+        value = raw.strip()
+        if not value or len(value) > 30 or any(character in value for character in "<>\n\r\t"):
+            raise SystemExit("Each tag must contain 1-30 readable characters without markup or newlines")
+        if value not in normalized:
+            normalized.append(value)
+    if len(normalized) > 8:
+        raise SystemExit("A paper may have at most 8 unique tags including its direction")
+    return normalized
+
+
 def is_public_artifact(path: Path) -> bool:
     return (
         path.suffix.lower() in PUBLIC_EXTENSIONS
-        and not any(part.startswith(".") for part in path.parts)
+        and not any(part.startswith((".", "batch-")) for part in path.parts)
         and not any(Path(part).stem.lower() in PRIVATE_NAMES for part in path.parts)
     )
+
+
+def publication_key_for(args: argparse.Namespace) -> str:
+    return getattr(args, "publication_key", None) or args.date
 
 
 def validate(args: argparse.Namespace) -> list[Path]:
     validate_date(args.date)
     validate_slide_path(args.slides)
+    publication_key = publication_key_for(args)
+    validate_publication_key(publication_key)
+    if not args.title.strip() or not args.title_zh.strip():
+        raise SystemExit("English and Chinese titles must both be non-empty")
+    if len(args.title) > 500 or len(args.title_zh) > 200:
+        raise SystemExit("Paper title is unreasonably long")
+    normalize_tags(args.direction, args.tags)
 
     if args.source.is_symlink() or not args.source.is_dir():
         raise SystemExit(f"Source directory does not exist: {args.source}")
 
     source = args.source.resolve()
-    destination = (args.site_root / args.date).resolve()
+    destination = (args.site_root / publication_key).resolve()
     if source.is_relative_to(destination) or destination.is_relative_to(source):
         raise SystemExit("Source and publication destination must not overlap")
-    for path in (args.site_root, args.site_root / args.date, args.site_root / "papers.json"):
+    for path in (args.site_root, args.site_root / publication_key, args.site_root / "papers.json", args.site_root / "index.html"):
         if path.is_symlink():
             raise SystemExit(f"Publication paths must not be symbolic links: {path}")
-    if (args.site_root / args.date).exists() and not (args.site_root / args.date).is_dir():
-        raise SystemExit("The existing day path must be a directory")
+    if (args.site_root / publication_key).exists() and not (
+        args.site_root / publication_key
+    ).is_dir():
+        raise SystemExit("The existing publication path must be a directory")
 
     artifacts = []
     for path in sorted(source.rglob("*")):
@@ -124,7 +171,7 @@ def copy_artifacts(source: Path, destination: Path, artifacts: list[Path]) -> No
         shutil.copy2(source / relative, destination_path)
 
 
-def load_manifest(path: Path) -> list[dict[str, str]]:
+def load_manifest(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     try:
@@ -134,23 +181,177 @@ def load_manifest(path: Path) -> list[dict[str, str]]:
     if not isinstance(value, list):
         raise SystemExit(f"Existing manifest must contain a JSON array: {path}")
     required = {"date", "title", "arxiv_id", "direction", "summary", "path", "slides"}
-    seen_dates = set()
+    seen_paths = set()
+    seen_arxiv_ids = set()
     for item in value:
         if not isinstance(item, dict) or any(not isinstance(item.get(key), str) for key in required):
             raise SystemExit(f"Existing manifest contains an invalid paper entry: {path}")
         validate_date(item["date"])
         validate_slide_path(item["slides"])
+        publication_key = item["path"].removesuffix("/")
+        validate_publication_key(publication_key)
+        if "title_zh" in item and (
+            not isinstance(item["title_zh"], str) or not item["title_zh"].strip()
+        ):
+            raise SystemExit(f"Existing manifest contains an invalid Chinese title: {path}")
+        if "tags" in item and (
+            not isinstance(item["tags"], list)
+            or any(not isinstance(tag, str) for tag in item["tags"])
+            or normalize_tags(item["direction"], item["tags"]) != item["tags"]
+        ):
+            raise SystemExit(f"Existing manifest contains invalid tags: {path}")
         if (
-            item["path"] != f'{item["date"]}/'
+            item["path"] != f"{publication_key}/"
             or item["direction"] not in {"AI", "金融", "经济"}
-            or item["date"] in seen_dates
+            or item["path"] in seen_paths
+            or item["arxiv_id"] in seen_arxiv_ids
         ):
             raise SystemExit(f"Existing manifest contains an invalid or duplicate paper entry: {path}")
-        seen_dates.add(item["date"])
+        seen_paths.add(item["path"])
+        seen_arxiv_ids.add(item["arxiv_id"])
     return value
 
 
-def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
+def render_home_page(entries: list[dict[str, Any]]) -> str:
+    all_tags = sorted(
+        {tag for entry in entries for tag in entry.get("tags", [entry["direction"]])},
+        key=lambda tag: (tag not in {"AI", "金融", "经济"}, tag),
+    )
+    filters = ['<a class="filter is-active" href="./" data-tag="" aria-current="true">全部</a>']
+    topic_filters = []
+    for tag in all_tags:
+        target = filters if tag in {"AI", "金融", "经济"} else topic_filters
+        target.append(
+            f'<a class="filter" href="?tag={quote(tag)}" '
+            f'data-tag="{html.escape(tag, quote=True)}">{html.escape(tag)}</a>'
+        )
+    if len(topic_filters) > 8:
+        topic_markup = f'<details class="topic-filters"><summary>更多主题标签（{len(topic_filters)}）</summary><div class="filters">{"".join(topic_filters)}</div></details>'
+    else:
+        filters.extend(topic_filters)
+        topic_markup = ''
+    cards = []
+    for entry in entries:
+        tags = entry.get("tags", [entry["direction"]])
+        encoded_tags = html.escape(json.dumps(tags, ensure_ascii=False), quote=True)
+        title_zh = entry.get("title_zh") or entry["title"]
+        tag_markup = "".join(f"<li>{html.escape(tag)}</li>" for tag in tags)
+        cards.append(
+            f"""      <li class="paper" data-tags="{encoded_tags}" data-paper-id="{html.escape(entry['arxiv_id'], quote=True)}">
+        <p class="meta">{html.escape(entry["date"])} · arXiv:{html.escape(entry["arxiv_id"])}</p>
+        <h2><a href="{quote(entry["path"], safe="/")}">{html.escape(title_zh)}</a></h2>
+        <p class="original-title" lang="en">{html.escape(entry["title"])}</p>
+        <ul class="tags" aria-label="论文标签">{tag_markup}</ul>
+        <p class="summary">{html.escape(entry["summary"])}</p>
+        <button class="read-toggle" data-read-toggle="{html.escape(entry['arxiv_id'], quote=True)}" disabled>标为已读</button>
+      </li>"""
+        )
+    paper_markup = "\n".join(cards)
+    empty_markup = (
+        """    <section class="empty">
+      <h2>站点已经就绪</h2>
+      <p>学习包发布后，这里会按日期列出中英文标题、主题标签和阅读入口。</p>
+    </section>"""
+        if not entries
+        else f"""    <div class="reading-filters" role="group" aria-label="按阅读状态筛选">
+      <button data-read-filter="all" data-label="全部" aria-pressed="true" disabled>全部</button>
+      <button data-read-filter="unread" data-label="未读" aria-pressed="false" disabled>未读</button>
+      <button data-read-filter="read" data-label="已读" aria-pressed="false" disabled>已读</button>
+    </div>
+    <p class="storage-help">手动标记阅读进度，仅保存在当前浏览器。已读不代表已掌握。</p>
+    <p data-storage-notice role="status" hidden></p>
+    <noscript><p>启用 JavaScript 后可筛选和保存阅读状态；下方仍可阅读全部论文。</p></noscript>
+    <div class="filters" aria-label="按标签筛选">
+      {"".join(filters)}
+    </div>
+{topic_markup}
+    <p class="result-count" id="result-count" role="status" aria-live="polite">共 {len(entries)} 篇</p>
+    <ol class="papers">
+{paper_markup}
+    </ol>
+    <p class="no-results" id="no-results" hidden>没有符合当前标签和阅读状态的论文。</p>"""
+    )
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>每日 arXiv 论文带读</title>
+  <style>
+    * {{ box-sizing: border-box; }}
+    :root {{
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #18212f;
+      background: #f3f6fb;
+    }}
+    body {{ max-width: 960px; margin: 0 auto; padding: 72px 24px; }}
+    header {{ margin-bottom: 34px; }}
+    h1 {{ margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.045em; }}
+    p {{ color: #526071; font-size: 1.05rem; line-height: 1.75; }}
+    a:focus-visible, button:focus-visible {{ outline: 3px solid #1d7a70; outline-offset: 4px; }}
+    button {{ font: inherit; cursor: pointer; min-height: 44px; border: 1px solid #b9c8d8; padding: 8px 14px; border-radius: 10px; color: inherit; background: transparent; }}
+    button:disabled {{ cursor: default; opacity: .65; }}
+    button[aria-pressed="true"] {{ color: #fff; background: #1d7a70; border-color: #1d7a70; }}
+    .reading-filters {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+    .read-toggle {{ margin-top: 18px; font-size: .9rem; }}
+    .storage-help {{ font-size: .88rem; }}
+    .topic-filters {{ margin: 12px 0 18px; }}
+    .topic-filters summary {{ cursor: pointer; padding: 10px 0; color: #526071; }}
+    .topic-filters .filters {{ padding-top: 10px; }}
+    .paper {{ overflow-wrap: anywhere; }}
+    .filters {{ display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }}
+    .filter {{
+      padding: 8px 15px; border: 1px solid #b9c8d8; border-radius: 999px; color: #334155;
+      background: #fff; text-decoration: none; font-weight: 650;
+    }}
+    .filter:hover {{ border-color: #1d7a70; }}
+    .filter.is-active {{ color: #fff; border-color: #1d7a70; background: #1d7a70; }}
+    .result-count {{ margin: 0 0 18px; font-size: .95rem; }}
+    .empty, .no-results {{
+      padding: 28px; border: 1px solid #dbe3ee; border-radius: 18px; background: #fff;
+      box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
+    }}
+    .papers {{ display: grid; gap: 18px; padding: 0; list-style: none; }}
+    .paper {{
+      padding: 26px; border: 1px solid #dbe3ee; border-radius: 18px; background: #fff;
+      box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
+    }}
+    .paper[hidden] {{ display: none; }}
+    .paper h2 {{ margin: 9px 0 5px; font-size: clamp(1.35rem, 3vw, 1.8rem); line-height: 1.4; }}
+    .paper h2 a {{ color: inherit; text-decoration-thickness: .08em; text-underline-offset: .15em; }}
+    .meta {{ margin: 0; font-size: .9rem; }}
+    .original-title {{ margin: 0 0 14px; font-size: .96rem; line-height: 1.55; }}
+    .summary {{ margin-bottom: 0; }}
+    .tags {{ display: flex; flex-wrap: wrap; gap: 7px; padding: 0; margin: 0; list-style: none; }}
+    .tags li {{ padding: 4px 10px; border-radius: 999px; color: #245c55; background: #e5f2ef; font-size: .83rem; }}
+    @media (max-width: 600px) {{ body {{ padding: 42px 18px; }} .paper {{ padding: 21px; }} }}
+    @media (prefers-color-scheme: dark) {{
+      :root {{ color: #eef4ff; background: #0e1420; }}
+      p {{ color: #a9b7ca; }}
+      .empty, .no-results, .paper {{ border-color: #263247; background: #141c2a; }}
+      .filter {{ color: #dbe8f5; border-color: #42526a; background: #141c2a; }}
+      .filter.is-active {{ color: #081514; border-color: #7bd6c8; background: #7bd6c8; }}
+      .tags li {{ color: #a8e5da; background: #213d3a; }}
+    }}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>每日 arXiv 论文带读</h1>
+    <p>每天一篇 AI、金融或经济论文，用中文从基础讲清整篇主线。可按标签筛选，打开本篇总览后选择图解全文或详细讲解即可。</p>
+  </header>
+  <main>
+{empty_markup}
+  </main>
+  <script src="assets/read-state.js" defer></script>
+  <script src="assets/paper-list.js" defer></script>
+</body>
+</html>
+"""
+
+
+def render_day_page(entry: dict[str, Any], artifact_names: list[str]) -> str:
     labels = {
         "notes.html": "详细讲解（文章版）",
         "answers.html": "自测参考答案（先尝试再看）",
@@ -218,6 +419,8 @@ def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
   <nav aria-label="站点导航"><a href="../">← 返回论文列表</a></nav>
   <main>
     <p class="meta">{html.escape(entry["date"])} · {html.escape(entry["direction"])} · arXiv:{html.escape(entry["arxiv_id"])}</p>
+    <button data-read-toggle="{html.escape(entry['arxiv_id'], quote=True)}" disabled>标为已读</button>
+    <p data-storage-notice role="status" hidden></p>
     <h1>从这里开始读这一篇</h1>
     <p class="value">{html.escape(entry["summary"])}</p>
     <div class="guide">
@@ -246,6 +449,7 @@ def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
       <ul>{links_markup}</ul>
     </details>
   </main>
+  <script src="../assets/read-state.js" defer></script>
 </body>
 </html>
 """
@@ -254,17 +458,24 @@ def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
 def publish(args: argparse.Namespace) -> None:
     artifacts = validate(args)
     site_root = args.site_root.resolve()
-    destination = site_root / args.date
+    publication_key = publication_key_for(args)
+    destination = site_root / publication_key
     manifest_path = site_root / "papers.json"
-    entries = [item for item in load_manifest(manifest_path) if item["date"] != args.date]
+    index_path = site_root / "index.html"
+    entries = [item for item in load_manifest(manifest_path) if item["path"] != f"{publication_key}/"]
+    base_id = re.sub(r"v\d+$", "", args.arxiv_id)
+    if any(re.sub(r"v\d+$", "", item["arxiv_id"]) == base_id for item in entries):
+        raise SystemExit("This paper already exists under another publication key; update that key instead")
 
     entry = {
         "date": args.date,
         "title": args.title,
+        "title_zh": args.title_zh.strip(),
         "arxiv_id": args.arxiv_id,
         "direction": args.direction,
+        "tags": normalize_tags(args.direction, args.tags),
         "summary": args.summary,
-        "path": f"{args.date}/",
+        "path": f"{publication_key}/",
         "slides": args.slides,
     }
 
@@ -275,8 +486,9 @@ def publish(args: argparse.Namespace) -> None:
     # Build everything outside the upload tree before touching the previous publication.
     with tempfile.TemporaryDirectory(prefix=".publish-stage-", dir=site_root.parent) as temporary:
         stage = Path(temporary)
-        staged_day = stage / args.date
+        staged_day = stage / publication_key
         staged_manifest = stage / "papers.json"
+        staged_index = stage / "index.html"
         copy_artifacts(args.source.resolve(), staged_day, artifacts)
         (staged_day / "index.html").write_text(
             render_day_page(entry, [path.as_posix() for path in artifacts]), encoding="utf-8"
@@ -284,38 +496,49 @@ def publish(args: argparse.Namespace) -> None:
         staged_manifest.write_text(
             json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
+        staged_index.write_text(render_home_page(entries), encoding="utf-8")
 
         # Previous files remain recoverable outside site/, including after a successful rerun.
         backup = Path(tempfile.mkdtemp(prefix=".publish-backup-", dir=site_root.parent))
-        moved_day = moved_manifest = installed_day = installed_manifest = False
+        moved_day = moved_manifest = moved_index = False
+        installed_day = installed_manifest = installed_index = False
         try:
             if destination.exists():
-                destination.rename(backup / args.date)
+                destination.rename(backup / publication_key)
                 moved_day = True
             if manifest_path.exists():
                 manifest_path.rename(backup / "papers.json")
                 moved_manifest = True
+            if index_path.exists():
+                index_path.rename(backup / "index.html")
+                moved_index = True
             staged_day.rename(destination)
             installed_day = True
             staged_manifest.rename(manifest_path)
             installed_manifest = True
+            staged_index.rename(index_path)
+            installed_index = True
         except BaseException:
+            if installed_index:
+                index_path.rename(stage / "failed-index.html")
             if installed_manifest:
                 manifest_path.rename(stage / "failed-papers.json")
             if installed_day:
                 destination.rename(stage / "failed-day")
             if moved_day:
-                (backup / args.date).rename(destination)
+                (backup / publication_key).rename(destination)
             if moved_manifest:
                 (backup / "papers.json").rename(manifest_path)
+            if moved_index:
+                (backup / "index.html").rename(index_path)
             raise
-        if moved_day or moved_manifest:
+        if moved_day or moved_manifest or moved_index:
             print(f"Previous publication backup: {backup}")
         else:
             backup.rmdir()
 
     print(f"Published {args.date} to {destination}")
-    print(f'Slides URL path: /ar_xiv_slider/{args.date}/{quote(args.slides, safe="/")}')
+    print(f'Slides URL path: /ar_xiv_slider/{publication_key}/{quote(args.slides, safe="/")}')
 
 
 def main() -> None:

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="把“看错宽度”和“用了错公式”拆开，学会定位图形题的第一处错误。">
+<title>详细讲解 · 迷失于感知：分离多模态物理与几何推理中的感知失败和推理失败</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18991v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">AI · arXiv:2609.18991v1</p>
+<h1>迷失于感知：分离多模态物理与几何推理中的感知失败和推理失败</h1><p class="original" lang="en">Lost in Perception: Isolating Perceptual and Reasoning Failures in Multimodal Physics and Geometry Reasoning</p>
+<p class="lead">把“看错宽度”和“用了错公式”拆开，学会定位图形题的第一处错误。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">一道长方形面积题</a><a href="#section-1">先看整体关系</a><a href="#section-2">把输入到答案画成两段</a><a href="#section-3">感知错误也不只有看错数字</a><a href="#section-4">五个对照：每次换一份信息</a><a href="#section-5">一张图为什么可能让原本会的题做错</a><a href="#section-6">用正确说明恢复答案，能推断什么</a><a href="#section-7">问题引导不是总能改善看图</a><a href="#section-8">还要分开错答与没有答完</a><a href="#section-9">原文证据与适用边界</a><a href="#section-10">用同一道题跑三个条件</a><a href="#section-11">最小实践：运行、观察与边界</a><a href="#section-12">先自己试着解释</a><a href="#section-13">原文与阅读范围</a></nav><section id="section-0"><h2>一道长方形面积题</h2><p>图上长4、宽3，AI却回答24。可能它把宽3看成6，也可能宽度看对却用了错误公式。最终答案都是错，改进办法完全不同。让它“再认真想想”未必能修复最早的读图错误。</p><p>论文用五种输入条件拆开感知与推理。读完你应能设计一个小对照：保持题目与求解过程尽量一致，只换图像信息的呈现方式，观察哪类错误能被纠正，以及为什么这种纠正仍不等于完整因果证明。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[同一道题] --&gt; B[原图或不同说明]
+B --&gt; C[识别实体关系与数值]
+C --&gt; D[选择规则与计算]
+D --&gt; E[正确 错误 未完成]
+E --&gt; F[对照Q IQ CQ CQ* GQ]
+F --&gt; G[定位感知阻塞或推理瓶颈]
+G --&gt; H[保留提示与评审局限]</pre></details>
+</figure></section><section id="section-1"><h2>先看整体关系</h2><div class="mermaid">flowchart TD
+A[同一道题] --&gt; B[原图或不同说明]
+B --&gt; C[识别实体关系与数值]
+C --&gt; D[选择规则与计算]
+D --&gt; E[正确 错误 未完成]
+E --&gt; F[对照Q IQ CQ CQ* GQ]
+F --&gt; G[定位感知阻塞或推理瓶颈]
+G --&gt; H[保留提示与评审局限]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section id="section-2"><h2>把输入到答案画成两段</h2><p>第一段把图片变成模型可以使用的事实：有什么物体、它们如何连接、数字和符号是多少。第二段选择规则、组合事实、做计算并生成答案。论文按“识别”与“推导”划分两类错误。</p><p>现实中两段会互相影响：题目可以引导看图，看图也可能让模型改变问题理解。拆分是一种诊断设计，不代表网络内部真的存在完全隔离的两个模块。我们通过改变输入条件观察表现，而不是直接看见每一个神经计算步骤。</p></section><section id="section-3"><h2>感知错误也不只有看错数字</h2><p>论文区分场景描述、科学解释、数值或符号三种感知错误。把两条不相连的线看成相交，是结构问题；误读单位或角度，是数值问题；对图示物理配置做出错误解释，又是另一类。</p><p>后续推理错误则分为误解题目、概念误用和计算错误。知道名字不是目的，目的是能指出具体的第一处偏离：若宽度已经错了，后面乘法算得再熟练，仍只能把错误输入准确加工成错误答案。</p></section><section id="section-4"><h2>五个对照：每次换一份信息</h2><p>Q 只给文字问题；IQ 给原图和问题；CQ 先让模型不看问题写图的说明，再根据说明解题；CQ* 让模型写说明时也看到问题；GQ 使用人工撰写的正确说明。五组求解提示尽量保持一致。</p><p>它们分别帮助检查文字本身能提供多少信息、原图是否干扰、先描述是否有帮助、问题会不会改善关注点，以及给足正确图像事实后还有多少推理困难。这里 GQ 不是把答案告诉模型，而是提供研究者核对的图像描述。</p></section><section id="section-5"><h2>一张图为什么可能让原本会的题做错</h2><p>某些题的文字已经足够解答；加入图像后，模型却被误识别的细节带偏。论文用 Vision Hurts Rate 统计“只给文字本来答对，但加图后答错”的条件比例。</p><p>分母是文字条件下答对的题，不是所有题。看到某个高比例，不能直接写成模型总错误率。这个指标最有用的地方，是识别视觉输入是否在某些情况下把本来可用的推理链拉向错误事实。</p></section><section id="section-6"><h2>用正确说明恢复答案，能推断什么</h2><p>若 IQ 做错，但换成人工说明 GQ 后做对，说明在这一呈现方式下模型有能力利用正确事实解决问题。论文把它当作感知阻塞的重要信号；若说明正确后仍做错，则还存在求解或理解困难。</p><p>但我们的推断要留一个边界：人工说明也可能改变措辞、强调关系、减轻任务负担，所以恢复不能独自证明所有提升都只来自视觉识别。更严谨的对照需要说明格式、信息量和提示都尽量匹配。</p></section><section id="section-7"><h2>问题引导不是总能改善看图</h2><p>论文第7节发现，带问题生成说明在物理题中通常改善感知，但在几何题中可能下降。举例说，Gemini-2.5 Flash 在 SeePhys 的所报感知准确率从53.8%到87.0%；OlympiadBench 则从30.0%到8.9%。</p><p>作者解释，物理题提供更多上下文约束，而简短几何题可能使模型过度推断。这个解释有合理性，但不能把“所有物理题都该这样、所有几何题都不该这样”当成规则。它提醒我们实际验证提示方式，而不是默认加更多引导必然有益。</p></section><section id="section-8"><h2>还要分开错答与没有答完</h2><p>论文另行讨论 InternS1-mini 时发现不少推理过程耗尽预算，没有最终答案。若统计时只把有答案但错误的计入错误率，这类模型的“错答率”可能看起来反而低。</p><p>因此完整结果最好分为正确、错误、未完成，三类合起来理解。这里不能据此说延长思考一定有害：该模型规模、训练方式、预算也不同，论文明确无法单独把表现归因于其中某个因素。缺最终答案是一种失败，但原因还需要进一步对照。</p></section><section id="section-9"><h2>原文证据与适用边界</h2><p>主实验覆盖五个模型和物理、几何基准，用自动评审并做人工一致性检查，所报κ约0.74—0.84。较高一致性不等于评审完全没有系统偏差，尤其对概念错误的边界可能存在判断分歧。</p><p>作者没有验证所有科学领域、任意自由叙述说明或所有前沿模型。教学上应该学会它的诊断方法，再在自己的图表阅读任务里建立样本。本文不会从这些特定数据直接宣布某一模型“有视觉缺陷”或“不会推理”的永久标签。</p></section><section id="section-10"><h2>用同一道题跑三个条件</h2><p>教学程序固定一个面积求解器。正确事实是长4宽3，读错宽度为6时得到24；纠正事实后得到12。再把求解器换成错误的相加规则，即使输入正确也得到7。</p><p>中间状态公开展示：图像事实、选择的规则、最终结果。它没有真正读图片，读错值是手工注入；也没有评测大模型。通过这个最小例子，你能明确知道下一步该修正输入事实，还是修正推理规则，而不是一律要求系统多想几遍。</p></section><section id="section-11"><h2>最小实践：运行、观察与边界</h2><p>需求：保持一份真实事实不变，分别注入读数错误和公式错误，记录输入事实、规则和输出；再演示正确/错误/未完成应分开计数。假图像信息直接用字典表示，以便只检验错误传播逻辑。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>手工注入感知错误： {&#x27;length&#x27;: 4, &#x27;width&#x27;: 6} -&gt; 24
+纠正事实后： {&#x27;length&#x27;: 4, &#x27;width&#x27;: 3} -&gt; 12
+边界：事实正确但公式错： {&#x27;length&#x27;: 4, &#x27;width&#x27;: 3} -&gt; 7
+结果计数： {&#x27;correct&#x27;: 1, &#x27;unfinished&#x27;: 2, &#x27;wrong&#x27;: 1}
+教学算例不调用视觉模型，不能报告真实感知恢复率。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-12"><h2>先自己试着解释</h2><ol><li>纠正宽度后仍答7，下一步应检查哪一段？</li><li>“加图后受伤比例”为什么不能当总错误率？</li><li>人工说明后答对，是否证明全部差异仅来自读图能力？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section id="section-13"><h2>原文与阅读范围</h2><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18991v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18991v1">元数据与版本</a></p><p>已读取第3—7节、第8节相关表格与Limitations；核对图2五任务、图3/4感知准确率、表3条件比例、表5恢复与表9截断。教学没有声称执行模型实验。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Lost in Perception: Isolating Perceptual and Reasoning Failures in Multimodal Physics and Geometry Reasoning</p><p>Jaiswal, Raj、Uppalapati, Sree Krishna、Patel, Dhruvkumar、Khatoniar, Ria、Ganu, Tanuja、Shah, Rajiv Ratn</p>
+<p>arXiv:2609.18991v1 · 发布日期：2026-07-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18991v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18991v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

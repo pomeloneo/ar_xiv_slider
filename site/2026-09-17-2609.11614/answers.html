@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="从二手店低收高卖却仍可能亏钱讲起，理解库存、持续单边订单与面向困难情境的训练。">
+<title>参考答案 · 状态切换订单流下稳健做市的深度学习</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.11614v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><p>买入便宜 0.5 元只相对于成交当时的参考价。若库存尚未卖出，之后价格持续下降，库存重估损失可以远大于这 0.5 元，因此总 PnL 仍可能为负。</p><p>只训练买卖平衡环境，可能没有足够长的同向订单压力，也可能缺少推断隐藏状态的输入。论文 B 增加贝叶斯流向信念与自身报价暴露，C 加强困难场景抽样。小程序只是手写库存规则，既没有训练 RL，也没有验证真实市场盈利。</p><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

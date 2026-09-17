@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="通过“前台改口、档案仍在”的例子，区分回答改变与信息删除。">
+<title>详细讲解 · 被压制而非抹除：即使不修改权重，知识编辑后旧事实的表征痕迹仍会保留</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18985v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">AI · arXiv:2609.18985v1</p>
+<h1>被压制而非抹除：即使不修改权重，知识编辑后旧事实的表征痕迹仍会保留</h1><p class="original" lang="en">Suppressed, Not Erased: A Representational Trace of Edited Facts Survives Even Weight-Free Knowledge Editing</p>
+<p class="lead">通过“前台改口、档案仍在”的例子，区分回答改变与信息删除。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">一个前台改口的问题</a><a href="#section-1">先看整体关系</a><a href="#section-2">先认识知识编辑的输入与输出</a><a href="#section-3">三种编辑器，三条不同路径</a><a href="#section-4">第一种证据：编辑后的回答确实变了</a><a href="#section-5">第二种证据：用探针读内部信号</a><a href="#section-6">表 1 的结果与最容易漏掉的分母</a><a href="#section-7">第三种证据：旧答案会不会重新出现</a><a href="#section-8">一个没有奏效的测量也值得学</a><a href="#section-9">作者主张与我们能接受的边界</a><a href="#section-10">怎样把三种检查接成一张证据表</a><a href="#section-11">最小实践：运行、观察与边界</a><a href="#section-12">先自己试着解释</a><a href="#section-13">原文与阅读范围</a></nav><section id="section-0"><h2>一个前台改口的问题</h2><p>假设图书馆的前台系统原来告诉你某本书在一楼，现在被要求回答在二楼。测试人员问一次，得到二楼，于是宣布旧信息已删除。可是后台目录是否还记得一楼？换一个问法会不会又出现旧答案？这两个问题不能靠前台的一句回答解决。</p><p>论文研究的是模型知识编辑，不是教我们修改现实事实。作者故意用反事实目标做可控实验。读完你应能区分输出行为、内部可读信号、再次出现旧答案这三种证据，并说明它们各自不能证明什么。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[旧事实与编辑目标] --&gt; B[权重修改或外部覆盖]
+B --&gt; C[生成是否改答]
+B --&gt; D[隐藏状态探针]
+B --&gt; E[改写问题压力测试]
+C --&gt; F[联合解释证据]
+D --&gt; F
+E --&gt; F
+F --&gt; G[小样本排除和单模型限制]</pre></details>
+</figure></section><section id="section-1"><h2>先看整体关系</h2><div class="mermaid">flowchart TD
+A[旧事实与编辑目标] --&gt; B[权重修改或外部覆盖]
+B --&gt; C[生成是否改答]
+B --&gt; D[隐藏状态探针]
+B --&gt; E[改写问题压力测试]
+C --&gt; F[联合解释证据]
+D --&gt; F
+E --&gt; F
+F --&gt; G[小样本排除和单模型限制]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section id="section-2"><h2>先认识知识编辑的输入与输出</h2><p>输入是一条旧关联，例如“某实体—某关系—旧对象”，以及希望模型改答的新对象。编辑器作用后得到新模型或新推理过程。最直接的输出检查是：用编辑相关的问题询问它，是否生成新对象。</p><p>这里有三个中间位置：固定模型参数、运行中的隐藏状态、最终词语。隐藏状态是网络计算时的一串数值，不是能直接打开阅读的秘密笔记。信息可能在其中留下可辨认的规律，即使最终选择的词已经改变。</p></section><section id="section-3"><h2>三种编辑器，三条不同路径</h2><p>ROME 在某一层的权重上做特定形式的修改；FT-L 对相关权重做受约束的迭代微调；GRACE 则保存外部记忆，在匹配的内部状态出现时做替换，基础权重保持不变。</p><p>用图书馆类比，分别像改一段目录映射、反复调整目录规则、给前台外挂更正卡。类比只解释编辑发生的位置，不能把网络权重当成逐条整齐保存的事实表。选择三种方法的目的，是检查现象是否只来自某一种改法。</p></section><section id="section-4"><h2>第一种证据：编辑后的回答确实变了</h2><p>作者先检查生成结果，而不是把新答案事先喂给模型再看打分。实验中 50 条有效 CounterFact 编辑在三种编辑器上都达到所用生成检查的成功标准。只有先确认改口，才值得问旧信号是否仍然存在。</p><p>这 100% 是指定问题和匹配规则下的成功率，不是任意提问都不会再说旧答案。局部成功的证书只能覆盖实际测试条件。读论文时把“在这个检查里通过”和“所有行为都被改变”分开，是本篇最重要的基础动作。</p></section><section id="section-5"><h2>第二种证据：用探针读内部信号</h2><p>线性探针是一个简单分类器，输入模型某层的隐藏状态，输出一个类别。它像给内部数值装一把测量尺：若在交叉验证中能稳定分开两种情况，说明那里存在可读的差别。</p><p>本论文的标签来自旧对象与新对象在模型输出方向上的投影谁更大，然后训练逻辑回归预测这个二元标签。这个细节很重要：实验并不是在开放词表里盲猜并恢复完整的旧事实，更不是自动提取任意秘密。教学中的“读出旧信息”必须结合它具体测量的定义理解。</p></section><section id="section-6"><h2>表 1 的结果与最容易漏掉的分母</h2><p>论文表 1 的探针准确率为 ROME 0.96、FT-L 0.86、GRACE 0.79，并列出 0.50 的机会基线。ROME 与 FT-L 使用 50 条事实；GRACE 有 36 条产生无法使用的非有限隐藏数值，最终探针只基于 14 条。</p><p>因此不能写成“三种方法都在 50 个样本上达到这些分数”。作者在第六节明确承认 GRACE 的估计精度有限。我们的进一步判断是，排除并非随机缺失时，也要关注剩余样本是否具有代表性；小样本与选择过程会影响结论强度。</p></section><section id="section-7"><h2>第三种证据：旧答案会不会重新出现</h2><p>作者还用改写问题和长上下文进行压力测试，报告旧对象再次生成的比例较低：三种方法约为 0.01 到 0.10。它们与探针分数测的不是同一件事：一个看内部可分信号，一个看最终是否真的说出旧词。</p><p>可以把它想成档案柜里存在旧卡片，却不代表前台每次都会拿出来。反过来，压力测试暂时没有看到旧答案，也不能证明内部不存在任何可恢复信息。有限问题集无法覆盖全部可能的提问方式。</p></section><section id="section-8"><h2>一个没有奏效的测量也值得学</h2><p>论文尝试过“重新学回旧事实是否更省步骤”的指标，但结果不可靠。检查只每五步做一次，时间分辨率可能太粗；对于 GRACE，外部覆盖仍开着，重新训练一边努力恢复，外挂一边继续强制新答案。</p><p>因此负的节省值可能说明测量与编辑机制相互打架，而不是旧记忆消失。作者没有把它当成支持结论的证据。日常排错的迁移点是：测量工具本身有前提，读到异常数值时先检查工具是否适用于这类系统。</p></section><section id="section-9"><h2>作者主张与我们能接受的边界</h2><p>作者把现象解释为成功编辑常常压制旧关联而没有彻底抹除。证据范围是 GPT-2-XL、三种编辑器、英语百科式单次编辑；没有覆盖更大指令模型、多次编辑或所有隐私删除任务。</p><p>我们的审读提醒是，标签本身由隐藏状态投影导出，最佳层选择和类别平衡都会影响探针结果的解释。准确率高说明这种局部可分信号存在，不自动等于已经证明旧事实可以被任意攻击者完整恢复。更严谨的后续审计需要独立标签、保留测试集和更广泛的恢复任务。</p></section><section id="section-10"><h2>怎样把三种检查接成一张证据表</h2><p>检查输出改没改，是行为检查；检查隐藏状态能否区分类别，是表征检查；换问法再次出现旧答案，是压力检查。三个检查可以同时成立，也可能出现不同结果，不能用其中一个替代全部。</p><p>下面的最小程序用“基础字典加外部覆盖”模拟 GRACE 一类位置关系：前台读到新值，底层旧值仍在，移除覆盖后旧值回来。它没有神经网络、训练或探针，所以只验证一个逻辑反例：输出改变并不蕴含存储删除。它不能证明论文里的数值，也不能说明所有编辑方法都会如此。</p></section><section id="section-11"><h2>最小实践：运行、观察与边界</h2><p>需求：分开基础记录与外部覆盖，比较编辑后回答、内部记录和撤去覆盖后的回答。边界情形直接替换唯一字典中的记录。输出用断言核查；该字典没有分布式表征，所以不能模拟神经网络的全部删除难题。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>编辑后前台回答： 二楼
+内部基础记录： 一楼
+撤掉外挂后回答： 一楼
+边界：若直接替换唯一存储，当前字典旧值不再保留： {&#x27;书A的位置&#x27;: &#x27;二楼&#x27;}
+这只是外部覆盖机制示例，不是神经网络知识删除证明。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-12"><h2>先自己试着解释</h2><ol><li>前台回答全改对了，为什么还需要检查内部信号？</li><li>GRACE 的 0.79 为什么不能和另两行当成同样精度的估计？</li><li>探针没读出来，能不能证明旧信息不存在？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section id="section-13"><h2>原文与阅读范围</h2><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18985v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18985v1">元数据与版本</a></p><p>已读取第3—8节及Limitations，核对表1、图2和第6节按编辑器列出的样本排除。特别核实GRACE探针为14/50，并读取第5节未成功的重新学习测量。 已实际打开并查看原文图2 PNG：核对三组柱、0.50虚线机会基线、权重编辑/零权重变动记忆编辑图例；GRACE的14/50有效样本口径来自图注和第6节，柱图本身未展示该分母。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Suppressed, Not Erased: A Representational Trace of Edited Facts Survives Even Weight-Free Knowledge Editing</p><p>Srivastava, Priyansh、Chatterjee, Romit</p>
+<p>arXiv:2609.18985v1 · 发布日期：2026-07-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18985v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18985v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

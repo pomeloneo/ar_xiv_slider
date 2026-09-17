@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用三条选择回路解释：重复出现更多的对象不能直接多算票，抽样估计要纠正出现频率。">
+<title>图解全文 · 金钱泵指数的可处理估计：一则评论</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.16086v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 经济</p><h1 tabindex="-1">金钱泵指数的可处理估计：一则评论</h1><p class="lead">用三条选择回路解释：重复出现更多的对象不能直接多算票，抽样估计要纠正出现频率。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 经济</p><h1 tabindex="-1">从购物记录判断偏好，会遇到什么麻烦？</h1><p>某次购物你买了组合A，而同样预算本来可以买B，研究者可能推断这次选择显示A至少不差于B。换一组价格你又选B而放弃C，之后却选C而严格放弃可负担的A，就可能形成偏好循环。</p><p>本文研究怎样量化这类循环，并减少计算量。读完你应能区分选择一致性与道德评价，知道为何循环太多无法全数枚举，以及怎样用已知出现频率纠正抽样平均。它不是根据三次购物就给消费者贴‘不理性’标签的工具。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 经济</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[价格与购物篮] --&gt; B[显示偏好有向图]
+B --&gt; C[回路太多难穷举]
+C --&gt; D[随机排列形成路径]
+D --&gt; E[提取基础回路]
+E --&gt; F[按出现频率倒数加权]
+F --&gt; G[合并分子分母估计均值]
+F --&gt; H[加权累计分布估计分位数]
+G --&gt; I[三观察精确例与购买数据比较]
+H --&gt; I
+I --&gt; J[边界：稳定偏好和正分母]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 经济</p><h1 tabindex="-1">全景：价格和购物篮变成一张有向图</h1><p>每次观察有当时的价格向量与实际购物篮。用这次价格给另一篮子计价，如果另一篮也付得起，就画一条偏好箭头。多条箭头串成闭环且包含严格比较时，会触及显示偏好一致性的限制。</p><p>论文先定义GARP与金钱泵指数MPI，再将回路组织成路径生成的基础集合，用出现频率加权，构造均值与分位数估计，最后在超市扫描购买资料上比较。核心不是画图本身，而是利用结构把难穷举的问题改成可抽样的问题。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 经济</p><h1 tabindex="-1">‘金钱泵’只是一个理论度量</h1><p>若一个人的选择可以沿圈交换回原来的东西，却在途中不断愿意付费，理论上就出现能被利用的循环。MPI用标准化的金额刻画这种不一致程度，比简单回答是否违反一致性更细。</p><p>不过现实选择还受库存、家庭成员、心情、学习和测量误差影响。把跨期资料当成同一个稳定偏好消费者，是需要核对的前提。指数不是实际被商家骗走的钱，也不是道德评判；本文的方法改进主要是怎样算，不自动解决识别前提。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 经济</p><h1 tabindex="-1">为什么不把所有圈找出来？</h1><p>观察次数增加，回路组合会爆炸。原文用25次观察、长度10的回路说明数量可达约1.18×10¹²。只统计短圈较快，却可能漏掉长圈，对均值或中位数产生不同影响。</p><p>作者并未把精确穷举突然变成便宜操作。换一种精确表达后，全部路径仍有n!条，同样不可行。真正的计算节省来自只抽K条路径，每条处理约n²个基础回路；精确恒等式与有限样本近似是两层不同结论。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 经济</p><h1 tabindex="-1">随机排一条路，再批量得到小回路</h1><p>把三个观察按1→2→3排列。连续段1→2可以接回1，2→3可以接回2，整个1→2→3可以接回1；跳过中间的1→3也可以接回1。这样得到三个两点回路和一个三点回路。</p><p>对不同排列重复这个操作，每次生成一组结构化回路。原文图1展示提取规则，图2说明非基础回路的线性组合关系。估计并不是简单把某个线性组合的指数相加，因为标准化比率一般不保持线性；真正恢复总体均值靠的是跨路径出现次数加权。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 经济</p><h1 tabindex="-1">出现六次和三次，不能直接同票计算</h1><p>三个观察有六种排列。任一两点回路会出现六次，某个方向的三点回路只出现三次。直接把收集到的回路指数平均，两点回路就被重复计算得更重，统计目标已经改变。</p><p>原文例子的三个违反回路指数为0.15、0.20、0.20，前两个是两点回路，第三个是三点回路。给每次出现分别乘1/6、1/6、1/3，累计后每个独特回路恰好一票；加权总成本0.55除以总权重3，得到0.18333。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 经济</p><h1 tabindex="-1">要先合并分子分母，不能先平均各组比率</h1><p>每条抽到的路径产生一个加权成本M和一个加权计数W。估计应为所有M之和除以所有W之和。若先在每条路径算M/W，再平均这些比率，就让违反回路很少与很多的路径有相同影响，一般得到不同的目标。</p><p>这种比率估计有限样本可能有偏，因为比率的期望不等于期望的比率。论文命题1给一致性，命题2在最小基础权重为正等条件下给偏差界。‘抽得越来越多趋近目标’不等于‘抽一次就是无偏’或‘每次加样本误差都下降’。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 经济</p><h1 tabindex="-1">中位数要恢复整条分布</h1><p>平均值只需加权指数总和；中位数还要知道有多少加权质量落在某个值以下。作者构造加权累计分布，在累计比例首次达到50%的位置取中位数；原文三回路例中结果为0.20。</p><p>分位数落在离散阶梯边界时更敏感。正文的指数偏差界使用严格正的垂直间隔δ和正的最小权重条件，这些不是所有输入自动满足。本包不会把该保证扩写成任意分布的无条件快速收敛。若没有违反回路，分母为零，程序应明确报告无法定义。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 经济</p><h1 tabindex="-1">真实资料检验了哪一部分？</h1><p>原文第4节使用Stanford Basket Dataset，494个家庭、26周、375种商品，其中396个家庭严格违反其GARP检验。表1比较短圈近似与基础回路估计的均值、中位数；表2报告bootstrap偏差评估及相应界。</p><p>作者报告平均结果接近，较长回路对中位数仍有影响。我们没有下载并重跑这批购买资料，也不把文中的‘偏差可忽略’升级成对所有家庭、所有样本都成立。表2的bootstrap是样本内评估，不是真值已知条件下对任意数据的保证。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 经济</p><h1 tabindex="-1">可以迁移到哪些统计问题？</h1><p>图采样、网络路径、日志片段都可能出现‘有些对象更容易被抽到’的问题。学习到的通用习惯是先写清目标总体，再查每个对象进入样本的机会，最后决定是否以及如何加权。对象出现得多不等于它在目标总体里应该更重要。</p><p>这里的权重来源于论文特定的路径构造，不能未经推导套到任意采样器。下面用全部六路径核验恒等式，再用固定种子的随机路径演示近似，并保留未纠偏的反例；固定种子用于复查教学实验，不是重新选择论文。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 经济</p><h1 tabindex="-1">最小实践的实际输出</h1><pre><code>unique-cycle mean=0.183333; corrected all-path mean=0.183333; uncorrected=0.180000
+1000 sampled paths (seed 1729): weighted mean=0.183210
+exact weighted median over all paths = 0.20
+</code></pre><p>全路径纠偏均值等于独特回路真值0.183333；不纠偏得到0.18。1000次抽样输出仅是固定种子的一个近似结果，不能用这一轮证明一致性或误差界。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 经济</p><h1 tabindex="-1">检验理解</h1><ol><li>为什么两点回路不能因为出现六次就算六票？</li><li>ΣM/ΣW和先算各路径M/W再平均，是同一件事吗？</li><li>有限样本结果接近真值，是否证明每次都准确？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 金钱泵指数的可处理估计：一则评论</option><option value="2">2. 从购物记录判断偏好，会遇到什么麻烦？</option><option value="3">3. 把整篇串起来</option><option value="4">4. 全景：价格和购物篮变成一张有向图</option><option value="5">5. ‘金钱泵’只是一个理论度量</option><option value="6">6. 为什么不把所有圈找出来？</option><option value="7">7. 随机排一条路，再批量得到小回路</option><option value="8">8. 出现六次和三次，不能直接同票计算</option><option value="9">9. 要先合并分子分母，不能先平均各组比率</option><option value="10">10. 中位数要恢复整条分布</option><option value="11">11. 真实资料检验了哪一部分？</option><option value="12">12. 可以迁移到哪些统计问题？</option><option value="13">13. 最小实践的实际输出</option><option value="14">14. 检验理解</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Tractable Estimation of the Money Pump Index: A Comment</p><p>Gavin Kader</p>
+<p>arXiv:2609.16086v1 · 发布日期：2026-09-14 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.16086v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.16086v1">论文正文</a></p></details><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.16086v1'>Tractable Estimation of the Money Pump Index: A Comment</a>；2609.16086v1；提交日期 2026-09-14。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2节GARP与MPI；第3节三观察例、图1—3、定理1—2和命题1—4；第4节表1—2；第5节结论。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

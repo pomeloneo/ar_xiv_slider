@@ -1,0 +1,9 @@
+multiplier=1: relative_tail=1.000000, toy_return_period=4.20 years
+multiplier=10: relative_tail=0.181970, toy_return_period=23.08 years
+multiplier=100: relative_tail=0.033113, toy_return_period=126.84 years
+equation check: 10^(-0.74)=0.181970; 10^(-1.74)=0.018197
+sensitivity alpha=1.5: tail_ratio_at_100=0.100000
+sensitivity alpha=1.74: tail_ratio_at_100=0.033113
+sensitivity alpha=2.1: tail_ratio_at_100=0.006310
+Poisson teaching assumption: probability of >=1 event within 10 years=4.7384%
+PASS: density exponent and tail exponent differ by one; return periods are not schedules.

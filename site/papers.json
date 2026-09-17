@@ -2,10 +2,497 @@
   {
     "date": "2026-09-17",
     "title": "The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System",
+    "title_zh": "公理化交易者：潜在规律、信息预算与量化投资系统的标准形",
     "arxiv_id": "2608.23416v2",
     "direction": "金融",
+    "tags": [
+      "金融",
+      "量化投资",
+      "风险管理",
+      "方法论"
+    ],
     "summary": "从两个公交站的等待时间出发，读懂论文完整的五步研究流程、真实证据与适用边界。",
     "path": "2026-09-17/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "The Other Half of the Memory Wall: Serving 35B MoEs from SSD with Trained Routing Prediction",
+    "title_zh": "内存墙的另一半：通过训练路由预测，从 SSD 运行 350 亿参数混合专家模型",
+    "arxiv_id": "2609.18063v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "模型推理",
+      "内存优化",
+      "混合专家"
+    ],
+    "summary": "用仓库提前备货的例子，理解模型为什么可以少算，却仍然放不进内存。",
+    "path": "2026-09-17-2609.18063/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Decodability is Not Causality: Dissociating Probe Readouts from Behavioral Drivers via SAE Decomposition",
+    "title_zh": "可解码不等于因果：通过稀疏自编码器分解区分探针读数与行为驱动因素",
+    "arxiv_id": "2609.18080v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "可解释性",
+      "因果推断",
+      "模型内部机制"
+    ],
+    "summary": "用温度计与加热器的区别，理解读懂信号为什么不等于找到控制开关。",
+    "path": "2026-09-17-2609.18080/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "AutoTuneBench: Trustworthy Measurement for Agent Auto-Tuning of LLM Serving Engines",
+    "title_zh": "AutoTuneBench：针对大语言模型服务引擎智能体自动调优的可信测量",
+    "arxiv_id": "2609.18123v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "模型评测",
+      "性能优化",
+      "实验方法"
+    ],
+    "summary": "学会拆解“快了十倍”背后的基线、计时与正确性。",
+    "path": "2026-09-17-2609.18123/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Symbolic Temporal Supervision of LLM Agents Using Contracts",
+    "title_zh": "使用契约对大语言模型智能体进行符号化时序监督",
+    "arxiv_id": "2609.18128v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "智能体",
+      "形式化方法",
+      "工具调用"
+    ],
+    "summary": "用一张会记住前后步骤的检查表，理解为什么单次操作合法还不够。",
+    "path": "2026-09-17-2609.18128/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Re2A: Situated Conversational Recommendation via Rubric-based Preference Reasoning and Alignment",
+    "title_zh": "Re2A：基于评分准则的偏好推理与对齐，实现情境化对话推荐",
+    "arxiv_id": "2609.18249v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "推荐系统",
+      "多模态",
+      "偏好推理"
+    ],
+    "summary": "在同一货架上，先把“我想要什么”讲清楚，再确认“这里有什么”。",
+    "path": "2026-09-17-2609.18249/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "REPAIR: Resolving Long-Tail Confusion in Scientific Retrievers via Fact-Verified Iterative Refinement",
+    "title_zh": "REPAIR：通过事实核验的迭代改进，解决科学检索器的长尾概念混淆",
+    "arxiv_id": "2609.18262v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "信息检索",
+      "数据增强",
+      "科学文献"
+    ],
+    "summary": "专门找“看起来几乎一样但关键条件不同”的材料，理解检索器怎样学会分辨。",
+    "path": "2026-09-17-2609.18262/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "The Mirage of Calibrated Confidence: Trajectory-Independence of Verbalized Confidence in Vision-Language Models",
+    "title_zh": "校准置信度的幻象：视觉语言模型口头置信度对推理轨迹的独立性",
+    "arxiv_id": "2609.18453v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "置信度",
+      "多模态",
+      "模型评测"
+    ],
+    "summary": "用一位永远说“五成把握”的答题者，区分总体校准和真的检查了推理。",
+    "path": "2026-09-17-2609.18453/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Disentangling Long-Term Memory via Latent Neuro-Symbolic Reasoning",
+    "title_zh": "通过潜在神经符号推理解耦长期记忆",
+    "arxiv_id": "2609.18461v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "智能体记忆",
+      "个性化",
+      "图推理"
+    ],
+    "summary": "把分散在多次聊天里的线索按当前问题重新连接，理解长期记忆为什么不只是搜索旧句子。",
+    "path": "2026-09-17-2609.18461/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "TRIPROBE: Probing Task Separability Beyond Classification for XAI",
+    "title_zh": "TRIPROBE：超越分类准确率，探测任务可分性以解释模型瓶颈",
+    "arxiv_id": "2609.18525v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "模型诊断",
+      "可解释性",
+      "数据质量"
+    ],
+    "summary": "沿原始数据、特征与决策前表示三个检查点，找到信息在哪一步丢了。",
+    "path": "2026-09-17-2609.18525/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Which LLM is Best for Translating Natural Language Goals to PDDL",
+    "title_zh": "哪个大语言模型最擅长把自然语言目标翻译成 PDDL",
+    "arxiv_id": "2609.18731v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "自动规划",
+      "自然语言接口",
+      "模型评测"
+    ],
+    "summary": "把“把箱子送到B房间”拆成目标、动作和可达性，理解自然语言如何接上规划器。",
+    "path": "2026-09-17-2609.18731/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Suppressed, Not Erased: A Representational Trace of Edited Facts Survives Even Weight-Free Knowledge Editing",
+    "title_zh": "被压制而非抹除：即使不修改权重，知识编辑后旧事实的表征痕迹仍会保留",
+    "arxiv_id": "2609.18985v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "知识编辑",
+      "模型解释",
+      "评测方法"
+    ],
+    "summary": "通过“前台改口、档案仍在”的例子，区分回答改变与信息删除。",
+    "path": "2026-09-17-2609.18985/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Lost in Perception: Isolating Perceptual and Reasoning Failures in Multimodal Physics and Geometry Reasoning",
+    "title_zh": "迷失于感知：分离多模态物理与几何推理中的感知失败和推理失败",
+    "arxiv_id": "2609.18991v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "多模态",
+      "视觉推理",
+      "错误诊断"
+    ],
+    "summary": "把“看错宽度”和“用了错公式”拆开，学会定位图形题的第一处错误。",
+    "path": "2026-09-17-2609.18991/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Flag Game: A Toy Model for Mechanistic Swarm Interpretability",
+    "title_zh": "国旗游戏：用于群体机制可解释性的玩具模型",
+    "arxiv_id": "2609.19124v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "多智能体",
+      "群体决策",
+      "可解释性"
+    ],
+    "summary": "每个人只看一块国旗：交流怎样传播证据，也怎样制造共同误判。",
+    "path": "2026-09-17-2609.19124/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Algorithmic Attention and Content Creation on Social Media Platforms",
+    "title_zh": "社交媒体平台上的算法注意力与内容创作",
+    "arxiv_id": "2609.15573v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "平台经济",
+      "推荐系统",
+      "创作者激励"
+    ],
+    "summary": "把注意力看成既能卖广告、也能奖励创作的资源，理解平台为什么不只最大化每次匹配。",
+    "path": "2026-09-17-2609.15573/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Tractable Estimation of the Money Pump Index: A Comment",
+    "title_zh": "金钱泵指数的可处理估计：一则评论",
+    "arxiv_id": "2609.16086v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "消费者行为",
+      "显示偏好",
+      "抽样估计"
+    ],
+    "summary": "用三条选择回路解释：重复出现更多的对象不能直接多算票，抽样估计要纠正出现频率。",
+    "path": "2026-09-17-2609.16086/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Auction Design with ROI-Constrained Bidders: Truthfulness and Revenue Maximization",
+    "title_zh": "具有投资回报约束的竞标者的拍卖设计：真实性与收入最大化",
+    "arxiv_id": "2609.16522v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "机制设计",
+      "广告拍卖",
+      "激励相容"
+    ],
+    "summary": "用广告位的小菜单，区分广告价值、付款金额和每份价值所能承受的价格。",
+    "path": "2026-09-17-2609.16522/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Equilibrium Selection in Coordination Games with Planned Actions and Scouting",
+    "title_zh": "计划行动与侦察下协调博弈的均衡选择",
+    "arxiv_id": "2609.17608v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "博弈论",
+      "合作",
+      "信息设计"
+    ],
+    "summary": "从两人合办活动出发，理解观察准备动作、保留修改机会，为什么能改变合作困局。",
+    "path": "2026-09-17-2609.17608/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Reputation without a Control Group",
+    "title_zh": "没有对照组的声誉",
+    "arxiv_id": "2609.17617v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "组织经济学",
+      "声誉",
+      "知识传承"
+    ],
+    "summary": "项目做得更保险，有时反而看不清顾问的判断是否准确；关键不只在记录，更在持续产生证据的能力。",
+    "path": "2026-09-17-2609.17617/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Dynamic Pooling and Regional Participation in Deceased-Donor Organ Allocation",
+    "title_zh": "逝者器官分配中的动态共享与地区参与",
+    "arxiv_id": "2609.18147v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "资源分配",
+      "排队模型",
+      "公平与效率"
+    ],
+    "summary": "从两地共享维修名额出发，理解总效率提高，为什么仍可能有人不愿加入。",
+    "path": "2026-09-17-2609.18147/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Fractional Assignment with $\\ell_1$ Preferences",
+    "title_zh": "具有 ℓ₁ 偏好的分数分配",
+    "arxiv_id": "2609.18299v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "公平分配",
+      "机制设计",
+      "资源调度"
+    ],
+    "summary": "从实验室时段分配出发，用装水与平方惩罚两种规则，理解效率、公平和防串通的区别。",
+    "path": "2026-09-17-2609.18299/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Policy Targeting with Market Equilibrium",
+    "title_zh": "市场均衡下的政策定向分配",
+    "arxiv_id": "2609.18600v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "公共政策",
+      "补贴",
+      "市场均衡"
+    ],
+    "summary": "用鸡蛋优惠券解释：收到折扣的人得到好处，没领券的人也可能因涨价受到影响。",
+    "path": "2026-09-17-2609.18600/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Comparison of Deterministic Information Providers",
+    "title_zh": "确定性信息提供者的比较",
+    "arxiv_id": "2609.18701v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "信息经济学",
+      "博弈论",
+      "公共信号"
+    ],
+    "summary": "用三个天气状态演示：分别满足两个人的信息需求，不代表一条公共消息能同时满足两人。",
+    "path": "2026-09-17-2609.18701/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Beyond Pretrends: A Discordance-Based Sensitivity Analysis for Difference-in-Differences",
+    "title_zh": "超越事前趋势：基于不一致程度的双重差分敏感性分析",
+    "arxiv_id": "2609.19081v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "因果推断",
+      "政策评估",
+      "双重差分"
+    ],
+    "summary": "用两家店的销量说明：过去走势一致，仍可能在政策之后出现不同冲击，改变因果解释。",
+    "path": "2026-09-17-2609.19081/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Robustness or Crowding: Experimental Design for Trading Strategy Capacity",
+    "title_zh": "稳健性还是拥挤效应：交易策略容量的实验设计",
+    "arxiv_id": "2608.08405v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "实验设计",
+      "因果推断",
+      "策略容量"
+    ],
+    "summary": "通过食堂排队的类比，理解为什么同日对照能去掉天气噪声，也可能去掉真正想测的拥挤影响。",
+    "path": "2026-09-17-2608.08405/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Simplifying Cyber Cat(astrophe)s with Cyber Kittens: Power Law Plausibility for Cyber Insurance Risks",
+    "title_zh": "用“小型网络事件”简化网络巨灾：网络保险风险的幂律合理性检验",
+    "arxiv_id": "2609.07486v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "保险",
+      "尾部风险",
+      "幂律"
+    ],
+    "summary": "从赔款、受害企业数和重现期的区别出发，学会审查一次跨百倍规模的风险外推。",
+    "path": "2026-09-17-2609.07486/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Market-Informed Networks for Modeling and Forecast Evaluation of Financial Extremes",
+    "title_zh": "用于金融极端值建模与预测评价的市场信息网络",
+    "arxiv_id": "2609.11575v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "极端风险",
+      "统计建模",
+      "高频数据"
+    ],
+    "summary": "用班级最高分与全年最高分的区别，读懂局部极值、历史分位数和共同极端模式怎样影响风险模型。",
+    "path": "2026-09-17-2609.11575/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Deep Learning of Robust Market Making under Regime-Switching Order Flow",
+    "title_zh": "状态切换订单流下稳健做市的深度学习",
+    "arxiv_id": "2609.11614v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "做市",
+      "强化学习",
+      "分布变化"
+    ],
+    "summary": "从二手店低收高卖却仍可能亏钱讲起，理解库存、持续单边订单与面向困难情境的训练。",
+    "path": "2026-09-17-2609.11614/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Sparsity Regularized and Robust Mean Variance Portfolio Selection Under Ellipsoidal Uncertainty",
+    "title_zh": "椭球不确定性下带稀疏正则化的稳健均值—方差投资组合选择",
+    "arxiv_id": "2609.11749v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "稳健优化",
+      "稀疏选择",
+      "算法"
+    ],
+    "summary": "用三个虚构资产解释：预测会错、持有项目太多，怎样同时写进一个可检查的优化问题？",
+    "path": "2026-09-17-2609.11749/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "Entropic Value-at-Risk parity for tempered stable returns",
+    "title_zh": "温和稳定收益分布下的熵风险价值平价",
+    "arxiv_id": "2609.11905v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "风险平价",
+      "尾部风险",
+      "资产配置"
+    ],
+    "summary": "用两个波动大小不同的资产，分清资金比例、单项风险和组合风险贡献，并检查均值怎样混进风险指标。",
+    "path": "2026-09-17-2609.11905/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-17",
+    "title": "The skew Brownian motion should not be used as a risk-neutral returns process: a well-posed skew-normal alternative",
+    "title_zh": "偏斜布朗运动不应作为风险中性收益过程：一个适定的偏斜正态替代模型",
+    "arxiv_id": "2609.15306v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "期权定价",
+      "随机过程",
+      "模型验证"
+    ],
+    "summary": "用两棵小树区分“到期价格分布相同”和“整条价格路径合法”，读懂论文如何修复一个定价模型。",
+    "path": "2026-09-17-2609.15306/",
     "slides": "slides.html"
   }
 ]

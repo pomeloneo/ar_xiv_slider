@@ -1,0 +1,8 @@
+A: raw=4.5, historical_rank=0.80, exceeds_past_mean=1
+ JEAM teaching weight(g=0.5, fixed past pattern)=0.883310, cosine=0.966620
+B: raw=12.0, historical_rank=0.20, exceeds_past_mean=0
+ JEAM teaching weight(g=0.5, fixed past pattern)=0.583310, cosine=0.966620
+joint toy history: P(A)=0.60, P(B)=0.60, P(A and B)=0.40
+independence shortcut=0.36; empirical joint=0.40
+boundary: B=60 has past-only rank 1.000; leaking future 1000 changes rank to 0.833
+PASS: magnitude, historical extremeness, and co-occurrence are different quantities.

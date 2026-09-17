@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="从实验室时段分配出发，用装水与平方惩罚两种规则，理解效率、公平和防串通的区别。">
+<title>详细讲解 · 具有 ℓ₁ 偏好的分数分配</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18299v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.18299v1</p>
+<h1>具有 ℓ₁ 偏好的分数分配</h1><p class="original" lang="en">Fractional Assignment with $\ell_1$ Preferences</p>
+<p class="lead">从实验室时段分配出发，用装水与平方惩罚两种规则，理解效率、公平和防串通的区别。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">不是争第一名，而是想要一份组合</a><a href="#section-1">全景：先衡量偏差，再选择规则</a><a href="#section-2">满意度先用‘重合多少’理解</a><a href="#section-3">先把资源分成挤、刚好和冷清三类</a><a href="#section-4">WF：像同时给杯子装水</a><a href="#section-5">QP：在高效方案里再压低集中程度</a><a href="#section-6">‘不羡慕’与‘拿得一样多’不同</a><a href="#section-7">QP不是每个例子都更照顾最弱者</a><a href="#section-8">证明与算例各自负责哪一层</a><a href="#section-9">选择分配规则，要先说清更重视什么</a><a href="#section-10">动手验证：需求、运行与结果</a><a href="#section-11">自测：解释、预测与迁移</a><a href="#section-12">资料与证据</a></nav><section id="section-0"><h2>不是争第一名，而是想要一份组合</h2><p>三位同学分三个实验设施的使用时段，每种设施共有一单位时间，每人总共获得一单位。甲只想用设施A，乙和丙各想一半A、一半B。大家并不一定希望独占一个设施，更可能偏好混合配置。</p><p>传统排序只问A、B、C哪个最好，表达不了这种目标组合。论文用每个人的理想份额描述偏好，研究怎样兼顾总满意、彼此不羡慕以及不值得谎报。读完你应会把分配写成矩阵，并判断两个看似同样高效的方案有什么区别。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[每人的理想资源比例] --&gt; B[重合度或ℓ₁距离]
+B --&gt; C[行列均为1的可行矩阵]
+C --&gt; D[总偏差最小集合]
+D --&gt; E[WF两阶段装水]
+D --&gt; F[QP最小平方和]
+E --&gt; G[个人公平及群体防操纵]
+F --&gt; H[个人公平及最弱者比例保证]
+G --&gt; I[例子与反例检查]
+H --&gt; I
+I --&gt; J[边界：偏好距离和容量假设]</pre></details>
+</figure></section><section id="section-1"><h2>全景：先衡量偏差，再选择规则</h2><p>输入是每个人对每种资源的理想份额，输出是实际分配矩阵。每一行加起来等于1，表示每个人拿满一份；每一列加起来等于1，表示资源不超发也不剩余。现实若允许闲置或人数不同，需要改模型。</p><p>论文先把份额差转换成重合度，再刻画总偏差最小的所有方案。在这个候选集合里，它给出装水规则WF和二次规划规则QP，证明共同的公平与激励性质，再比较抗串通和最弱者保障的差异。</p></section><section id="section-2"><h2>满意度先用‘重合多少’理解</h2><p>若你希望(0.5,0.5,0)，实际得到(0.25,0.5,0.25)，与理想重合的是A的0.25和B的0.5，合计0.75。C虽然给了0.25，却不是你想要的，因此不增加这种重合满意度。</p><p>逐项差的绝对值相加叫ℓ₁距离：0.25+0+0.25=0.5。对总和都为1的组合，重合度=1−距离/2。于是少一点偏离和多一点重合是同一目标。这个特定偏好假设使理论成立；不同人对超额或短缺可能有不同感受，现实不能默认都一样。</p></section><section id="section-3"><h2>先把资源分成挤、刚好和冷清三类</h2><p>理想需求相加，A需要2单位但只有1，B正好1，C没人要却有1。总偏差最小的分法应把紧缺A分得不超过各人所求，把刚好B按理想给出，并把剩余份额填到冷清C。</p><p>这不是保证所有人实现愿望，而是避免一边给人超过想要的紧缺资源，一边让别人同资源短缺所造成的额外浪费。引理1把这个直觉写成充要条件。很多分法都达到同样的最小总偏差，所以还要进一步规定选哪一种。</p></section><section id="section-4"><h2>WF：像同时给杯子装水</h2><p>第一阶段从全零开始，让所有格子以相同速度增长；某格达到该人的理想份额，或该资源整列用满，就停止增长。A列三人同时装，最终各1/3；B列乙丙各1/2；C理想为0，第一阶段暂时不填。</p><p>第二阶段只在还没拿满的人与还没用完的资源之间同步补足。得到甲(1/3,0,2/3)，乙丙各(1/3,1/2,1/6)。装水比喻对应精确的连续增加规则，不是按照谁更会争取来排队；原文例2展示这一结果。</p></section><section id="section-5"><h2>QP：在高效方案里再压低集中程度</h2><p>第二种规则先保证总偏差最小，再让所有分配格子的平方和最小。平方会对集中在少数大格子的分配施加更大代价，给出唯一的二次规划解。不能把它理解成直接最大化最不满意者的满意度，这不是它的定义。</p><p>原文例3利用乙丙对称，将问题简化为单个变量z，目标等于6(z−1/4)²+5/8，因此最小值在z=1/4。分配为甲(1/2,0,1/2)，乙丙各(1/4,1/2,1/4)。这次最少重合度提高到1/2，而总重合仍为2。</p></section><section id="section-6"><h2>‘不羡慕’与‘拿得一样多’不同</h2><p>不羡慕是用我的偏好评估你的整份分配，我也不更想换过去。每个人偏好不同，因此公平不要求每个格子一样。论文证明两种机制都满足不羡慕、总效率、同偏好同待遇和个人无法通过谎报变好。</p><p>WF还有群体策略无利可图的较强保证：一群人不能联合谎报，使所有人不差且至少一人更好。QP连较弱的群体版本也可能不满足。个人不值得作弊，并不自动意味着合伙作弊也无利可图，这是制度比较中常被混淆的两个层次。</p></section><section id="section-7"><h2>QP不是每个例子都更照顾最弱者</h2><p>命题9展示某些家庭中WF最小重合为1/n，QP为1/2；人数增长时差距可很大。但这不是说QP逐个输入都胜过WF。原文例4恰好给反例：WF最小重合14/15，而QP为4/5，前者更高。</p><p>正文定理3给的是统一比例保证：WF的最弱者重合度不超过QP的两倍。这类最坏情况保证与每个实例谁更好完全不同。我们的demo同时验证正例和反例，防止读者把一个漂亮案例升级为无条件排序。</p></section><section id="section-8"><h2>证明与算例各自负责哪一层</h2><p>主要结论由定理1—3及其证明支撑。小程序完整实现WF装水，在两个原文例子上核对资源约束、重合度和不羡慕；QP使用论文已经给出的解析例解进行检查，没有安装通用优化器。</p><p>因此我们真正验证的是有限例子的数值性质，不是用两个案例证明普遍防谎报或群体防串通。原文研究人数等于资源种数、每人每项单位容量和ℓ₁偏好，改成别的距离、容量或可弃置资源，必须重新论证。</p></section><section id="section-9"><h2>选择分配规则，要先说清更重视什么</h2><p>分共享设备、重复轮班或学习时段时，可以先问：偏好真能用理想比例表达吗？偏差是否等权？最弱者保障重要，还是防多人串通更重要？论文展示同样高效且个人公平的规则，仍可能在这些维度取舍。</p><p>这些是可迁移的设计问题，不是说直接把本demo拿去分配真实学校名额就足够。完整材料已给出两套机制和比较，练习让你检验能否解释差别；使用者是否掌握仍等待真实作答。</p></section><section id="section-10"><h2>动手验证：需求、运行与结果</h2><p>用分数精确实现WF两阶段装水；对原文例1—3与例4，比较已给出的QP解析解。输出重合满意度、总和与最小值，断言行列约束及逐对不羡慕。例4是‘QP总是更好’的边界反例。</p><p>运行方式：下载同目录的 <a href='demo.py'>demo.py</a>，执行 <code>python3 demo.py</code>。仅使用 Python 标准库。</p><pre><code>example 1 WF overlap=[&#x27;1/3&#x27;, &#x27;5/6&#x27;, &#x27;5/6&#x27;] sum=2 min=1/3
+example 1 QP overlap=[&#x27;1/2&#x27;, &#x27;3/4&#x27;, &#x27;3/4&#x27;] sum=2 min=1/2
+example 4 WF overlap=[&#x27;14/15&#x27;, &#x27;14/15&#x27;, &#x27;14/15&#x27;] sum=14/5 min=14/15
+example 4 QP overlap=[&#x27;4/5&#x27;, &#x27;1&#x27;, &#x27;1&#x27;] sum=14/5 min=4/5
+</code></pre><p>第一例总重合都为2，但最小值分别1/3与1/2；反例中WF最小值14/15反而高于QP的4/5。程序核对原文有限例子，未证明通用策略性质。</p></section><section id="section-11"><h2>自测：解释、预测与迁移</h2><ol><li>总重合相同是否意味着每个人都一样满意？</li><li>QP最小化平方和是否等于直接最大化最小满意度？</li><li>个人无法获利谎报，能否推出一群人也不能合作获利？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><section id="section-12"><h2>资料与证据</h2><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.18299v1'>Fractional Assignment with $\ell_1$ Preferences</a>；2609.18299v1；提交日期 2026-09-16。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2节重合式1、引理1与WF/QP定义、例1—3；第3—4节定理1—2；第5节命题9、定理3与例4。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Fractional Assignment with $\ell_1$ Preferences</p><p>Yasushi Kawase、Warut Suksompong、Hanna Sumita、Yu Yokoi</p>
+<p>arXiv:2609.18299v1 · 发布日期：2026-09-16 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.18299v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18299v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

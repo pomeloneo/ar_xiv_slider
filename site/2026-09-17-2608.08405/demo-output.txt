@@ -1,0 +1,7 @@
+L=1: average_erosion=0.400000; G=0.200000; corrected=2.000000
+L=5: average_erosion=0.924288; G=0.462144; corrected=2.000000
+L=20: average_erosion=1.604612; G=0.802306; corrected=2.000000
+common_crowding=0: control=13, treated=11, within_date_difference=-2
+common_crowding=5: control=8, treated=6, within_date_difference=-2
+boundary: correcting with wrong persistence gives 1.146404, true steady effect=2
+PASS: common shocks and common crowding both cancel; correction depends on the assumed kernel.

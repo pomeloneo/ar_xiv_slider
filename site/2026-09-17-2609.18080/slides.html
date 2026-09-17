@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用温度计与加热器的区别，理解读懂信号为什么不等于找到控制开关。">
+<title>图解全文 · 可解码不等于因果：通过稀疏自编码器分解区分探针读数与行为驱动因素</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18080v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 16 · AI</p><h1 tabindex="-1">可解码不等于因果：通过稀疏自编码器分解区分探针读数与行为驱动因素</h1><p class="lead">用温度计与加热器的区别，理解读懂信号为什么不等于找到控制开关。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 16 · AI</p><h1 tabindex="-1">先想一支温度计</h1><p>温度计读数和房间温度高度相关，但拨动温度计的指针不会自动把房间加热。神经网络里的探针也可能读出一个可靠信号，却没有找到真正驱动最终回答的内部因素。</p><p>论文研究的是这种“可读取”与“能改变行为”的区别。读完你应能设计一个最小干预：改变一个内部量，分别看探针和模型输出如何变化，再说明为什么两者都需要测。温度计是类比；真实网络里信号与控制可能交织，不能简单划成两根独立电线。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 16 · AI</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart LR
+A[隐藏状态] --&gt; B[外加探针读数]
+A --&gt; C[模型最终行为]
+A --&gt; D[SAE分解与候选排名]
+D --&gt; E[定向消融加随机对照]
+E --&gt; F[分别比较读数和行为]
+F --&gt; G[检查输出有效性和任务边界]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 16 · AI</p><h1 tabindex="-1">先看整体关系</h1><div class="mermaid">flowchart LR
+A[隐藏状态] --&gt; B[外加探针读数]
+A --&gt; C[模型最终行为]
+A --&gt; D[SAE分解与候选排名]
+D --&gt; E[定向消融加随机对照]
+E --&gt; F[分别比较读数和行为]
+F --&gt; G[检查输出有效性和任务边界]</div><p>顺着图看：先确认输入和问题，再理解中间机制，最后核对证据与失效条件。下文一次讲完整篇核心论证。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 16 · AI</p><h1 tabindex="-1">探针到底读什么</h1><p>模型某层隐藏状态是一串数值。线性探针用一组权重对它们加权相加，得到真假等标签的预测。准确率高说明这串数值足够让这个探针分类，不自动说明原模型生成答案时也按同样的权重计算。</p><p>这里的输入是同一份内部状态，输出却有两条路：原模型继续计算最终文字，外加探针读出分类。它们可能依赖部分相同信息，也可能依赖不同但相关的信息。把两条路画开，是理解整篇论文的起点。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 16 · AI</p><h1 tabindex="-1">把混合信号拆成较稀疏的成分</h1><p>论文用 SAE，也就是稀疏自编码器，把隐藏状态近似分解为若干特征的加权组合。稀疏意味着每个样本只激活较少特征，有助于让干预更有针对性。它不是保证每个特征都有唯一、准确的人类名称。</p><p>研究者先看每个特征方向与探针权重有多对齐。这个分数只看方向，就像知道某个旋钮接在读数表的哪条线上，却还不知道它在当前样本里有没有真正工作。特征实际激活大小也会影响结果。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 16 · AI</p><h1 tabindex="-1">第二份排名：模型对谁敏感</h1><p>作者还计算模型最终 True/False 倾向对特征的梯度敏感性。梯度可以理解为当前位置上很小改变的局部影响，用于提出“可能重要”的候选名单。</p><p>但局部小改变和彻底删除一个特征不是同一操作。某特征在局部导数很大，实际激活却接近零；或者大范围删除进入非线性区域。因此论文没有把梯度排名直接等同于因果真相，而是随后做真实干预。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 16 · AI</p><h1 tabindex="-1">关键实验：改动后两条输出分别怎样</h1><p>将特征分为探针与模型共同看重、探针独有以及随机对照，按相同数量删除其在隐藏状态中的重建贡献，再让模型继续。分别记录最终答案翻转率和探针读数变化。</p><p>若删除某组主要改变探针、对原模型影响很小，它更像测量表读到的线；若另一组让原模型经常翻转，则说明这组在当前条件下对行为有作用。相同数量与随机对照帮助排除“随便破坏一大片都会变”的解释。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 16 · AI</p><h1 tabindex="-1">为什么还要检查输出是否正常</h1><p>若删完特征后模型只输出乱码，那么答案变了并不能说明找到了真假决策的关键。论文用 coherence gate，即输出有效性检查，确认回答仍为合法 True/False，并检查重建质量、扰动大小及分布变化。</p><p>这一门槛也有边界：输出仍是两个合法词，证明的是格式未崩，不是所有语言能力、全部知识或真实诚实性都保持。我们的审读建议是按实际量测口径理解“连贯”，不要自动把它升级成全面能力无损。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 16 · AI</p><h1 tabindex="-1">论文的表格支持什么</h1><p>主案例在 Gemma2-9B-Instruct 的一个层和特定真假/欺骗提示任务上，探针几何排名与模型梯度排名的前100个特征只重合12个，秩相关约0.10。它们不是完全无关，但远非同一份名单。</p><p>表4在相同16个特征和五种种子的条件下，激活感知掩码的行为翻转率约17.6%，几何前16约6.1%，随机对照约0.8%。这支持“仅按几何对齐挑特征不足”，也说明结合真实激活后探针信息仍可能有用，不能粗暴得出所有探针都没价值。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 16 · AI</p><h1 tabindex="-1">翻转答案不等于让模型更诚实</h1><p>论文表3里，某共享特征消融主要把 True 改成 False；800个样本中86个沿这个方向翻转，反向只有4个，准确率还从约0.403降到0.330。这个结果展示的是行为控制，不是修复诚实性的成功方案。</p><p>这点很容易被标题或漂亮的翻转率掩盖。研究者可以发现某个部件影响输出，却尚不知道怎样让输出更正确。因果影响、正确性、现实世界的诚实是三个不同目标，不能只凭“我能拨动开关”就宣布解决后两者。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 16 · AI</p><h1 tabindex="-1">适用边界和后续问题</h1><p>论文主要是一个模型、一个层、一个 SAE 和一种行为设置。不同的分解可能把相同计算拆成不同特征，删除操作也可能让状态偏离正常分布。作者明确没有声称发现普遍的“欺骗模块”。</p><p>我们的推断是，更强结论需要跨层、跨模型、不同干预方式与保留集验证。若一个方法只在挑选特征的同一批数据上奏效，还应担心选择偏差；论文的保留切分与多种子结果是在朝这个方向补证据，而不是消除所有不确定性。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 16 · AI</p><h1 tabindex="-1">用两个变量走一遍</h1><p>教学模型有“控制变量”和“显示变量”，平时两者相同，所以探针只读显示变量也能预测模型。人为把显示变量清零，探针变了但模型不变；再把控制变量清零，模型才改变。</p><p>这份输入沿两条读取路径走到底，展示观察一致不等于干预一致。真实论文没有如此干净的两个变量，使用的是上万 SAE 特征与神经网络；小程序不训练探针，只给出一个足够明确的反例，让因果逻辑看得见。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 16 · AI</p><h1 tabindex="-1">最小实践：运行、观察与边界</h1><p>需求：建立两个在正常样本中相等、但被不同读取者使用的变量；分别干预它们，观察模型输出和探针读数。断言验证两种分离。此例只演示因果识别逻辑，不模拟论文的全部神经网络细节。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库，无需模型、API、GPU 或额外数据。下列输出由本次实际运行保存；这是教学算例，不是论文实验复现。</p><pre>正常 模型= True 探针= True
+清除显示特征 模型= True 探针= False
+清除控制特征 模型= False 探针= True
+边界：正常数据里两个变量始终相等，仅观察相关无法区分控制与显示。
+教学结构方程，不是SAE训练或Gemma干预复现。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-15" aria-label="第 15 页"><p class="eyebrow">15 / 16 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么高探针准确率不等于找到模型行为的驱动因素？</li><li>消融后回答从True变成False，为什么不能立刻称为更诚实？</li><li>如果消融后只输出乱码，翻转率为什么难以解释？</li></ol><p>答案在独立参考答案页。材料已准备；是否能解释、实践和迁移，等待你的实际回答验证。</p></section><section class="slide" id="slide-16" aria-label="第 16 页"><p class="eyebrow">16 / 16 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18080v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18080v1">元数据与版本</a></p><p>已读取第3—5、7节，核对公式1—3、图2双输出干预、表1重合、表3方向与准确率、表4同规模比较。教学反例不声称复现SAE或模型实验。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 可解码不等于因果：通过稀疏自编码器分解区分探针读数与行为驱动因素</option><option value="2">2. 先想一支温度计</option><option value="3">3. 把整篇串起来</option><option value="4">4. 先看整体关系</option><option value="5">5. 探针到底读什么</option><option value="6">6. 把混合信号拆成较稀疏的成分</option><option value="7">7. 第二份排名：模型对谁敏感</option><option value="8">8. 关键实验：改动后两条输出分别怎样</option><option value="9">9. 为什么还要检查输出是否正常</option><option value="10">10. 论文的表格支持什么</option><option value="11">11. 翻转答案不等于让模型更诚实</option><option value="12">12. 适用边界和后续问题</option><option value="13">13. 用两个变量走一遍</option><option value="14">14. 最小实践：运行、观察与边界</option><option value="15">15. 先自己试着解释</option><option value="16">16. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Decodability is Not Causality: Dissociating Probe Readouts from Behavioral Drivers via SAE Decomposition</p><p>Tiwari, Devesh、Davis, Camille、Sinha, Shivank、Weaver, Talia、Shah, Aditya、Chaudhary, Maheep</p>
+<p>arXiv:2609.18080v1 · 发布日期：2026-09-16 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.18080v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18080v1">论文正文</a></p></details><details><summary>展开核对论文原文、表图与阅读范围</summary><p><a href="https://arxiv.org/html/2609.18080v1">arXiv HTML 正文</a> · <a href="https://arxiv.org/abs/2609.18080v1">元数据与版本</a></p><p>已读取第3—5、7节，核对公式1—3、图2双输出干预、表1重合、表3方向与准确率、表4同规模比较。教学反例不声称复现SAE或模型实验。</p><p>本文中的生活例子、手工数据和 Python 算例均为教学设计；论文实验数字只在标明论文实验的段落中出现。解释性判断若超出作者证据，已在文中标为我们的推断。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

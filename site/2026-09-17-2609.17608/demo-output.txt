@@ -1,0 +1,3 @@
+p=0.99, delta=0.99: posterior=0.917, V=8.544, screening_viable=True
+p=0.60, delta=0.99: posterior=0.143, V=2.255, screening_viable=False
+p=0.99, delta=0.50: posterior=0.917, V=1.803, screening_viable=False

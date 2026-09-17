@@ -6,140 +6,335 @@
   <meta name="color-scheme" content="light dark">
   <title>每日 arXiv 论文带读</title>
   <style>
+    * { box-sizing: border-box; }
     :root {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #18212f;
       background: #f3f6fb;
     }
-    body {
-      max-width: 880px;
-      margin: 0 auto;
-      padding: 72px 24px;
+    body { max-width: 960px; margin: 0 auto; padding: 72px 24px; }
+    header { margin-bottom: 34px; }
+    h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.045em; }
+    p { color: #526071; font-size: 1.05rem; line-height: 1.75; }
+    a:focus-visible, button:focus-visible { outline: 3px solid #1d7a70; outline-offset: 4px; }
+    button { font: inherit; cursor: pointer; min-height: 44px; border: 1px solid #b9c8d8; padding: 8px 14px; border-radius: 10px; color: inherit; background: transparent; }
+    button:disabled { cursor: default; opacity: .65; }
+    button[aria-pressed="true"] { color: #fff; background: #1d7a70; border-color: #1d7a70; }
+    .reading-filters { display: flex; flex-wrap: wrap; gap: 10px; }
+    .read-toggle { margin-top: 18px; font-size: .9rem; }
+    .storage-help { font-size: .88rem; }
+    .topic-filters { margin: 12px 0 18px; }
+    .topic-filters summary { cursor: pointer; padding: 10px 0; color: #526071; }
+    .topic-filters .filters { padding-top: 10px; }
+    .paper { overflow-wrap: anywhere; }
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+    .filter {
+      padding: 8px 15px; border: 1px solid #b9c8d8; border-radius: 999px; color: #334155;
+      background: #fff; text-decoration: none; font-weight: 650;
     }
-    header {
-      margin-bottom: 40px;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 5vw, 3.6rem);
-      letter-spacing: -0.045em;
-    }
-    p {
-      color: #526071;
-      font-size: 1.05rem;
-      line-height: 1.75;
-    }
-    .empty {
-      padding: 28px;
-      border: 1px solid #dbe3ee;
-      border-radius: 18px;
-      background: #fff;
+    .filter:hover { border-color: #1d7a70; }
+    .filter.is-active { color: #fff; border-color: #1d7a70; background: #1d7a70; }
+    .result-count { margin: 0 0 18px; font-size: .95rem; }
+    .empty, .no-results {
+      padding: 28px; border: 1px solid #dbe3ee; border-radius: 18px; background: #fff;
       box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
     }
-    .papers {
-      display: grid;
-      gap: 16px;
-      padding: 0;
-      list-style: none;
-    }
+    .papers { display: grid; gap: 18px; padding: 0; list-style: none; }
     .paper {
-      padding: 24px;
-      border: 1px solid #dbe3ee;
-      border-radius: 18px;
-      background: #fff;
+      padding: 26px; border: 1px solid #dbe3ee; border-radius: 18px; background: #fff;
       box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
     }
-    .paper h2 {
-      margin: 8px 0;
-      line-height: 1.3;
-    }
-    .paper a {
-      color: inherit;
-      text-decoration-thickness: 0.08em;
-      text-underline-offset: 0.15em;
-    }
-    .meta {
-      margin: 0;
-      font-size: 0.9rem;
-    }
-    code {
-      padding: 0.15rem 0.35rem;
-      border-radius: 0.35rem;
-      background: #e8edf5;
-    }
+    .paper[hidden] { display: none; }
+    .paper h2 { margin: 9px 0 5px; font-size: clamp(1.35rem, 3vw, 1.8rem); line-height: 1.4; }
+    .paper h2 a { color: inherit; text-decoration-thickness: .08em; text-underline-offset: .15em; }
+    .meta { margin: 0; font-size: .9rem; }
+    .original-title { margin: 0 0 14px; font-size: .96rem; line-height: 1.55; }
+    .summary { margin-bottom: 0; }
+    .tags { display: flex; flex-wrap: wrap; gap: 7px; padding: 0; margin: 0; list-style: none; }
+    .tags li { padding: 4px 10px; border-radius: 999px; color: #245c55; background: #e5f2ef; font-size: .83rem; }
+    @media (max-width: 600px) { body { padding: 42px 18px; } .paper { padding: 21px; } }
     @media (prefers-color-scheme: dark) {
-      :root {
-        color: #eef4ff;
-        background: #0e1420;
-      }
-      p {
-        color: #a9b7ca;
-      }
-      .empty {
-        border-color: #263247;
-        background: #141c2a;
-      }
-      .paper {
-        border-color: #263247;
-        background: #141c2a;
-      }
-      code {
-        background: #263247;
-      }
+      :root { color: #eef4ff; background: #0e1420; }
+      p { color: #a9b7ca; }
+      .empty, .no-results, .paper { border-color: #263247; background: #141c2a; }
+      .filter { color: #dbe8f5; border-color: #42526a; background: #141c2a; }
+      .filter.is-active { color: #081514; border-color: #7bd6c8; background: #7bd6c8; }
+      .tags li { color: #a8e5da; background: #213d3a; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>每日 arXiv 论文带读</h1>
-    <p>每天一篇 AI、金融或经济论文，用中文从基础讲清整篇主线。打开本篇总览，选择图解版或文章版即可，不必重复读两遍。</p>
+    <p>每天一篇 AI、金融或经济论文，用中文从基础讲清整篇主线。可按标签筛选，打开本篇总览后选择图解全文或详细讲解即可。</p>
   </header>
-  <main id="paper-list">
-    <section class="empty" id="empty-state">
-      <h2>站点已经就绪</h2>
-      <p>第一篇学习包发布后，这里会按日期列出论文标题、所属方向和课件入口。</p>
-    </section>
+  <main>
+    <div class="reading-filters" role="group" aria-label="按阅读状态筛选">
+      <button data-read-filter="all" data-label="全部" aria-pressed="true" disabled>全部</button>
+      <button data-read-filter="unread" data-label="未读" aria-pressed="false" disabled>未读</button>
+      <button data-read-filter="read" data-label="已读" aria-pressed="false" disabled>已读</button>
+    </div>
+    <p class="storage-help">手动标记阅读进度，仅保存在当前浏览器。已读不代表已掌握。</p>
+    <p data-storage-notice role="status" hidden></p>
+    <noscript><p>启用 JavaScript 后可筛选和保存阅读状态；下方仍可阅读全部论文。</p></noscript>
+    <div class="filters" aria-label="按标签筛选">
+      <a class="filter is-active" href="./" data-tag="" aria-current="true">全部</a><a class="filter" href="?tag=AI" data-tag="AI">AI</a><a class="filter" href="?tag=%E7%BB%8F%E6%B5%8E" data-tag="经济">经济</a><a class="filter" href="?tag=%E9%87%91%E8%9E%8D" data-tag="金融">金融</a>
+    </div>
+<details class="topic-filters"><summary>更多主题标签（81）</summary><div class="filters"><a class="filter" href="?tag=%E4%B8%AA%E6%80%A7%E5%8C%96" data-tag="个性化">个性化</a><a class="filter" href="?tag=%E4%BF%9D%E9%99%A9" data-tag="保险">保险</a><a class="filter" href="?tag=%E4%BF%A1%E6%81%AF%E6%A3%80%E7%B4%A2" data-tag="信息检索">信息检索</a><a class="filter" href="?tag=%E4%BF%A1%E6%81%AF%E7%BB%8F%E6%B5%8E%E5%AD%A6" data-tag="信息经济学">信息经济学</a><a class="filter" href="?tag=%E4%BF%A1%E6%81%AF%E8%AE%BE%E8%AE%A1" data-tag="信息设计">信息设计</a><a class="filter" href="?tag=%E5%81%8F%E5%A5%BD%E6%8E%A8%E7%90%86" data-tag="偏好推理">偏好推理</a><a class="filter" href="?tag=%E5%81%9A%E5%B8%82" data-tag="做市">做市</a><a class="filter" href="?tag=%E5%85%AC%E5%85%B1%E4%BF%A1%E5%8F%B7" data-tag="公共信号">公共信号</a><a class="filter" href="?tag=%E5%85%AC%E5%85%B1%E6%94%BF%E7%AD%96" data-tag="公共政策">公共政策</a><a class="filter" href="?tag=%E5%85%AC%E5%B9%B3%E4%B8%8E%E6%95%88%E7%8E%87" data-tag="公平与效率">公平与效率</a><a class="filter" href="?tag=%E5%85%AC%E5%B9%B3%E5%88%86%E9%85%8D" data-tag="公平分配">公平分配</a><a class="filter" href="?tag=%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96" data-tag="内存优化">内存优化</a><a class="filter" href="?tag=%E5%88%86%E5%B8%83%E5%8F%98%E5%8C%96" data-tag="分布变化">分布变化</a><a class="filter" href="?tag=%E5%88%9B%E4%BD%9C%E8%80%85%E6%BF%80%E5%8A%B1" data-tag="创作者激励">创作者激励</a><a class="filter" href="?tag=%E5%8D%9A%E5%BC%88%E8%AE%BA" data-tag="博弈论">博弈论</a><a class="filter" href="?tag=%E5%8F%8C%E9%87%8D%E5%B7%AE%E5%88%86" data-tag="双重差分">双重差分</a><a class="filter" href="?tag=%E5%8F%AF%E8%A7%A3%E9%87%8A%E6%80%A7" data-tag="可解释性">可解释性</a><a class="filter" href="?tag=%E5%90%88%E4%BD%9C" data-tag="合作">合作</a><a class="filter" href="?tag=%E5%9B%A0%E6%9E%9C%E6%8E%A8%E6%96%AD" data-tag="因果推断">因果推断</a><a class="filter" href="?tag=%E5%9B%BE%E6%8E%A8%E7%90%86" data-tag="图推理">图推理</a><a class="filter" href="?tag=%E5%A3%B0%E8%AA%89" data-tag="声誉">声誉</a><a class="filter" href="?tag=%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93" data-tag="多智能体">多智能体</a><a class="filter" href="?tag=%E5%A4%9A%E6%A8%A1%E6%80%81" data-tag="多模态">多模态</a><a class="filter" href="?tag=%E5%AE%9E%E9%AA%8C%E6%96%B9%E6%B3%95" data-tag="实验方法">实验方法</a><a class="filter" href="?tag=%E5%AE%9E%E9%AA%8C%E8%AE%BE%E8%AE%A1" data-tag="实验设计">实验设计</a><a class="filter" href="?tag=%E5%B0%BE%E9%83%A8%E9%A3%8E%E9%99%A9" data-tag="尾部风险">尾部风险</a><a class="filter" href="?tag=%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8" data-tag="工具调用">工具调用</a><a class="filter" href="?tag=%E5%B8%82%E5%9C%BA%E5%9D%87%E8%A1%A1" data-tag="市场均衡">市场均衡</a><a class="filter" href="?tag=%E5%B9%82%E5%BE%8B" data-tag="幂律">幂律</a><a class="filter" href="?tag=%E5%B9%B3%E5%8F%B0%E7%BB%8F%E6%B5%8E" data-tag="平台经济">平台经济</a><a class="filter" href="?tag=%E5%B9%BF%E5%91%8A%E6%8B%8D%E5%8D%96" data-tag="广告拍卖">广告拍卖</a><a class="filter" href="?tag=%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0" data-tag="强化学习">强化学习</a><a class="filter" href="?tag=%E5%BD%A2%E5%BC%8F%E5%8C%96%E6%96%B9%E6%B3%95" data-tag="形式化方法">形式化方法</a><a class="filter" href="?tag=%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96" data-tag="性能优化">性能优化</a><a class="filter" href="?tag=%E6%8A%BD%E6%A0%B7%E4%BC%B0%E8%AE%A1" data-tag="抽样估计">抽样估计</a><a class="filter" href="?tag=%E6%8E%92%E9%98%9F%E6%A8%A1%E5%9E%8B" data-tag="排队模型">排队模型</a><a class="filter" href="?tag=%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F" data-tag="推荐系统">推荐系统</a><a class="filter" href="?tag=%E6%94%BF%E7%AD%96%E8%AF%84%E4%BC%B0" data-tag="政策评估">政策评估</a><a class="filter" href="?tag=%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA" data-tag="数据增强">数据增强</a><a class="filter" href="?tag=%E6%95%B0%E6%8D%AE%E8%B4%A8%E9%87%8F" data-tag="数据质量">数据质量</a><a class="filter" href="?tag=%E6%96%B9%E6%B3%95%E8%AE%BA" data-tag="方法论">方法论</a><a class="filter" href="?tag=%E6%98%BE%E7%A4%BA%E5%81%8F%E5%A5%BD" data-tag="显示偏好">显示偏好</a><a class="filter" href="?tag=%E6%99%BA%E8%83%BD%E4%BD%93" data-tag="智能体">智能体</a><a class="filter" href="?tag=%E6%99%BA%E8%83%BD%E4%BD%93%E8%AE%B0%E5%BF%86" data-tag="智能体记忆">智能体记忆</a><a class="filter" href="?tag=%E6%9C%9F%E6%9D%83%E5%AE%9A%E4%BB%B7" data-tag="期权定价">期权定价</a><a class="filter" href="?tag=%E6%9C%BA%E5%88%B6%E8%AE%BE%E8%AE%A1" data-tag="机制设计">机制设计</a><a class="filter" href="?tag=%E6%9E%81%E7%AB%AF%E9%A3%8E%E9%99%A9" data-tag="极端风险">极端风险</a><a class="filter" href="?tag=%E6%A8%A1%E5%9E%8B%E5%86%85%E9%83%A8%E6%9C%BA%E5%88%B6" data-tag="模型内部机制">模型内部机制</a><a class="filter" href="?tag=%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86" data-tag="模型推理">模型推理</a><a class="filter" href="?tag=%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A" data-tag="模型解释">模型解释</a><a class="filter" href="?tag=%E6%A8%A1%E5%9E%8B%E8%AF%84%E6%B5%8B" data-tag="模型评测">模型评测</a><a class="filter" href="?tag=%E6%A8%A1%E5%9E%8B%E8%AF%8A%E6%96%AD" data-tag="模型诊断">模型诊断</a><a class="filter" href="?tag=%E6%A8%A1%E5%9E%8B%E9%AA%8C%E8%AF%81" data-tag="模型验证">模型验证</a><a class="filter" href="?tag=%E6%B6%88%E8%B4%B9%E8%80%85%E8%A1%8C%E4%B8%BA" data-tag="消费者行为">消费者行为</a><a class="filter" href="?tag=%E6%B7%B7%E5%90%88%E4%B8%93%E5%AE%B6" data-tag="混合专家">混合专家</a><a class="filter" href="?tag=%E6%BF%80%E5%8A%B1%E7%9B%B8%E5%AE%B9" data-tag="激励相容">激励相容</a><a class="filter" href="?tag=%E7%9F%A5%E8%AF%86%E4%BC%A0%E6%89%BF" data-tag="知识传承">知识传承</a><a class="filter" href="?tag=%E7%9F%A5%E8%AF%86%E7%BC%96%E8%BE%91" data-tag="知识编辑">知识编辑</a><a class="filter" href="?tag=%E7%A7%91%E5%AD%A6%E6%96%87%E7%8C%AE" data-tag="科学文献">科学文献</a><a class="filter" href="?tag=%E7%A8%80%E7%96%8F%E9%80%89%E6%8B%A9" data-tag="稀疏选择">稀疏选择</a><a class="filter" href="?tag=%E7%A8%B3%E5%81%A5%E4%BC%98%E5%8C%96" data-tag="稳健优化">稳健优化</a><a class="filter" href="?tag=%E7%AD%96%E7%95%A5%E5%AE%B9%E9%87%8F" data-tag="策略容量">策略容量</a><a class="filter" href="?tag=%E7%AE%97%E6%B3%95" data-tag="算法">算法</a><a class="filter" href="?tag=%E7%BB%84%E7%BB%87%E7%BB%8F%E6%B5%8E%E5%AD%A6" data-tag="组织经济学">组织经济学</a><a class="filter" href="?tag=%E7%BB%9F%E8%AE%A1%E5%BB%BA%E6%A8%A1" data-tag="统计建模">统计建模</a><a class="filter" href="?tag=%E7%BD%AE%E4%BF%A1%E5%BA%A6" data-tag="置信度">置信度</a><a class="filter" href="?tag=%E7%BE%A4%E4%BD%93%E5%86%B3%E7%AD%96" data-tag="群体决策">群体决策</a><a class="filter" href="?tag=%E8%87%AA%E5%8A%A8%E8%A7%84%E5%88%92" data-tag="自动规划">自动规划</a><a class="filter" href="?tag=%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E6%8E%A5%E5%8F%A3" data-tag="自然语言接口">自然语言接口</a><a class="filter" href="?tag=%E8%A1%A5%E8%B4%B4" data-tag="补贴">补贴</a><a class="filter" href="?tag=%E8%A7%86%E8%A7%89%E6%8E%A8%E7%90%86" data-tag="视觉推理">视觉推理</a><a class="filter" href="?tag=%E8%AF%84%E6%B5%8B%E6%96%B9%E6%B3%95" data-tag="评测方法">评测方法</a><a class="filter" href="?tag=%E8%B5%84%E4%BA%A7%E9%85%8D%E7%BD%AE" data-tag="资产配置">资产配置</a><a class="filter" href="?tag=%E8%B5%84%E6%BA%90%E5%88%86%E9%85%8D" data-tag="资源分配">资源分配</a><a class="filter" href="?tag=%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6" data-tag="资源调度">资源调度</a><a class="filter" href="?tag=%E9%87%8F%E5%8C%96%E6%8A%95%E8%B5%84" data-tag="量化投资">量化投资</a><a class="filter" href="?tag=%E9%94%99%E8%AF%AF%E8%AF%8A%E6%96%AD" data-tag="错误诊断">错误诊断</a><a class="filter" href="?tag=%E9%9A%8F%E6%9C%BA%E8%BF%87%E7%A8%8B" data-tag="随机过程">随机过程</a><a class="filter" href="?tag=%E9%A3%8E%E9%99%A9%E5%B9%B3%E4%BB%B7" data-tag="风险平价">风险平价</a><a class="filter" href="?tag=%E9%A3%8E%E9%99%A9%E7%AE%A1%E7%90%86" data-tag="风险管理">风险管理</a><a class="filter" href="?tag=%E9%AB%98%E9%A2%91%E6%95%B0%E6%8D%AE" data-tag="高频数据">高频数据</a></div></details>
+    <p class="result-count" id="result-count" role="status" aria-live="polite">共 31 篇</p>
+    <ol class="papers">
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;量化投资&quot;, &quot;风险管理&quot;, &quot;方法论&quot;]" data-paper-id="2608.23416v2">
+        <p class="meta">2026-09-17 · arXiv:2608.23416v2</p>
+        <h2><a href="2026-09-17/">公理化交易者：潜在规律、信息预算与量化投资系统的标准形</a></h2>
+        <p class="original-title" lang="en">The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>量化投资</li><li>风险管理</li><li>方法论</li></ul>
+        <p class="summary">从两个公交站的等待时间出发，读懂论文完整的五步研究流程、真实证据与适用边界。</p>
+        <button class="read-toggle" data-read-toggle="2608.23416v2" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;模型推理&quot;, &quot;内存优化&quot;, &quot;混合专家&quot;]" data-paper-id="2609.18063v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18063v1</p>
+        <h2><a href="2026-09-17-2609.18063/">内存墙的另一半：通过训练路由预测，从 SSD 运行 350 亿参数混合专家模型</a></h2>
+        <p class="original-title" lang="en">The Other Half of the Memory Wall: Serving 35B MoEs from SSD with Trained Routing Prediction</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>模型推理</li><li>内存优化</li><li>混合专家</li></ul>
+        <p class="summary">用仓库提前备货的例子，理解模型为什么可以少算，却仍然放不进内存。</p>
+        <button class="read-toggle" data-read-toggle="2609.18063v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;可解释性&quot;, &quot;因果推断&quot;, &quot;模型内部机制&quot;]" data-paper-id="2609.18080v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18080v1</p>
+        <h2><a href="2026-09-17-2609.18080/">可解码不等于因果：通过稀疏自编码器分解区分探针读数与行为驱动因素</a></h2>
+        <p class="original-title" lang="en">Decodability is Not Causality: Dissociating Probe Readouts from Behavioral Drivers via SAE Decomposition</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>可解释性</li><li>因果推断</li><li>模型内部机制</li></ul>
+        <p class="summary">用温度计与加热器的区别，理解读懂信号为什么不等于找到控制开关。</p>
+        <button class="read-toggle" data-read-toggle="2609.18080v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;模型评测&quot;, &quot;性能优化&quot;, &quot;实验方法&quot;]" data-paper-id="2609.18123v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18123v1</p>
+        <h2><a href="2026-09-17-2609.18123/">AutoTuneBench：针对大语言模型服务引擎智能体自动调优的可信测量</a></h2>
+        <p class="original-title" lang="en">AutoTuneBench: Trustworthy Measurement for Agent Auto-Tuning of LLM Serving Engines</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>模型评测</li><li>性能优化</li><li>实验方法</li></ul>
+        <p class="summary">学会拆解“快了十倍”背后的基线、计时与正确性。</p>
+        <button class="read-toggle" data-read-toggle="2609.18123v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;智能体&quot;, &quot;形式化方法&quot;, &quot;工具调用&quot;]" data-paper-id="2609.18128v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18128v1</p>
+        <h2><a href="2026-09-17-2609.18128/">使用契约对大语言模型智能体进行符号化时序监督</a></h2>
+        <p class="original-title" lang="en">Symbolic Temporal Supervision of LLM Agents Using Contracts</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>智能体</li><li>形式化方法</li><li>工具调用</li></ul>
+        <p class="summary">用一张会记住前后步骤的检查表，理解为什么单次操作合法还不够。</p>
+        <button class="read-toggle" data-read-toggle="2609.18128v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;推荐系统&quot;, &quot;多模态&quot;, &quot;偏好推理&quot;]" data-paper-id="2609.18249v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18249v1</p>
+        <h2><a href="2026-09-17-2609.18249/">Re2A：基于评分准则的偏好推理与对齐，实现情境化对话推荐</a></h2>
+        <p class="original-title" lang="en">Re2A: Situated Conversational Recommendation via Rubric-based Preference Reasoning and Alignment</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>推荐系统</li><li>多模态</li><li>偏好推理</li></ul>
+        <p class="summary">在同一货架上，先把“我想要什么”讲清楚，再确认“这里有什么”。</p>
+        <button class="read-toggle" data-read-toggle="2609.18249v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;信息检索&quot;, &quot;数据增强&quot;, &quot;科学文献&quot;]" data-paper-id="2609.18262v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18262v1</p>
+        <h2><a href="2026-09-17-2609.18262/">REPAIR：通过事实核验的迭代改进，解决科学检索器的长尾概念混淆</a></h2>
+        <p class="original-title" lang="en">REPAIR: Resolving Long-Tail Confusion in Scientific Retrievers via Fact-Verified Iterative Refinement</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>信息检索</li><li>数据增强</li><li>科学文献</li></ul>
+        <p class="summary">专门找“看起来几乎一样但关键条件不同”的材料，理解检索器怎样学会分辨。</p>
+        <button class="read-toggle" data-read-toggle="2609.18262v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;置信度&quot;, &quot;多模态&quot;, &quot;模型评测&quot;]" data-paper-id="2609.18453v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18453v1</p>
+        <h2><a href="2026-09-17-2609.18453/">校准置信度的幻象：视觉语言模型口头置信度对推理轨迹的独立性</a></h2>
+        <p class="original-title" lang="en">The Mirage of Calibrated Confidence: Trajectory-Independence of Verbalized Confidence in Vision-Language Models</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>置信度</li><li>多模态</li><li>模型评测</li></ul>
+        <p class="summary">用一位永远说“五成把握”的答题者，区分总体校准和真的检查了推理。</p>
+        <button class="read-toggle" data-read-toggle="2609.18453v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;智能体记忆&quot;, &quot;个性化&quot;, &quot;图推理&quot;]" data-paper-id="2609.18461v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18461v1</p>
+        <h2><a href="2026-09-17-2609.18461/">通过潜在神经符号推理解耦长期记忆</a></h2>
+        <p class="original-title" lang="en">Disentangling Long-Term Memory via Latent Neuro-Symbolic Reasoning</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>智能体记忆</li><li>个性化</li><li>图推理</li></ul>
+        <p class="summary">把分散在多次聊天里的线索按当前问题重新连接，理解长期记忆为什么不只是搜索旧句子。</p>
+        <button class="read-toggle" data-read-toggle="2609.18461v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;模型诊断&quot;, &quot;可解释性&quot;, &quot;数据质量&quot;]" data-paper-id="2609.18525v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18525v1</p>
+        <h2><a href="2026-09-17-2609.18525/">TRIPROBE：超越分类准确率，探测任务可分性以解释模型瓶颈</a></h2>
+        <p class="original-title" lang="en">TRIPROBE: Probing Task Separability Beyond Classification for XAI</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>模型诊断</li><li>可解释性</li><li>数据质量</li></ul>
+        <p class="summary">沿原始数据、特征与决策前表示三个检查点，找到信息在哪一步丢了。</p>
+        <button class="read-toggle" data-read-toggle="2609.18525v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;自动规划&quot;, &quot;自然语言接口&quot;, &quot;模型评测&quot;]" data-paper-id="2609.18731v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18731v1</p>
+        <h2><a href="2026-09-17-2609.18731/">哪个大语言模型最擅长把自然语言目标翻译成 PDDL</a></h2>
+        <p class="original-title" lang="en">Which LLM is Best for Translating Natural Language Goals to PDDL</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>自动规划</li><li>自然语言接口</li><li>模型评测</li></ul>
+        <p class="summary">把“把箱子送到B房间”拆成目标、动作和可达性，理解自然语言如何接上规划器。</p>
+        <button class="read-toggle" data-read-toggle="2609.18731v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;知识编辑&quot;, &quot;模型解释&quot;, &quot;评测方法&quot;]" data-paper-id="2609.18985v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18985v1</p>
+        <h2><a href="2026-09-17-2609.18985/">被压制而非抹除：即使不修改权重，知识编辑后旧事实的表征痕迹仍会保留</a></h2>
+        <p class="original-title" lang="en">Suppressed, Not Erased: A Representational Trace of Edited Facts Survives Even Weight-Free Knowledge Editing</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>知识编辑</li><li>模型解释</li><li>评测方法</li></ul>
+        <p class="summary">通过“前台改口、档案仍在”的例子，区分回答改变与信息删除。</p>
+        <button class="read-toggle" data-read-toggle="2609.18985v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;多模态&quot;, &quot;视觉推理&quot;, &quot;错误诊断&quot;]" data-paper-id="2609.18991v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18991v1</p>
+        <h2><a href="2026-09-17-2609.18991/">迷失于感知：分离多模态物理与几何推理中的感知失败和推理失败</a></h2>
+        <p class="original-title" lang="en">Lost in Perception: Isolating Perceptual and Reasoning Failures in Multimodal Physics and Geometry Reasoning</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>多模态</li><li>视觉推理</li><li>错误诊断</li></ul>
+        <p class="summary">把“看错宽度”和“用了错公式”拆开，学会定位图形题的第一处错误。</p>
+        <button class="read-toggle" data-read-toggle="2609.18991v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;AI&quot;, &quot;多智能体&quot;, &quot;群体决策&quot;, &quot;可解释性&quot;]" data-paper-id="2609.19124v1">
+        <p class="meta">2026-09-17 · arXiv:2609.19124v1</p>
+        <h2><a href="2026-09-17-2609.19124/">国旗游戏：用于群体机制可解释性的玩具模型</a></h2>
+        <p class="original-title" lang="en">Flag Game: A Toy Model for Mechanistic Swarm Interpretability</p>
+        <ul class="tags" aria-label="论文标签"><li>AI</li><li>多智能体</li><li>群体决策</li><li>可解释性</li></ul>
+        <p class="summary">每个人只看一块国旗：交流怎样传播证据，也怎样制造共同误判。</p>
+        <button class="read-toggle" data-read-toggle="2609.19124v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;平台经济&quot;, &quot;推荐系统&quot;, &quot;创作者激励&quot;]" data-paper-id="2609.15573v1">
+        <p class="meta">2026-09-17 · arXiv:2609.15573v1</p>
+        <h2><a href="2026-09-17-2609.15573/">社交媒体平台上的算法注意力与内容创作</a></h2>
+        <p class="original-title" lang="en">Algorithmic Attention and Content Creation on Social Media Platforms</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>平台经济</li><li>推荐系统</li><li>创作者激励</li></ul>
+        <p class="summary">把注意力看成既能卖广告、也能奖励创作的资源，理解平台为什么不只最大化每次匹配。</p>
+        <button class="read-toggle" data-read-toggle="2609.15573v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;消费者行为&quot;, &quot;显示偏好&quot;, &quot;抽样估计&quot;]" data-paper-id="2609.16086v1">
+        <p class="meta">2026-09-17 · arXiv:2609.16086v1</p>
+        <h2><a href="2026-09-17-2609.16086/">金钱泵指数的可处理估计：一则评论</a></h2>
+        <p class="original-title" lang="en">Tractable Estimation of the Money Pump Index: A Comment</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>消费者行为</li><li>显示偏好</li><li>抽样估计</li></ul>
+        <p class="summary">用三条选择回路解释：重复出现更多的对象不能直接多算票，抽样估计要纠正出现频率。</p>
+        <button class="read-toggle" data-read-toggle="2609.16086v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;机制设计&quot;, &quot;广告拍卖&quot;, &quot;激励相容&quot;]" data-paper-id="2609.16522v1">
+        <p class="meta">2026-09-17 · arXiv:2609.16522v1</p>
+        <h2><a href="2026-09-17-2609.16522/">具有投资回报约束的竞标者的拍卖设计：真实性与收入最大化</a></h2>
+        <p class="original-title" lang="en">Auction Design with ROI-Constrained Bidders: Truthfulness and Revenue Maximization</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>机制设计</li><li>广告拍卖</li><li>激励相容</li></ul>
+        <p class="summary">用广告位的小菜单，区分广告价值、付款金额和每份价值所能承受的价格。</p>
+        <button class="read-toggle" data-read-toggle="2609.16522v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;博弈论&quot;, &quot;合作&quot;, &quot;信息设计&quot;]" data-paper-id="2609.17608v1">
+        <p class="meta">2026-09-17 · arXiv:2609.17608v1</p>
+        <h2><a href="2026-09-17-2609.17608/">计划行动与侦察下协调博弈的均衡选择</a></h2>
+        <p class="original-title" lang="en">Equilibrium Selection in Coordination Games with Planned Actions and Scouting</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>博弈论</li><li>合作</li><li>信息设计</li></ul>
+        <p class="summary">从两人合办活动出发，理解观察准备动作、保留修改机会，为什么能改变合作困局。</p>
+        <button class="read-toggle" data-read-toggle="2609.17608v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;组织经济学&quot;, &quot;声誉&quot;, &quot;知识传承&quot;]" data-paper-id="2609.17617v1">
+        <p class="meta">2026-09-17 · arXiv:2609.17617v1</p>
+        <h2><a href="2026-09-17-2609.17617/">没有对照组的声誉</a></h2>
+        <p class="original-title" lang="en">Reputation without a Control Group</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>组织经济学</li><li>声誉</li><li>知识传承</li></ul>
+        <p class="summary">项目做得更保险，有时反而看不清顾问的判断是否准确；关键不只在记录，更在持续产生证据的能力。</p>
+        <button class="read-toggle" data-read-toggle="2609.17617v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;资源分配&quot;, &quot;排队模型&quot;, &quot;公平与效率&quot;]" data-paper-id="2609.18147v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18147v1</p>
+        <h2><a href="2026-09-17-2609.18147/">逝者器官分配中的动态共享与地区参与</a></h2>
+        <p class="original-title" lang="en">Dynamic Pooling and Regional Participation in Deceased-Donor Organ Allocation</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>资源分配</li><li>排队模型</li><li>公平与效率</li></ul>
+        <p class="summary">从两地共享维修名额出发，理解总效率提高，为什么仍可能有人不愿加入。</p>
+        <button class="read-toggle" data-read-toggle="2609.18147v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;公平分配&quot;, &quot;机制设计&quot;, &quot;资源调度&quot;]" data-paper-id="2609.18299v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18299v1</p>
+        <h2><a href="2026-09-17-2609.18299/">具有 ℓ₁ 偏好的分数分配</a></h2>
+        <p class="original-title" lang="en">Fractional Assignment with $\ell_1$ Preferences</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>公平分配</li><li>机制设计</li><li>资源调度</li></ul>
+        <p class="summary">从实验室时段分配出发，用装水与平方惩罚两种规则，理解效率、公平和防串通的区别。</p>
+        <button class="read-toggle" data-read-toggle="2609.18299v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;公共政策&quot;, &quot;补贴&quot;, &quot;市场均衡&quot;]" data-paper-id="2609.18600v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18600v1</p>
+        <h2><a href="2026-09-17-2609.18600/">市场均衡下的政策定向分配</a></h2>
+        <p class="original-title" lang="en">Policy Targeting with Market Equilibrium</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>公共政策</li><li>补贴</li><li>市场均衡</li></ul>
+        <p class="summary">用鸡蛋优惠券解释：收到折扣的人得到好处，没领券的人也可能因涨价受到影响。</p>
+        <button class="read-toggle" data-read-toggle="2609.18600v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;信息经济学&quot;, &quot;博弈论&quot;, &quot;公共信号&quot;]" data-paper-id="2609.18701v1">
+        <p class="meta">2026-09-17 · arXiv:2609.18701v1</p>
+        <h2><a href="2026-09-17-2609.18701/">确定性信息提供者的比较</a></h2>
+        <p class="original-title" lang="en">Comparison of Deterministic Information Providers</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>信息经济学</li><li>博弈论</li><li>公共信号</li></ul>
+        <p class="summary">用三个天气状态演示：分别满足两个人的信息需求，不代表一条公共消息能同时满足两人。</p>
+        <button class="read-toggle" data-read-toggle="2609.18701v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;经济&quot;, &quot;因果推断&quot;, &quot;政策评估&quot;, &quot;双重差分&quot;]" data-paper-id="2609.19081v1">
+        <p class="meta">2026-09-17 · arXiv:2609.19081v1</p>
+        <h2><a href="2026-09-17-2609.19081/">超越事前趋势：基于不一致程度的双重差分敏感性分析</a></h2>
+        <p class="original-title" lang="en">Beyond Pretrends: A Discordance-Based Sensitivity Analysis for Difference-in-Differences</p>
+        <ul class="tags" aria-label="论文标签"><li>经济</li><li>因果推断</li><li>政策评估</li><li>双重差分</li></ul>
+        <p class="summary">用两家店的销量说明：过去走势一致，仍可能在政策之后出现不同冲击，改变因果解释。</p>
+        <button class="read-toggle" data-read-toggle="2609.19081v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;实验设计&quot;, &quot;因果推断&quot;, &quot;策略容量&quot;]" data-paper-id="2608.08405v1">
+        <p class="meta">2026-09-17 · arXiv:2608.08405v1</p>
+        <h2><a href="2026-09-17-2608.08405/">稳健性还是拥挤效应：交易策略容量的实验设计</a></h2>
+        <p class="original-title" lang="en">Robustness or Crowding: Experimental Design for Trading Strategy Capacity</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>实验设计</li><li>因果推断</li><li>策略容量</li></ul>
+        <p class="summary">通过食堂排队的类比，理解为什么同日对照能去掉天气噪声，也可能去掉真正想测的拥挤影响。</p>
+        <button class="read-toggle" data-read-toggle="2608.08405v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;保险&quot;, &quot;尾部风险&quot;, &quot;幂律&quot;]" data-paper-id="2609.07486v1">
+        <p class="meta">2026-09-17 · arXiv:2609.07486v1</p>
+        <h2><a href="2026-09-17-2609.07486/">用“小型网络事件”简化网络巨灾：网络保险风险的幂律合理性检验</a></h2>
+        <p class="original-title" lang="en">Simplifying Cyber Cat(astrophe)s with Cyber Kittens: Power Law Plausibility for Cyber Insurance Risks</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>保险</li><li>尾部风险</li><li>幂律</li></ul>
+        <p class="summary">从赔款、受害企业数和重现期的区别出发，学会审查一次跨百倍规模的风险外推。</p>
+        <button class="read-toggle" data-read-toggle="2609.07486v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;极端风险&quot;, &quot;统计建模&quot;, &quot;高频数据&quot;]" data-paper-id="2609.11575v1">
+        <p class="meta">2026-09-17 · arXiv:2609.11575v1</p>
+        <h2><a href="2026-09-17-2609.11575/">用于金融极端值建模与预测评价的市场信息网络</a></h2>
+        <p class="original-title" lang="en">Market-Informed Networks for Modeling and Forecast Evaluation of Financial Extremes</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>极端风险</li><li>统计建模</li><li>高频数据</li></ul>
+        <p class="summary">用班级最高分与全年最高分的区别，读懂局部极值、历史分位数和共同极端模式怎样影响风险模型。</p>
+        <button class="read-toggle" data-read-toggle="2609.11575v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;做市&quot;, &quot;强化学习&quot;, &quot;分布变化&quot;]" data-paper-id="2609.11614v1">
+        <p class="meta">2026-09-17 · arXiv:2609.11614v1</p>
+        <h2><a href="2026-09-17-2609.11614/">状态切换订单流下稳健做市的深度学习</a></h2>
+        <p class="original-title" lang="en">Deep Learning of Robust Market Making under Regime-Switching Order Flow</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>做市</li><li>强化学习</li><li>分布变化</li></ul>
+        <p class="summary">从二手店低收高卖却仍可能亏钱讲起，理解库存、持续单边订单与面向困难情境的训练。</p>
+        <button class="read-toggle" data-read-toggle="2609.11614v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;稳健优化&quot;, &quot;稀疏选择&quot;, &quot;算法&quot;]" data-paper-id="2609.11749v1">
+        <p class="meta">2026-09-17 · arXiv:2609.11749v1</p>
+        <h2><a href="2026-09-17-2609.11749/">椭球不确定性下带稀疏正则化的稳健均值—方差投资组合选择</a></h2>
+        <p class="original-title" lang="en">Sparsity Regularized and Robust Mean Variance Portfolio Selection Under Ellipsoidal Uncertainty</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>稳健优化</li><li>稀疏选择</li><li>算法</li></ul>
+        <p class="summary">用三个虚构资产解释：预测会错、持有项目太多，怎样同时写进一个可检查的优化问题？</p>
+        <button class="read-toggle" data-read-toggle="2609.11749v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;风险平价&quot;, &quot;尾部风险&quot;, &quot;资产配置&quot;]" data-paper-id="2609.11905v1">
+        <p class="meta">2026-09-17 · arXiv:2609.11905v1</p>
+        <h2><a href="2026-09-17-2609.11905/">温和稳定收益分布下的熵风险价值平价</a></h2>
+        <p class="original-title" lang="en">Entropic Value-at-Risk parity for tempered stable returns</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>风险平价</li><li>尾部风险</li><li>资产配置</li></ul>
+        <p class="summary">用两个波动大小不同的资产，分清资金比例、单项风险和组合风险贡献，并检查均值怎样混进风险指标。</p>
+        <button class="read-toggle" data-read-toggle="2609.11905v1" disabled>标为已读</button>
+      </li>
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;期权定价&quot;, &quot;随机过程&quot;, &quot;模型验证&quot;]" data-paper-id="2609.15306v1">
+        <p class="meta">2026-09-17 · arXiv:2609.15306v1</p>
+        <h2><a href="2026-09-17-2609.15306/">偏斜布朗运动不应作为风险中性收益过程：一个适定的偏斜正态替代模型</a></h2>
+        <p class="original-title" lang="en">The skew Brownian motion should not be used as a risk-neutral returns process: a well-posed skew-normal alternative</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>期权定价</li><li>随机过程</li><li>模型验证</li></ul>
+        <p class="summary">用两棵小树区分“到期价格分布相同”和“整条价格路径合法”，读懂论文如何修复一个定价模型。</p>
+        <button class="read-toggle" data-read-toggle="2609.15306v1" disabled>标为已读</button>
+      </li>
+    </ol>
+    <p class="no-results" id="no-results" hidden>没有符合当前标签和阅读状态的论文。</p>
   </main>
-  <script>
-    const list = document.querySelector("#paper-list");
-
-    fetch("./papers.json")
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((papers) => {
-        if (!Array.isArray(papers) || papers.length === 0) return;
-
-        const items = document.createElement("ol");
-        items.className = "papers";
-
-        for (const paper of papers) {
-          const item = document.createElement("li");
-          item.className = "paper";
-
-          const meta = document.createElement("p");
-          meta.className = "meta";
-          meta.textContent = `${paper.date} · ${paper.direction} · arXiv:${paper.arxiv_id}`;
-
-          const heading = document.createElement("h2");
-          const link = document.createElement("a");
-          link.href = paper.path;
-          link.textContent = paper.title;
-          heading.append(link);
-
-          const summary = document.createElement("p");
-          summary.textContent = paper.summary;
-
-          item.append(meta, heading, summary);
-          items.append(item);
-        }
-
-        list.replaceChildren(items);
-      })
-      .catch((error) => {
-        console.error("无法读取论文清单", error);
-      });
-  </script>
+  <script src="assets/read-state.js" defer></script>
+  <script src="assets/paper-list.js" defer></script>
 </body>
 </html>

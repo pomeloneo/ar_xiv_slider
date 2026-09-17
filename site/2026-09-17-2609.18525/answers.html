@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="沿原始数据、特征与决策前表示三个检查点，找到信息在哪一步丢了。">
+<title>参考答案 · TRIPROBE：超越分类准确率，探测任务可分性以解释模型瓶颈</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18525v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>优先检查中间表示变换和分类主体是否丢掉区分线索，同时核查样本一致性和训练设置；仍需对照验证。</p></li><li><p>不能。二维乘积反例说明非线性组合可能仍包含完美区分信息。</p></li><li><p>它们是不同量：此处是均值差/类内波动的可分性比率，常见F1-score来自精确率与召回率。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

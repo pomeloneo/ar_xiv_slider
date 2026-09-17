@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="项目做得更保险，有时反而看不清顾问的判断是否准确；关键不只在记录，更在持续产生证据的能力。">
+<title>图解全文 · 没有对照组的声誉</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.17617v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 经济</p><h1 tabindex="-1">没有对照组的声誉</h1><p class="lead">项目做得更保险，有时反而看不清顾问的判断是否准确；关键不只在记录，更在持续产生证据的能力。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 经济</p><h1 tabindex="-1">项目成功了，顾问就一定判断准确吗？</h1><p>顾问说‘这个任务很难，必须上很多人手’。团队照做后项目成功，但我们不知道普通投入是否也能成功。采取更保险的方案保护了项目，却可能减少检验顾问判断的机会。这里不是指控某个真实顾问，而是一个可以形式化研究的激励问题。</p><p>论文再加上一点：熟练员工知道怎样用较低成本做普通方案，而且要通过现场实践把诀窍传给下一班。短暂停项目可能切断这条传承，使后来的人更倾向保险方案。读完要能解释：保留旧证据与保留产生新证据的能力，是两件不同的事。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 经济</p><h1 tabindex="-1">把整篇串起来</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[顾问决定提出或暂停项目] --&gt; B{工人有实操知识吗}
+B --&gt;|有且声誉居中| C[普通执行]
+B --&gt;|无且声誉居中| D[加强执行]
+C --&gt; E[产生诊断证据并传授知识]
+D --&gt; F[证据较少且知识难传]
+E --&gt; G[更新公开声誉]
+F --&gt; G
+G --&gt; A
+A --&gt;|暂停导致断档| B
+G --&gt; H[知识保存反事实与均衡证明]
+H --&gt; I[边界：非普遍行为预测]</pre></details>
+</figure></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 经济</p><h1 tabindex="-1">全景：声誉和知识，两条状态一起走</h1><p>模型里顾问长期存在，工人一届接一届。顾问决定是否提出项目；工人决定普通执行还是加强执行。普通执行揭示警告是否准确，也给继任者学习诀窍的机会。加强执行保护项目，但只有偶尔的外部评估能带来信息。</p><p>因此要同时跟踪两种状态：大家认为顾问有能力的概率，以及新工人继承知识的可能性。项目结果更新前者；是否实际做过普通程序更新后者。暂停并不删除公开记录，却可能改变下一任工人的成本。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 经济</p><h1 tabindex="-1">同样相信顾问，熟手和新手也会选不同方案</h1><p>顾问声誉越高，‘普通方案不够用’的警告越可信，加强执行就更吸引人。熟手做普通方案便宜一点，所以愿意在更高的声誉下仍尝试普通方案。论文由成本与警告准确率推导出新手、熟手各自的门槛。</p><p>这产生一个中间区间：同样的公开声誉，熟手选普通，新手选加强。区别不是新手盲信，也不是熟手天生怀疑，而是他们面对的实施成本不同。经济模型的关键往往藏在这样一项很小但改变选择的成本差。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 经济</p><h1 tabindex="-1">用原文参数走一遍选择翻转</h1><p>原文例W的新手门槛为1/3，熟手门槛为2/5。初始声誉5/16低于两个门槛，普通方案可被采用；一次结果证实警告后，声誉更新为25/69，约0.362，恰好落在两个门槛之间。</p><p>在这个点，熟手普通执行的净收益为113/460，约0.24565，加强执行为0.24。新手普通执行还要多付0.01，变为约0.23565，于是改选加强。我们的demo用分数精确重算这些值，观察同一信念下知识丢失怎样改变行动。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 经济</p><h1 tabindex="-1">顾问为什么可能先暂停，再恢复？</h1><p>有经验的一届继续普通执行，会反复产生能检验顾问的新证据。若暂停使下一届失去省成本的诀窍，下一届就倾向加强执行，顾问便能在较弱的检验环境下恢复推荐。顾问权衡的是整个未来，不只是当前项目利润。</p><p>论文证明在一组经核验的参数与条件下存在这样的均衡路径：先接受检验，声誉提高后暂停，知识断档后恢复。这里的‘存在’很重要：它展示一种可能的激励，不是说所有组织都如此，也不声称这种均衡唯一。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 经济</p><h1 tabindex="-1">检验风险不是必然让平均声誉降低</h1><p>按照贝叶斯更新，在给定当前信息时，未来声誉的平均值仍等于现在的声誉。顾问害怕检验，不一定是知道自己平均会被揭穿；即使均值不变，有上下波动且职业回报非线性，也可能让检验变得不划算。</p><p>原文用凹的声誉回报刻画这一点，并将预期职业损失与后验方差联系起来。方差可以理解为结果有多分散。可别把‘结果证实警告时声誉上升’与‘参与检验必然提高预期声誉’混为一谈，后者不由前者推出。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 经济</p><h1 tabindex="-1">如何证明知识断档真是关键机制？</h1><p>作者做两个比较。第一，只改变这一次暂停是否保留继任者知识，保持后续环境不变，顾问的选择会反转。第二，把知识保存技术永久改变，重新求顾问的最优行为，在例W的关键状态也不再出现同样暂停。</p><p>这比只看‘暂停之后评价变少’更能定位机制。但第二个比较仍是机械改变模型中的知识转移规则，不是已经设计出可实施的培训补贴，也没有证明某项组织改革福利更高。原文自己明确区分这两层。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 经济</p><h1 tabindex="-1">弱检验可以很久，但不是永远</h1><p>加强执行时仍偶尔有外部评估。对于低能力顾问，例W中不利信息长期会累积，保护阶段以概率1结束；原文算出的期望持续时间为500次推荐机会。这个数字来自特定的评估概率与随机游走，不是对现实组织的预测。</p><p>正文解释：平均需要5次非空评估，每次平均等100期，所以平均500期。平均值也不表示每条路径都恰好500期。这个区分帮助理解长期识别：最终能发现，不代表及时发现；信息公开，不代表信息来得够快。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 经济</p><h1 tabindex="-1">这篇论文不能用来给身边的人下判断</h1><p>机制依赖顾问能控制项目是否开展，知识主要靠现场传递，普通程序同时节约成本并产生诊断信息，人员会更替。若团队可自主开展项目、诀窍可完整写成文档，或强投入仍能清楚验证建议，链条可能断开。</p><p>论文没有调查顾问或导师是否普遍利用这种动机。它以精确代数与有限递推证书建立一个均衡存在例，而非由个案故事推断真实个人意图。合理的迁移是检查组织是否持续保留可验证的工作能力，而不是看到暂停就猜测动机。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 经济</p><h1 tabindex="-1">把机制带回知识管理</h1><p>会议记录说明过去发生过什么，操作能力决定以后还能做哪些检验。可以据此检查：一段空档之后，继任者还能独立做普通程序吗？他们失去的是事实记录，还是低成本产生新证据的方法？两种问题需要不同补救。</p><p>这是基于模型的组织诊断思路，未在本包开展实地验证。完整主线已经交付：两种状态、成本门槛、策略性暂停、知识保存反事实与最终识别。下方练习只测试你是否能沿这条链解释，不要求先读专业声誉理论。</p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 经济</p><h1 tabindex="-1">最小实践的实际输出</h1><pre><code>posterior: 5/16 -&gt; 25/69 = 0.362319
+experienced standard=0.245652; novice standard=0.235652; intensive=0.240000
+experienced chooses standard; novice chooses intensive
+weak-assessment duration in the paper example: 5 / 0.01 = 500 opportunities
+</code></pre><p>同一声誉下，只有知识成本改变，选择即翻转。程序只重算局部门槛与原文等待时间算式，没有验证顾问全部动态最优性；500是论文参数例，不是新模拟测量。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 经济</p><h1 tabindex="-1">检验理解</h1><ol><li>公开记录没删，为什么评估能力仍可能减弱？</li><li>选择翻转意味着新工人更轻信吗？</li><li>存在一个这样的均衡，能否推出所有组织会这样？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 没有对照组的声誉</option><option value="2">2. 项目成功了，顾问就一定判断准确吗？</option><option value="3">3. 把整篇串起来</option><option value="4">4. 全景：声誉和知识，两条状态一起走</option><option value="5">5. 同样相信顾问，熟手和新手也会选不同方案</option><option value="6">6. 用原文参数走一遍选择翻转</option><option value="7">7. 顾问为什么可能先暂停，再恢复？</option><option value="8">8. 检验风险不是必然让平均声誉降低</option><option value="9">9. 如何证明知识断档真是关键机制？</option><option value="10">10. 弱检验可以很久，但不是永远</option><option value="11">11. 这篇论文不能用来给身边的人下判断</option><option value="12">12. 把机制带回知识管理</option><option value="13">13. 最小实践的实际输出</option><option value="14">14. 检验理解</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Reputation without a Control Group</p><p>Shubh Lashkery、Georgy Lukyanov</p>
+<p>arXiv:2609.17617v1 · 发布日期：2026-09-14 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.17617v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.17617v1">论文正文</a></p></details><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.17617v1'>Reputation without a Control Group</a>；2609.17617v1；提交日期 2026-09-14。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2—3节模型与门槛；第4.2节例W与定理4.1；第5节知识保存比较、推论5.3；第6节局限。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

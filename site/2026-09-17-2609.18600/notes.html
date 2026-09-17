@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用鸡蛋优惠券解释：收到折扣的人得到好处，没领券的人也可能因涨价受到影响。">
+<title>详细讲解 · 市场均衡下的政策定向分配</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18600v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.18600v1</p>
+<h1>市场均衡下的政策定向分配</h1><p class="original" lang="en">Policy Targeting with Market Equilibrium</p>
+<p class="lead">用鸡蛋优惠券解释：收到折扣的人得到好处，没领券的人也可能因涨价受到影响。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">一张优惠券，为什么会影响没领券的人？</a><a href="#section-1">全景：先求市场结果，再比较分配</a><a href="#section-2">供给弹性，用一句话理解</a><a href="#section-3">九折不等于最后真的便宜一成</a><a href="#section-4">‘福利’不是销量，也不是财政收入</a><a href="#section-5">发给甲的价值，会随着是否发给乙而改变</a><a href="#section-6">论文的实证说明提供了什么证据？</a><a href="#section-7">参数估错，名单也可能变</a><a href="#section-8">本篇最小实践只验证价格传导</a><a href="#section-9">从论文回到政策阅读</a><a href="#section-10">动手验证：需求、运行与结果</a><a href="#section-11">自测：解释、预测与迁移</a><a href="#section-12">资料与证据</a></nav><section id="section-0"><h2>一张优惠券，为什么会影响没领券的人？</h2><p>社区准备发鸡蛋九折券。最直接的想法是：领券者买得便宜，其他人照旧。但若大家都想多买，而养殖和运输一时跟不上，摊位可能涨价。没拿到券的人也得付新价格。政策效果不再只发生在受助者身上。</p><p>这篇论文研究：在价格会随政策变化时，应该给所有人发券，还是只给部分人？读完你应能走通‘发券—需求—供给—价格—各组收益’这一条链，并分辨折扣率、实际到手价和整体福利三件不同的事。</p></section><section><h2>先看整篇的关系图</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[谁领九折券] --&gt; B[各组购买需求变化]
+B --&gt; C[供给响应与市场新标价]
+C --&gt; D[领券和未领券家庭都受影响]
+D --&gt; E[加权福利目标]
+E --&gt; F[条件下互补结构与优化]
+F --&gt; G[菲律宾资料校准]
+G --&gt; H[边界：供给与偏好估错]</pre></details>
+</figure></section><section id="section-1"><h2>全景：先求市场结果，再比较分配</h2><p>输入包括各组收入、消费偏好、折扣比例、供给对涨价的反应，以及政策制定者给各组的重视程度。选择谁领券后，先算各组愿买多少，再寻找让总需求等于总供给的价格，最后计算所有人的收益。</p><p>论文依次建立两种商品的市场模型，在特殊偏好下得到清楚公式，分析分配之间的互补结构，讨论参数估计误差，最后用菲律宾家庭支出资料做校准说明。每一项分配方案都要重新算价格，不能沿用发券前的旧价格。</p></section><section id="section-2"><h2>供给弹性，用一句话理解</h2><p>价格涨一点，供应量能增加很多，叫供给有弹性；价格涨了也很难多生产，叫供给缺乏弹性。这里谈的是数量对价格变化的相对反应，不是说商家态度灵活。鸡蛋、住房与数字下载品可能有不同反应，时间尺度也很重要。</p><p>教学模型用S(p)=p^κ：κ越大，供给随价格提高得越快。设总购买强度为A，各组需求相加是A/p。市场成交要求A/p=p^κ，所以价格是A的1/(1+κ)次方。这个指数直接解释：κ大时，同样需求变化引起的价格变化更小。</p></section><section id="section-3"><h2>九折不等于最后真的便宜一成</h2><p>领券者支付0.9倍新标价；没领券者支付新标价。若原价10元，发券后标价11元，领券者实际付9.9元，只比原来便宜1%；没领券者则贵了10%。这组数字是教学设定，用来区分标价和到手价。</p><p>下方实践采用更精确的可解需求：每组收入M中有固定份额γ用于目标商品，领券后该组的有效价格下降，其需求变为γM/[(1−τW)p]。W表示是否领券。读者不必会微积分，也能看出每一份新增补贴如何推高总购买强度。</p></section><section id="section-4"><h2>‘福利’不是销量，也不是财政收入</h2><p>论文把家庭买到两种商品后的满足程度合成为一个目标，还允许不同家庭有不同权重。收入、偏好与权重会影响哪个分配更好。因此‘最优’不是脱离价值判断的唯一答案，而是针对明确目标和假设的数学结果。</p><p>本文算例只展示价格和支付变化，不把销量增加当作社会福利增加。现实补贴还涉及财政成本、筹资方式、商家利润与长期供给，本包没有私自把这些未进入小算例的项算成零后宣布政策最好。先明确评价对象，是读政策优化论文的基础。</p></section><section id="section-5"><h2>发给甲的价值，会随着是否发给乙而改变</h2><p>如果干预彼此影响，就不能把每个人的单独受益排序后直接发放。论文在一定条件下得到一种互补性：已有更多人接受补贴时，再给一组补贴的边际目标增益不会更小。这种结构称超模性。它是目标函数的性质，不是‘所有人都因别人领券而受益’。</p><p>通过对等价的次模最小化问题求解，作者将相应无额外任意约束的二元选择问题变得可计算。一般情形还要求偏好曲率、价格反应等条件；论文明确指出线性需求加线性供给可能使关键符号反转。因此不能把这个计算保证搬到任何预算约束和市场模型。</p></section><section id="section-6"><h2>论文的实证说明提供了什么证据？</h2><p>作者用菲律宾支出资料校准，样本包含1,058个同时报告收入和食物支出份额的家庭，示例政策为10%折扣。文中供应弹性1.11来自其采用的既有研究校准。在这一设定下表1的最优覆盖率为96.7%，并比较全发、不发以及相反名单。</p><p>图1—3把供应弹性改为1.11、0.1与7，展示名单如何随供给响应改变。表2中供给弹性升高时，最优覆盖比例在该校准里扩大。这些是特定结构模型中的数值结果；不是在多个地区随机实施九折券后直接测出的普遍因果规律。</p></section><section id="section-7"><h2>参数估错，名单也可能变</h2><p>供给响应与家庭偏好不是天上掉下来的常数，研究者通常要从数据估计。论文给出在参数空间、平滑性与估计尾部界等要求下的误差控制，解释为何更准确的参数估计能改善政策评价。</p><p>实践中接近选择门槛的人尤其敏感：收入、偏好或供应响应的小变动，可能让他们从领券名单中移出。看见精确到小数点的覆盖率时，应先问模型参数如何得到、换参数是否稳健，而不是把精度当成确定性。</p></section><section id="section-8"><h2>本篇最小实践只验证价格传导</h2><p>我们设两组家庭收入与消费份额相同，先不发券，再给一组九折券。程序分别让供给弹性为0、1、7，计算新标价及两组的到手价相对变化。这样每一行只改一个条件，容易追踪价格反馈。</p><p>κ=0是边界：供应总量完全不动，补贴只能重新分配购买力，并推高标价。κ=7时供应能大量响应，标价增幅较小。我们用市场供求等式做断言检查，不把这个两组算例称为菲律宾样本复现，也不声称它求出了最佳名单。</p></section><section id="section-9"><h2>从论文回到政策阅读</h2><p>今后看到‘补贴让大家买得更多’的说法，可以按顺序问：谁得到补贴，谁没得到；供给能不能增加；标价有没有变；评价包含哪些人；优化对哪些假设成立。问清这些，已经比只盯折扣力度更接近论文机制。</p><p>我们可据此提出一个研究方向：对供给短期紧张和供给容易增加的商品分别检验价格反馈。它是本包的迁移建议，尚无新的实证结论。所有材料已一次覆盖，练习用于验证理解，不能替代政策评估所需的数据与识别。</p></section><section id="section-10"><h2>动手验证：需求、运行与结果</h2><p>输入两组相同消费强度、折扣0.1、领券名单[1,0]。输出新旧标价比、领券到手价比和未领券价比。正常情形κ=1，边界κ=0，并比较κ=7。使用论文Cobb-Douglas需求与常弹性供给的教学化二组参数。</p><p>运行方式：下载同目录的 <a href='demo.py'>demo.py</a>，执行 <code>python3 demo.py</code>。仅使用 Python 标准库。</p><pre><code>supply elasticity=0: list-price ratio=1.05556, coupon-price ratio=0.95000, untreated-price ratio=1.05556
+supply elasticity=1: list-price ratio=1.02740, coupon-price ratio=0.92466, untreated-price ratio=1.02740
+supply elasticity=7: list-price ratio=1.00678, coupon-price ratio=0.90610, untreated-price ratio=1.00678
+</code></pre><p>三种情况下标价均上升，没领券的人支付更多；供给越容易增加，上涨越小。领券者实际降价幅度小于票面10%。这是教学参数下的市场等式结果，不是政策建议。</p></section><section id="section-11"><h2>自测：解释、预测与迁移</h2><ol><li>九折券为什么可能只带来很小的实际降价？</li><li>κ提高后，同样需求增加更倾向反映在价格还是数量？</li><li>仅看领券者的变化，漏了哪一组人的影响？</li></ol><p><a href='answers.html'>完成后再查看独立参考答案</a>。材料已准备；掌握程度等待你的真实回答验证。</p></section><section id="section-12"><h2>资料与证据</h2><details><summary>原文与阅读范围</summary><p><a href='https://arxiv.org/abs/2609.18600v1'>Policy Targeting with Market Equilibrium</a>；2609.18600v1；提交日期 2026-09-16。</p><p>本包已读取 HTML 正文的模型、主要结果、例子与结论，并核对本包引用的公式、表格或图示说明。重点位置：第2节Cobb-Douglas基准、超模性条件与统计保证；第3节图1—3、表1—2；第4节结论。没有逐行重证附录，也没有复现作者完整实验。</p><p>本包用自己的例子解释机制；数字明确区分论文报告与教学设定。推断和模型结论不等于真实世界的无条件因果结论。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Policy Targeting with Market Equilibrium</p><p>Gyungbae Park</p>
+<p>arXiv:2609.18600v1 · 发布日期：2026-09-16 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.18600v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18600v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

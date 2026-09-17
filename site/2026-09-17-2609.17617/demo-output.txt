@@ -1,0 +1,4 @@
+posterior: 5/16 -> 25/69 = 0.362319
+experienced standard=0.245652; novice standard=0.235652; intensive=0.240000
+experienced chooses standard; novice chooses intensive
+weak-assessment duration in the paper example: 5 / 0.01 = 500 opportunities
