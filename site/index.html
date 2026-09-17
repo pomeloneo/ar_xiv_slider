@@ -6,140 +6,115 @@
   <meta name="color-scheme" content="light dark">
   <title>每日 arXiv 论文带读</title>
   <style>
+    * { box-sizing: border-box; }
     :root {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #18212f;
       background: #f3f6fb;
     }
-    body {
-      max-width: 880px;
-      margin: 0 auto;
-      padding: 72px 24px;
+    body { max-width: 960px; margin: 0 auto; padding: 72px 24px; }
+    header { margin-bottom: 34px; }
+    h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.045em; }
+    p { color: #526071; font-size: 1.05rem; line-height: 1.75; }
+    a:focus-visible { outline: 3px solid #1d7a70; outline-offset: 4px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+    .filter {
+      padding: 8px 15px; border: 1px solid #b9c8d8; border-radius: 999px; color: #334155;
+      background: #fff; text-decoration: none; font-weight: 650;
     }
-    header {
-      margin-bottom: 40px;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 5vw, 3.6rem);
-      letter-spacing: -0.045em;
-    }
-    p {
-      color: #526071;
-      font-size: 1.05rem;
-      line-height: 1.75;
-    }
-    .empty {
-      padding: 28px;
-      border: 1px solid #dbe3ee;
-      border-radius: 18px;
-      background: #fff;
+    .filter:hover { border-color: #1d7a70; }
+    .filter.is-active { color: #fff; border-color: #1d7a70; background: #1d7a70; }
+    .result-count { margin: 0 0 18px; font-size: .95rem; }
+    .empty, .no-results {
+      padding: 28px; border: 1px solid #dbe3ee; border-radius: 18px; background: #fff;
       box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
     }
-    .papers {
-      display: grid;
-      gap: 16px;
-      padding: 0;
-      list-style: none;
-    }
+    .papers { display: grid; gap: 18px; padding: 0; list-style: none; }
     .paper {
-      padding: 24px;
-      border: 1px solid #dbe3ee;
-      border-radius: 18px;
-      background: #fff;
+      padding: 26px; border: 1px solid #dbe3ee; border-radius: 18px; background: #fff;
       box-shadow: 0 14px 38px rgb(40 61 89 / 8%);
     }
-    .paper h2 {
-      margin: 8px 0;
-      line-height: 1.3;
-    }
-    .paper a {
-      color: inherit;
-      text-decoration-thickness: 0.08em;
-      text-underline-offset: 0.15em;
-    }
-    .meta {
-      margin: 0;
-      font-size: 0.9rem;
-    }
-    code {
-      padding: 0.15rem 0.35rem;
-      border-radius: 0.35rem;
-      background: #e8edf5;
-    }
+    .paper[hidden] { display: none; }
+    .paper h2 { margin: 9px 0 5px; font-size: clamp(1.35rem, 3vw, 1.8rem); line-height: 1.4; }
+    .paper h2 a { color: inherit; text-decoration-thickness: .08em; text-underline-offset: .15em; }
+    .meta { margin: 0; font-size: .9rem; }
+    .original-title { margin: 0 0 14px; font-size: .96rem; line-height: 1.55; }
+    .summary { margin-bottom: 0; }
+    .tags { display: flex; flex-wrap: wrap; gap: 7px; padding: 0; margin: 0; list-style: none; }
+    .tags li { padding: 4px 10px; border-radius: 999px; color: #245c55; background: #e5f2ef; font-size: .83rem; }
+    @media (max-width: 600px) { body { padding: 42px 18px; } .paper { padding: 21px; } }
     @media (prefers-color-scheme: dark) {
-      :root {
-        color: #eef4ff;
-        background: #0e1420;
-      }
-      p {
-        color: #a9b7ca;
-      }
-      .empty {
-        border-color: #263247;
-        background: #141c2a;
-      }
-      .paper {
-        border-color: #263247;
-        background: #141c2a;
-      }
-      code {
-        background: #263247;
-      }
+      :root { color: #eef4ff; background: #0e1420; }
+      p { color: #a9b7ca; }
+      .empty, .no-results, .paper { border-color: #263247; background: #141c2a; }
+      .filter { color: #dbe8f5; border-color: #42526a; background: #141c2a; }
+      .filter.is-active { color: #081514; border-color: #7bd6c8; background: #7bd6c8; }
+      .tags li { color: #a8e5da; background: #213d3a; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>每日 arXiv 论文带读</h1>
-    <p>每天一篇 AI、金融或经济论文，用中文从基础讲清整篇主线。打开本篇总览，选择图解版或文章版即可，不必重复读两遍。</p>
+    <p>每天一篇 AI、金融或经济论文，用中文从基础讲清整篇主线。可按标签筛选，打开本篇总览后选择图解全文或详细讲解即可。</p>
   </header>
-  <main id="paper-list">
-    <section class="empty" id="empty-state">
-      <h2>站点已经就绪</h2>
-      <p>第一篇学习包发布后，这里会按日期列出论文标题、所属方向和课件入口。</p>
-    </section>
+  <main>
+    <div class="filters" aria-label="按标签筛选">
+      <a class="filter is-active" href="./" data-tag="" aria-current="true">全部</a><a class="filter" href="?tag=%E9%87%91%E8%9E%8D" data-tag="金融">金融</a><a class="filter" href="?tag=%E6%96%B9%E6%B3%95%E8%AE%BA" data-tag="方法论">方法论</a><a class="filter" href="?tag=%E9%87%8F%E5%8C%96%E6%8A%95%E8%B5%84" data-tag="量化投资">量化投资</a><a class="filter" href="?tag=%E9%A3%8E%E9%99%A9%E7%AE%A1%E7%90%86" data-tag="风险管理">风险管理</a>
+    </div>
+    <p class="result-count" id="result-count" role="status" aria-live="polite">共 1 篇</p>
+    <ol class="papers">
+      <li class="paper" data-tags="[&quot;金融&quot;, &quot;量化投资&quot;, &quot;风险管理&quot;, &quot;方法论&quot;]">
+        <p class="meta">2026-09-17 · arXiv:2608.23416v2</p>
+        <h2><a href="2026-09-17/">公理化交易者：潜在规律、信息预算与量化投资系统的标准形式</a></h2>
+        <p class="original-title" lang="en">The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</p>
+        <ul class="tags" aria-label="论文标签"><li>金融</li><li>量化投资</li><li>风险管理</li><li>方法论</li></ul>
+        <p class="summary">从两个公交站的等待时间出发，读懂论文完整的五步研究流程、真实证据与适用边界。</p>
+      </li>
+    </ol>
+    <p class="no-results" id="no-results" hidden>没有符合该标签的论文。</p>
   </main>
   <script>
-    const list = document.querySelector("#paper-list");
+    const controls = [...document.querySelectorAll("[data-tag]")];
+    const papers = [...document.querySelectorAll(".paper")];
+    const resultCount = document.querySelector("#result-count");
+    const noResults = document.querySelector("#no-results");
 
-    fetch("./papers.json")
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((papers) => {
-        if (!Array.isArray(papers) || papers.length === 0) return;
+    function applyTag(requestedTag, updateUrl = false) {
+      const availableTags = new Set(controls.map((control) => control.dataset.tag));
+      const tag = availableTags.has(requestedTag) ? requestedTag : "";
+      let visible = 0;
+      for (const paper of papers) {
+        const tags = JSON.parse(paper.dataset.tags);
+        paper.hidden = Boolean(tag) && !tags.includes(tag);
+        if (!paper.hidden) visible += 1;
+      }
+      for (const control of controls) {
+        const active = control.dataset.tag === tag;
+        control.classList.toggle("is-active", active);
+        if (active) control.setAttribute("aria-current", "true");
+        else control.removeAttribute("aria-current");
+      }
+      if (resultCount) resultCount.textContent = tag ? `${tag} · ${visible} 篇` : `共 ${visible} 篇`;
+      if (noResults) noResults.hidden = visible !== 0;
+      if (updateUrl) {
+        const url = new URL(location.href);
+        if (tag) url.searchParams.set("tag", tag);
+        else url.searchParams.delete("tag");
+        history.pushState({ tag }, "", url);
+      }
+    }
 
-        const items = document.createElement("ol");
-        items.className = "papers";
-
-        for (const paper of papers) {
-          const item = document.createElement("li");
-          item.className = "paper";
-
-          const meta = document.createElement("p");
-          meta.className = "meta";
-          meta.textContent = `${paper.date} · ${paper.direction} · arXiv:${paper.arxiv_id}`;
-
-          const heading = document.createElement("h2");
-          const link = document.createElement("a");
-          link.href = paper.path;
-          link.textContent = paper.title;
-          heading.append(link);
-
-          const summary = document.createElement("p");
-          summary.textContent = paper.summary;
-
-          item.append(meta, heading, summary);
-          items.append(item);
-        }
-
-        list.replaceChildren(items);
-      })
-      .catch((error) => {
-        console.error("无法读取论文清单", error);
+    for (const control of controls) {
+      control.addEventListener("click", (event) => {
+        event.preventDefault();
+        applyTag(control.dataset.tag, true);
       });
+    }
+    window.addEventListener("popstate", () => {
+      applyTag(new URLSearchParams(location.search).get("tag") || "");
+    });
+    applyTag(new URLSearchParams(location.search).get("tag") || "");
   </script>
 </body>
 </html>

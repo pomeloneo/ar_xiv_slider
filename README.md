@@ -48,8 +48,11 @@ python3 scripts/publish-day.py \
   --source /path/to/arxiv-daily/YYYY-MM-DD \
   --date YYYY-MM-DD \
   --title "Paper title" \
+  --title-zh "论文中文标题" \
   --arxiv-id "0000.00000v1" \
   --direction AI \
+  --tag "主题标签" \
+  --tag "方法标签" \
   --summary "一句话学习价值" \
   --slides slides.html
 ```
@@ -57,12 +60,13 @@ python3 scripts/publish-day.py \
 发布器会：
 
 1. 将当天学习包中允许公开的 HTML、笔记、代码、图像等文件复制到 `site/YYYY-MM-DD/`，跳过隐藏文件、配置、日志及私有记录。
-2. 生成当天入口页。
-3. 幂等更新 `site/papers.json`；同日重跑先验证并暂存新材料，再替换当天内容，旧内容保留在仓库根目录的 `.publish-backup-*` 中。
+2. 生成当天入口页，并在首页以中文译名为主标题、英文原题为辅助信息。
+3. 幂等更新 `site/papers.json` 和支持标签筛选的静态首页；方向会自动成为第一个标签，`--tag` 可重复传入。
 4. 输出 HTML 幻灯片的 Pages 路径；实际发布仍取决于下方部署步骤。
 
 发布器只接受包内规范相对路径的 HTML 课件，入口 `index.html` 为保留文件名。
 具体文件扩展名白名单见 `scripts/publish-day.py` 的 `PUBLIC_EXTENSIONS`；JSON/JSONL 不会自动公开，依赖这些文件的 demo 应先改为内嵌公开数据，或审查后调整白名单。
+同日发布第二篇时必须传入唯一的 `--publication-key`，例如 `YYYY-MM-DD-0000.00000`；不传时默认为日期，同日重跑会原位更新，旧内容保留在仓库根目录的 `.publish-backup-*` 中。
 
 检查变更无误后提交并推送：
 

@@ -29,7 +29,10 @@ class PublishDayTests(unittest.TestCase):
         self.day = self.site / "2026-09-17"
         self.args = argparse.Namespace(
             source=self.source, site_root=self.site, date="2026-09-17", title="Paper",
+            title_zh="论文中文标题",
             arxiv_id="2608.12345v1", direction="AI", summary="Learn a mechanism",
+            tags=["机器学习", "可靠性"],
+            publication_key=None,
             slides="slides.html",
         )
 
@@ -52,6 +55,118 @@ class PublishDayTests(unittest.TestCase):
         backups = list(self.root.glob(".publish-backup-*/2026-09-17/old.md"))
         self.assertEqual(len(backups), 1)
         self.assertEqual(backups[0].read_text(), "old notes")
+
+    def test_manifest_contains_bilingual_titles_and_normalized_tags(self):
+        self.args.tags = ["机器学习", "AI", "机器学习", "  可靠性  "]
+        self.publish()
+        entry = json.loads((self.site / "papers.json").read_text())[0]
+        self.assertEqual(entry["title"], "Paper")
+        self.assertEqual(entry["title_zh"], "论文中文标题")
+        self.assertEqual(entry["tags"], ["AI", "机器学习", "可靠性"])
+
+    def test_home_page_shows_bilingual_titles_and_filter_controls(self):
+        self.publish()
+        page = (self.site / "index.html").read_text()
+        self.assertIn(">论文中文标题</a>", page)
+        self.assertIn('class="original-title" lang="en">Paper</p>', page)
+        self.assertIn('href="?tag=AI" data-tag="AI"', page)
+        self.assertIn(
+            'href="?tag=%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0" data-tag="机器学习"',
+            page,
+        )
+        self.assertIn('data-tags="[&quot;AI&quot;, &quot;机器学习&quot;, &quot;可靠性&quot;]"', page)
+        self.assertIn("URLSearchParams(location.search).get", page)
+        self.assertIn('window.addEventListener("popstate"', page)
+        self.assertTrue(all(line == line.rstrip() for line in page.splitlines()))
+
+    def test_home_page_escapes_bilingual_metadata_and_tags(self):
+        self.args.title = '<img src=x onerror=alert(1)>'
+        self.args.title_zh = '<script>alert("标题")</script>'
+        self.args.tags = ['" data-bad="true']
+        self.publish()
+        page = (self.site / "index.html").read_text()
+        self.assertNotIn('<script>alert("标题")</script>', page)
+        self.assertNotIn("<img src=x", page)
+        self.assertNotIn('data-bad="true"', page)
+        self.assertIn("&lt;script&gt;", page)
+        self.assertIn("&lt;img", page)
+        self.assertIn("&quot; data-bad=&quot;true", page)
+
+    def test_same_date_supports_multiple_unique_publications(self):
+        self.publish()
+        self.args.publication_key = "2026-09-17-2608.54321"
+        self.args.arxiv_id = "2608.54321v1"
+        self.args.title = "Second Paper"
+        self.args.title_zh = "第二篇论文"
+        self.args.direction = "经济"
+        self.args.tags = ["因果推断"]
+        self.publish()
+
+        second = self.site / "2026-09-17-2608.54321"
+        entries = json.loads((self.site / "papers.json").read_text())
+        self.assertTrue((self.day / "slides.html").is_file())
+        self.assertTrue((second / "slides.html").is_file())
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entry["path"] for entry in entries},
+                         {"2026-09-17/", "2026-09-17-2608.54321/"})
+        page = (self.site / "index.html").read_text()
+        self.assertIn("论文中文标题", page)
+        self.assertIn("第二篇论文", page)
+        self.assertIn('data-tag="经济"', page)
+        self.assertIn('data-tag="因果推断"', page)
+
+    def test_rejects_reserved_keys_and_duplicate_base_arxiv_id(self):
+        for publication_key in ("assets", "index.html", "papers.json"):
+            with self.subTest(publication_key=publication_key):
+                self.args.publication_key = publication_key
+                with self.assertRaises(SystemExit):
+                    self.publish()
+                self.assertFalse(self.site.exists())
+
+        self.args.publication_key = None
+        self.publish()
+        before = self.snapshot()
+        self.args.publication_key = "2026-09-17-copy"
+        self.args.arxiv_id = "2608.12345v2"
+        with self.assertRaises(SystemExit):
+            self.publish()
+        self.assertEqual(self.snapshot(), before)
+
+    def test_rejects_noncanonical_arxiv_ids(self):
+        for arxiv_id in (
+            "2608.12345V2",
+            "2608.12345v02",
+            "2608.12345v2 ",
+            "2608.123",
+            "../2608.12345v1",
+        ):
+            with self.subTest(arxiv_id=arxiv_id):
+                self.args.arxiv_id = arxiv_id
+                with self.assertRaises(SystemExit):
+                    self.publish()
+                self.assertFalse(self.site.exists())
+
+        self.args.arxiv_id = "hep-th/9901001v2"
+        self.publish()
+        entry = json.loads((self.site / "papers.json").read_text())[0]
+        self.assertEqual(entry["arxiv_id"], "hep-th/9901001v2")
+
+    def test_rejects_invalid_bilingual_metadata_without_touching_site(self):
+        self.publish()
+        before = self.snapshot()
+        for title_zh, tags in (
+            ("", ["机器学习"]),
+            ("   ", ["机器学习"]),
+            ("论文中文标题", [""]),
+            ("论文中文标题", ["x" * 31]),
+            ("论文中文标题", list(map(str, range(9)))),
+        ):
+            with self.subTest(title_zh=title_zh, tags=tags):
+                self.args.title_zh = title_zh
+                self.args.tags = tags
+                with self.assertRaises(SystemExit):
+                    self.publish()
+                self.assertEqual(self.snapshot(), before)
 
     def test_rejects_overlap_without_touching_source_or_existing_day(self):
         self.publish()

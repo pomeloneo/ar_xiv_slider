@@ -2,8 +2,15 @@
   {
     "date": "2026-09-17",
     "title": "The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System",
+    "title_zh": "公理化交易者：潜在规律、信息预算与量化投资系统的标准形式",
     "arxiv_id": "2608.23416v2",
     "direction": "金融",
+    "tags": [
+      "金融",
+      "量化投资",
+      "风险管理",
+      "方法论"
+    ],
     "summary": "从两个公交站的等待时间出发，读懂论文完整的五步研究流程、真实证据与适用边界。",
     "path": "2026-09-17/",
     "slides": "slides.html"
