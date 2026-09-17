@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第一篇｜平均回测成绩为何不够？— The Axiomatic Trader</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#203047;background:#f4f6f9;line-height:1.85}*{box-sizing:border-box}body{max-width:1000px;margin:auto;padding:44px 22px 80px}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.25;letter-spacing:-.035em}h2{margin-top:2.3em;line-height:1.4}h3{line-height:1.5}p,li{font-size:18px}a{color:#175fb1;text-underline-offset:.2em}a:focus-visible{outline:3px solid #d67916;outline-offset:4px}.eyebrow{color:#526576;font-size:14px;letter-spacing:.12em}.card{background:white;padding:24px;border:1px solid #dce3eb;border-radius:14px;margin:20px 0}.meta{font-size:15px;color:#526576}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.flow div{padding:12px;border-radius:8px;background:#edf2f7;font-size:15px}.flow .focus{background:#d5e9ff;border:2px solid #175fb1}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:10px;border-bottom:1px solid #dce3eb;text-align:left}th{background:#edf2f7}.scroll{overflow:auto}.formula,pre{background:#122337;color:#e7f1ff;padding:20px;border-radius:10px;overflow:auto;line-height:1.65}.tag{font-size:14px;padding:3px 8px;border-radius:5px;background:#eaf1fa;color:#245277}code{font-family:ui-monospace,monospace}.note{border-left:4px solid #cd8c29;padding-left:16px}.links{display:flex;flex-wrap:wrap;gap:18px}footer{margin-top:55px;color:#526576;font-size:14px}@media(max-width:650px){.flow{grid-template-columns:1fr}.card{padding:18px}body{padding:26px 16px 60px}th,td{padding:8px}p,li{font-size:17px}}@media print{body{background:white;padding:0}.card{break-inside:avoid}.links{display:none}}
+</style>
+</head>
+<body>
+<nav class="links" aria-label="学习导航"><a href="../">所有论文</a><a href="slides.html">打开幻灯片</a><a href="map.mmd">Mermaid 源码</a></nav>
+<p class="eyebrow">每日 arXiv 带读 · 2026-09-17 · 金融</p>
+<h1>平均回测成绩更好，<br>为什么还可能选错？</h1>
+<p>今天学会一件事：把“未来会更多重复某些历史阶段”变成一个可计算的约束，并解释它为什么导向尾部平均损失 CVaR。</p>
+<section class="card" aria-labelledby="paper-title">
+<h2 id="paper-title" style="margin-top:0;font-size:1.2rem">The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</h2>
+<p class="meta">作者：Jiayu Li · arXiv：2608.23416 · 阅读版本：v2<br>首次提交：2026-08-24；v2 修订：2026-09-02。arXiv 分类为 cs.LG / q-fin.PM，本课按研究问题归入金融方向，没有给交叉论文优先权。</p>
+<p class="meta"><a href="https://arxiv.org/abs/2608.23416v2">论文信息</a> · <a href="https://arxiv.org/html/2608.23416v2">原文 HTML</a> · <a href="https://arxiv.org/pdf/2608.23416v2">原文 PDF</a></p>
+<p><span class="tag">研究问题</span> 如果历史规律只能在明确的复现、依赖与弱信号假设下延续，量化系统的模型选择、验证、搜索和风险配置应受到哪些限制？</p>
+<p class="meta">阅读范围：原文 §3、§4 的 A1–A3、§6、§10、§13，以及附录 B 的相关实验和表格；聚焦定理 6.2。论文共 97 页，本学习包不宣称独立复核了所有证明，也没有重跑作者的市场实证。</p>
+</section>
+
+<h2>先看全景：今天讲的是哪一环？</h2>
+<div class="flow" role="list" aria-label="论文的五阶段框架">
+<div role="listitem">S1<br>声明状态表示与假设</div><div role="listitem">S2<br>限制模型容量并收缩、集成</div><div class="focus" role="listitem">S3 · 本课重点<br>连续块验证与尾部聚合</div><div role="listitem">S4<br>限制搜索并扣除选择偏差</div><div role="listitem">S5<br>计入不确定性后配置风险</div>
+</div>
+<p><span class="tag">作者主张</span> 在论文的公理体系中，逐一省略这些阶段，都存在一个更差的情形。作者明确区分“阶段的必要性”和“所有好系统都必须分解成这五步”；后者并未证明。<a href="https://arxiv.org/html/2608.23416v2#S10">出处：§10</a></p>
+<p>本课只拆五个依赖相连的知识点：历史片段的比例 → 比例的上限 Λ → 最坏加权损失 → CVaR → 估计误差与覆盖边界。</p>
+
+<h2>1. 起点：平均值悄悄固定了比例</h2>
+<p><span class="tag">教学算例</span> 两个候选模型在四个等长历史时间块上，损失记分分别如下。数值完全人为构造，越小越好，不是收益率，也不是作者实验数据。</p>
+<div class="scroll"><table><thead><tr><th>候选</th><th>块 1</th><th>块 2</th><th>块 3</th><th>块 4</th><th>历史平均</th></tr></thead><tbody><tr><th>A</th><td>1</td><td>1</td><td>1</td><td>9</td><td>3</td></tr><tr><th>B</th><td>3</td><td>3</td><td>3</td><td>4</td><td>3.25</td></tr></tbody></table></div>
+<p>直接平均时，每块占 25%，A 胜出。但这个比较还没有回答：如果块 4 这种阶段以后出现得更频繁，A 的优势还在吗？</p>
+<p><span class="tag">教学类比</span> 可以把四个时间块想成四种历史路况，损失是车辆在其中的表现；平均分默认每种路况占四分之一。类比到此为止：真实时间块混合了潜在状态，还可能有时间依赖，不是四次独立抽样。</p>
+
+<h2>2. Λ：先声明未来可以偏到什么程度</h2>
+<p>输入是四个块的风险与一个声明的 Λ。输出不是预测概率，而是一组允许的未来比例。Λ=2 的意思是：每块原占 25%，未来最多占 50%，所有块的比例仍须加起来为 100%。</p>
+<pre class="formula" aria-label="四块的权重约束">w₁ + w₂ + w₃ + w₄ = 1
+每个 wⱼ ≥ 0；每个 wⱼ ≤ Λ / 4</pre>
+<p><span class="tag">作者假设</span> A3 在事先声明的块长度 b 上约束未来状态占比；A2 要求同一状态下的机制不变，或把偏离写成单独的误差项。今天先取机制偏差为零。Λ 与块长度都要先说清楚，不能看完结果再把 Λ 调成有利数值。<a href="https://arxiv.org/html/2608.23416v2#Thmaxiom3">出处：A3</a></p>
+<p class="note">Λ 不能靠历史数据估出一个对未来必然成立的值。历史可以反驳某些过强声明，却不能担保未来仍在这个范围里。稳定的市场机制也不意味着有限时间窗里的占比完全不变。<a href="https://arxiv.org/html/2608.23416v2#S5">出处：§5</a></p>
+
+<h2>3. 怎么找最坏情况：把权重搬向较差的块</h2>
+<p>固定 Λ=2。每块最多放 0.5 的权重；为了得到最坏损失，先给损失最大的块放满，再给次差的块，直到总权重达到 1。</p>
+<ol><li>A 的最差块是块 4，损失 9，放入权重 0.5。</li><li>还剩 0.5，放到损失为 1 的任意一个块；demo 在同分时按原顺序选择块 1。</li><li>最终权重是 [0.5, 0, 0, 0.5]，损失为 0.5×1 + 0.5×9 = 5。</li><li>B 同样得到 [0.5, 0, 0, 0.5]，损失为 0.5×3 + 0.5×4 = 3.5。</li></ol>
+<p>于是平均记分选择 A，受约束的最坏情况比较选择 B。这说明两种目标可以改变排序；不意味着每一组数据都一定会改变排序。</p>
+<p><span class="tag">最小推导</span> 如果较差的块还没装满，而较好的块上仍有权重，把少量权重从较好块搬到较差块，只会提高或保持损失。不断搬到不能再搬，就得到上述贪心解。模型各自取自己的最坏权重，比较的是各自的最坏风险，而不是在断言未来真的选择了这个权重。</p>
+
+<h2>4. 这就是本论文记号里的 CVaR</h2>
+<pre class="formula">R⁺(h) ≤ max Σⱼ wⱼ Rⱼ(h) = CVaR₁/Λ(R₁,…,Rᴮ)
+            w ≥ 0, Σw = 1, wⱼ ≤ Λ/B
+
+等价的有限情形：minₜ [t + (Λ/B) Σⱼ max(Rⱼ − t, 0)]</pre>
+<p><span class="tag">原文结果</span> 在 A2、A3 下，定理 6.2 把未来的条件期望风险上界写成上述最坏加权风险，且此上界能在允许的未来中达到。我们演示的是它的四个等权原子版本。<a href="https://arxiv.org/html/2608.23416v2#S6.Thmtheorem2">出处：定理 6.2</a></p>
+<p>这里 CVaR 的下标 1/Λ 是“最差尾部所占的比例”：Λ=2 就看最差一半。它不同于把 95% 当作置信水平的另一种常见记号。尾部包含不到整数个块时，边界块只取一部分权重，不要直接向上取整后平均。Λ=1 回到平均；四块算例在 Λ=4 就到达最差单块。</p>
+
+<h2>5. 把概念写成一个可执行的小需求</h2>
+<section class="card">
+<p><strong>问题：</strong>验证有权重上限的最坏加权损失，是否等于上尾平均，以及何时改变候选排序。</p>
+<p><strong>输入与假设：</strong>人工损失数组 A/B；四块等权；Λ≥1；损失视作已知的理论块风险；只改变已有块的权重。</p>
+<p><strong>输出：</strong>每步分配的权重、加权损失和排序；正常例 Λ=2、边界例 Λ=1 与 Λ=4，以及未见状态反例。</p>
+<p><strong>正确性依据：</strong>权重非负、总和为 1、不超过 Λ/4；另用枚举可行多面体顶点的独立解法核对最优值。</p>
+<p><strong>有意省略：</strong>模型拟合、真实行情、交易成本、purge/embargo、有限样本与搜索误差、实际仓位。它只验证一个确定性的数学机制。</p>
+</section>
+<pre>python3 demo.py
+python3 demo.py --lambda 1.5
+python3 -m unittest -v test_demo.py</pre>
+<p><a href="demo.py">下载 demo.py</a> · <a href="test_demo.py">下载独立核对测试</a> · <a href="demo-output.txt">查看实际运行输出</a>。Python 3 标准库即可；课件里的滑块也能演示同一计算。</p>
+<div class="scroll"><table><thead><tr><th>Λ</th><th>A 的最坏损失</th><th>B 的最坏损失</th><th>较小者</th></tr></thead><tbody><tr><td>1</td><td>3</td><td>3.25</td><td>A</td></tr><tr><td>1.5</td><td>4</td><td>3.375</td><td>B</td></tr><tr><td>2</td><td>5</td><td>3.5</td><td>B</td></tr><tr><td>4</td><td>9</td><td>4</td><td>B</td></tr></tbody></table></div>
+<p><span class="tag">已运行</span> 表中结果已由 Python 实际运行核对；8 项测试通过，其中包括 20 个独立顶点枚举子案例。这是算例正确性的证据，不是学习者已掌握的证据。</p>
+
+<h2>6. 两个必须守住的边界</h2>
+<p><strong>未见状态：</strong>假设未来出现一个从没出现在历史中的状态，损失为 20。怎样重新分配历史 [1,1,1,9] 的权重，都造不出这个状态。把 Λ 提到 4 只会算出 9，覆盖假设已经失败；更保守的权重不能补回缺失的历史支持。</p>
+<p><strong>理论风险 ≠ 实测块分数：</strong>定理里的 Rⱼ 是潜在状态下的条件期望风险，实际回测只能拿到含噪声的块损失估计。挑最差尾部还可能挑中了噪声。有限样本、依赖、状态表示误差和多次搜索都要另付误差代价，不能把 demo 的精确等式直接变成真实收益保证。<a href="https://arxiv.org/html/2608.23416v2#S8.SS4">出处：§8.4</a>、<a href="https://arxiv.org/html/2608.23416v2#S13.SS2">§13.2</a></p>
+
+<h2>7. 作者拿出了什么证据，又没有证明什么？</h2>
+<div class="scroll"><table><thead><tr><th>原文证据</th><th>应当怎样读</th></tr></thead><tbody>
+<tr><td>附录 B.3：合并的 752 个股票相关候选、19 个样本外年份中，挑选单条最优规则的均值法 Sharpe 为 0.51，五种稳健排序准则为 0.12–0.39；相应比较未达到 |t|=2。</td><td>不能据此说 CVaR 普遍提高真实收益；这个表反而要求我们警惕更窄尾部的估计噪声。</td></tr>
+<tr><td>附录 B.5：作者把五阶段走了一遍；在声明 Λ=4、按其承诺的惩罚方式计算时，没有候选剩下可支持的仓位。图 1 展示候选优势随 Λ 消失。</td><td>这是框架对记录作出的严格审计结果，不是盈利系统复现，更不是让读者按其结果下单。</td></tr>
+<tr><td>附录 B.8：预算饱和与实际 Kelly 比例的预测（P5）未作实证检验。</td><td>不能把理论推导或行业说法写成这篇论文已测得的事实。</td></tr>
+</tbody></table></div>
+<p class="meta">来源：<a href="https://arxiv.org/html/2608.23416v2#A2.SS3">B.3</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS5">B.5</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.F1">原文图 1</a> · <a href="https://arxiv.org/html/2608.23416v2#A2.SS8">B.8</a>。</p>
+<p><span class="tag">我的教学判断</span> 这篇论文值得作为“如何把回测的前提说清楚”的练习；它并未提供一套经过独立复现、可直接用于交易的方案。尤其要区分数学恒等式、作者的建模假设和有限样本中的实际表现。</p>
+
+<h2>8. 现在轮到你</h2>
+<p><strong>今天只需回答这一题：</strong>其他条件不变，把 Λ 从 1 提高到 2，最坏平均损失会变小吗？请从“允许选择的权重范围”解释。</p>
+<p>你可以直接回复这道题。其他自测题留作后续：① 为何普通随机 k-fold 可能破坏本课想保留的信息？② 只取最差 ⌈4/Λ⌉ 个块再直接平均，在哪里可能出错？③ 把这个方法迁移到服务器故障压力测试时，怎样描述“未见状态”的边界？</p>
+<p><a href="answers.html">单独打开参考答案（先作答再看）</a>。所有题目当前均为待回答；没有依据把你的状态标为“已掌握”。</p>
+
+<h2>选题与可追溯性</h2>
+<p class="meta">本次恢复本会话早先的抽取：金融方向，364 条检索候选中零基索引 137，对应本篇。当前已核对原文标题、作者、版本和正文可读性，未重新抽签。早先候选池只有元数据过滤，不能追认成“364 篇均已逐一完成正文资格核验”；该首次试运行的流程缺口已保留在 <a href="selection.md">选题审计说明</a>。不声称从 arXiv 全库均匀抽样。</p>
+<footer>材料已准备 ≠ 学习者已掌握。本站讲解与算例是学习材料；金融主题围绕假设、方法与证据，不提供个性化交易指令。</footer>
+</body></html>

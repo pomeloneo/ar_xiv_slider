@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="The Axiomatic Trader 中文机制带读：用可交互的四块算例理解 Λ-recurrence 与最坏块损失 CVaR。">
+  <title>历史均值之外：给未来的坏时段留多少空间？｜每日 arXiv 带读</title>
+  <style>
+    :root { --ink: #172b35; --muted: #536974; --paper: #f5f5ef; --card: #fff; --line: #d6e0db; --accent: #076b61; --soft: #e8f3ed; --warm: #a54820; --warm-soft: #fff0e6; font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; font-size: 18px; color: var(--ink); background: var(--paper); }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; line-height: 1.65; }
+    button, input { font: inherit; }
+    button, a, input { -webkit-tap-highlight-color: transparent; }
+    a { color: var(--accent); text-underline-offset: .2em; overflow-wrap: anywhere; }
+    a:hover { text-decoration-thickness: .14em; }
+    :focus-visible { outline: 3px solid #bd5c23; outline-offset: 4px; }
+    .topbar, main, .controls { width: min(1180px, calc(100% - 64px)); margin-inline: auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+    .brand { font-weight: 750; letter-spacing: .02em; }
+    .topbar nav { display: flex; flex-wrap: wrap; gap: 18px; }
+    .slide { min-height: min(720px, calc(100svh - 184px)); padding: 38px 0 32px; }
+    .eyebrow { color: var(--accent); font-weight: 750; margin: 0 0 14px; letter-spacing: .05em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(2.3rem, 4.9vw, 3.9rem); line-height: 1.15; letter-spacing: -.045em; max-width: 1000px; margin-bottom: 28px; }
+    h2 { font-size: clamp(1.85rem, 3.5vw, 2.7rem); line-height: 1.25; letter-spacing: -.035em; margin-bottom: 24px; }
+    h3 { font-size: 1.15rem; line-height: 1.4; margin-bottom: 12px; }
+    p { margin-bottom: 16px; }
+    .lead { font-size: 1.22rem; max-width: 930px; line-height: 1.7; }
+    .muted, .source { color: var(--muted); }
+    .source { border-top: 1px solid var(--line); padding-top: 17px; margin: 28px 0 0; }
+    .source a { margin-right: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .card { padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); min-width: 0; }
+    .card > :last-child { margin-bottom: 0; }
+    .highlight { background: var(--soft); border-color: #9fbfb0; }
+    .warning { background: var(--warm-soft); border-color: #e1baa4; }
+    .pill { display: inline-block; padding: 4px 12px; background: var(--soft); color: var(--accent); border-radius: 100px; font-weight: 700; margin: 0 8px 10px 0; }
+    .big-number { font-size: 2.6rem; line-height: 1.2; font-weight: 780; letter-spacing: -.04em; color: var(--accent); }
+    .formula { font-family: "Cambria Math", Georgia, serif; font-size: clamp(1.15rem, 2.6vw, 1.65rem); line-height: 1.9; padding: 22px; background: var(--soft); border-radius: 16px; overflow-wrap: anywhere; margin: 20px 0; }
+    .formula .explain { font-family: system-ui, sans-serif; font-size: 1rem; color: var(--muted); display: block; margin-top: 8px; }
+    .pipeline { padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: stages; }
+    .pipeline li { counter-increment: stages; display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start; background: white; border: 1px solid var(--line); border-radius: 13px; padding: 12px 18px; }
+    .pipeline li::before { content: counter(stages, decimal-leading-zero); color: var(--accent); font-weight: 750; }
+    .pipeline li.current { background: var(--soft); border-color: var(--accent); }
+    .pipeline small { display: block; color: var(--muted); font-size: 1rem; }
+    .steps { padding-left: 1.4em; }
+    .steps li { margin-bottom: 12px; padding-left: .2em; }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; font-weight: 700; margin-bottom: 12px; }
+    th, td { padding: 12px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { font-weight: 700; }
+    .comparison tr:last-child td { border-bottom: 0; }
+    .good { color: var(--accent); font-weight: 750; }
+    .blocks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 20px 0; }
+    .block { text-align: center; padding: 16px 4px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .block span { display: block; font-size: 1.7rem; font-weight: 750; }
+    .block.bad { background: var(--warm-soft); border-color: #daac91; }
+    .bar-track { background: #eaf0ed; height: 9px; border-radius: 10px; margin-top: 5px; }
+    .bar { height: 100%; background: var(--accent); border-radius: inherit; }
+    .control-panel { display: grid; grid-template-columns: 1fr auto; gap: 12px 24px; align-items: center; padding: 20px 24px; border-radius: 16px; background: var(--soft); margin-bottom: 20px; }
+    .control-panel label { font-weight: 750; }
+    .control-panel input { width: 100%; accent-color: var(--accent); min-width: 0; height: 32px; cursor: pointer; }
+    .control-panel output { font-size: 1.6rem; color: var(--accent); font-weight: 750; font-variant-numeric: tabular-nums; }
+    .control-panel .range { grid-column: 1 / -1; }
+    .range-labels { display: flex; justify-content: space-between; color: var(--muted); }
+    .toy-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+    .toy-heading h3 { margin-bottom: 4px; }
+    .toy-table th, .toy-table td { padding: 10px 4px; }
+    .toy-table th { font-size: 1rem; }
+    .toy-table td:nth-child(3) { min-width: 76px; }
+    .toy-result { margin: 18px 0 0; font-weight: 700; }
+    .tagline { padding-left: 18px; border-left: 4px solid var(--accent); margin: 24px 0; font-size: 1.15rem; }
+    .question { font-size: clamp(1.55rem, 3vw, 2.25rem); line-height: 1.5; font-weight: 750; margin: 0; }
+    .source-list { padding-left: 1.35em; }
+    .source-list li { margin-bottom: 16px; }
+    .controls { border-top: 1px solid var(--line); padding: 18px 0 26px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; }
+    .controls button { border: 1px solid var(--line); background: white; color: var(--ink); border-radius: 12px; padding: 10px 18px; cursor: pointer; width: fit-content; min-height: 48px; }
+    .controls button:last-child { justify-self: end; color: white; border-color: var(--accent); background: var(--accent); }
+    .controls button:disabled { cursor: default; opacity: .4; }
+    .page-count { text-align: center; font-variant-numeric: tabular-nums; }
+    .keyboard-hint { font-size: 1rem; color: var(--muted); }
+    .noscript { padding: 20px; background: var(--warm-soft); }
+    @media (max-width: 680px) {
+      .topbar, main, .controls { width: calc(100% - 36px); }
+      .topbar { align-items: flex-start; flex-direction: column; gap: 8px; padding: 18px 0; }
+      .topbar nav { gap: 20px; }
+      .slide { min-height: 0; padding: 28px 0; }
+      .grid { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 18px; }
+      .control-panel { padding: 16px; }
+      .formula { padding: 18px; }
+      h1 { font-size: 2.3rem; }
+      .lead { font-size: 1.1rem; }
+      th, td { padding: 10px 5px; }
+      .blocks { gap: 6px; }
+      .block { padding: 12px 2px; }
+      .controls { gap: 8px; }
+      .controls button { padding: 10px 12px; }
+      .keyboard-hint { display: none; }
+      .pipeline li { padding: 12px; gap: 8px; }
+    }
+    @media print {
+      :root { font-size: 14pt; background: white; }
+      .topbar, .controls, .control-panel { display: none; }
+      main { width: 100%; }
+      .slide, .slide[hidden] { display: block !important; min-height: 0; break-after: page; padding: 0; }
+      .slide:last-child { break-after: auto; }
+      .card { break-inside: avoid; }
+      a { color: inherit; }
+      h1 { font-size: 30pt; }
+      h2 { font-size: 25pt; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">每日 arXiv 带读 · 金融</div>
+    <nav aria-label="学习包导航"><a href="./">学习包</a><a href="notes.html">阅读笔记</a></nav>
+  </header>
+  <noscript><p class="noscript">本页翻页与算例需要 JavaScript。你仍可阅读下方全部幻灯片，或打开<a href="notes.html">阅读笔记</a>。</p></noscript>
+  <main aria-label="论文带读幻灯片">
+    <section class="slide" aria-labelledby="title-1" tabindex="-1">
+      <p class="eyebrow">01 / 真实问题 · 2026-09-17</p>
+      <h1 id="title-1">历史均值之外，<br>给未来的坏时段<br>留多少空间？</h1>
+      <p class="lead">两个方法：一个平时很好、偶尔很差；另一个一直平稳。<br>如果坏时段在未来变得更常见，仅比较平均损失还够吗？</p>
+      <p><span class="pill">今天只学一个机制</span><span class="pill">Λ-recurrence → CVaR</span></p>
+      <p class="muted">读完应能解释：怎样限制未来对历史时段的重新加权，并用四个数字算出最坏平均损失。</p>
+      <p class="source">Jiayu Li · <cite>The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System</cite><br><a href="https://arxiv.org/abs/2608.23416v2" target="_blank" rel="noopener noreferrer">arXiv:2608.23416v2</a> 首发 2026-08-24 · 所读 v2：2026-09-02<br>这是聚焦核心机制的导读，未逐项审计全文 97 页的全部证明。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-2" tabindex="-1">
+      <p class="eyebrow">02 / 全景 · 我们站在哪里</p>
+      <h2 id="title-2">今天放大的是：怎样评估候选方法。</h2>
+      <p class="lead">作者提出的五阶段标准形，把假设、建模、验证、搜索和规模选择接在一起。今天沿着第 3 步往里看。</p>
+      <ol class="pipeline">
+        <li><div><strong>声明表示方式</strong><small>哪些信息可用？用什么输入描述市场？</small></div></li>
+        <li><div><strong>限制容量并收缩集成</strong><small>防止模型复杂度超过信息所能支持的程度。</small></div></li>
+        <li class="current"><div><strong>连续、净化的块验证 → CVaR 聚合</strong><small>保留时间结构、减少训练验证泄漏，再对坏时段施加压力。</small></div></li>
+        <li><div><strong>限定搜索预算并校正筛选偏差</strong><small>试过很多候选后，不能把最幸运的结果当作确定能力。</small></div></li>
+        <li><div><strong>稳健的 fractional Kelly 规模选择</strong><small>把剩余不确定性传递到风险规模；本课不展开交易操作。</small></div></li>
+      </ol>
+      <p class="source">作者的方法结构：<a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">§10，五阶段标准形</a> 本课中的五句话是教学概括。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-3" tabindex="-1">
+      <p class="eyebrow">03 / 输入与输出</p>
+      <h2 id="title-3">先把未来看成“历史时段的不同配比”。</h2>
+      <div class="grid">
+        <article class="card"><h3>输入</h3><p>把历史划成 <strong>B 个连续时间块</strong>；每块给出同一候选方法的块损失。</p><p>再声明一个 <strong>Λ ≥ 1</strong>：未来可以把某一块的重要性放大多少。</p></article>
+        <article class="card highlight"><h3>输出</h3><p>在允许的配比里，找出<strong>最大的平均损失</strong>。</p><p>损失越低越好。这个输出是评估用的压力值。</p></article>
+      </div>
+      <p class="tagline">中间过程：给每块分配权重 → 检查约束 → 尽量多分给损失大的块。</p>
+      <p><strong>成立条件：</strong>这里采用 A2 的零缺陷简化：生成机制保持不变；A3 再限制未来对历史块的重加权。机制不变不等于观测到的市场分布永远不变。</p>
+      <p class="muted">理论中的块风险与有限样本测得的块损失需要区分；本课先用给定数字看清算术，第 8 页补上估计误差。</p>
+      <p class="source">假设来源：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4，A2 与 A3</a> 本页配比表述为教学解释。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-4" tabindex="-1">
+      <p class="eyebrow">04 / 中间状态 · 权重的边界</p>
+      <h2 id="title-4">Λ 限制的是“最多能偏重多少”。</h2>
+      <div class="formula">pᵢ ≥ 0，　∑ pᵢ = 1，　pᵢ ≤ Λ / B<span class="explain">pᵢ：未来对第 i 个历史块分配的概率权重；B：块数。</span></div>
+      <div class="grid">
+        <article class="card"><h3>4 个块，Λ = 1</h3><p>每块权重最多 ¼；四块加起来又必须是 1。</p><p class="big-number">[¼, ¼, ¼, ¼]</p><p>因此只能等权，结果就是普通均值。</p></article>
+        <article class="card highlight"><h3>4 个块，Λ = 2</h3><p>每块权重最多 ½；可以让两个坏块各占一半。</p><p class="big-number">[½, 0, 0, ½]</p><p>这是可行配比之一，不是预测出的未来频率。</p></article>
+      </div>
+      <p class="source"><a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4，Λ-recurrence</a> Λ 是声明的假设强度，不能把它当作从历史中可靠估出的保证。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-5" tabindex="-1">
+      <p class="eyebrow">05 / 同一输入 · 排名会改变</p>
+      <h2 id="title-5">均值更好，未必更耐“坏时段变多”。</h2>
+      <div class="grid">
+        <article class="card"><h3>候选 A · 三好一坏</h3><div class="blocks"><div class="block">块 1<span>1</span></div><div class="block">块 2<span>1</span></div><div class="block">块 3<span>1</span></div><div class="block bad">块 4<span>9</span></div></div><p>普通均值：<strong>3</strong></p></article>
+        <article class="card"><h3>候选 B · 相对平稳</h3><div class="blocks"><div class="block">块 1<span>3</span></div><div class="block">块 2<span>3</span></div><div class="block">块 3<span>3</span></div><div class="block">块 4<span>4</span></div></div><p>普通均值：<strong>3.25</strong></p></article>
+      </div>
+      <table class="comparison"><caption>在不同 Λ 下的最坏平均损失（越低越好）</caption><thead><tr><th scope="col">Λ</th><th scope="col">候选 A</th><th scope="col">候选 B</th></tr></thead><tbody><tr><th scope="row">1</th><td class="good">3</td><td>3.25</td></tr><tr><th scope="row">1.5</th><td>4</td><td class="good">3.375</td></tr><tr><th scope="row">2</th><td>5</td><td class="good">3.5</td></tr><tr><th scope="row">4</th><td>9</td><td class="good">4</td></tr></tbody></table>
+      <p class="source">全部数字均为<strong>人为构造、无量纲的教学损失</strong>，不是论文实验、市场数据或收益预测。下一页解释算式。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-6" tabindex="-1">
+      <p class="eyebrow">06 / 核心等式 · Theorem 6.2</p>
+      <h2 id="title-6">把权重先填给最坏的块，就是上尾 CVaR。</h2>
+      <ol class="steps"><li>按块损失从大到小排序。</li><li>从最坏的块开始，每块最多分配 Λ / B 的权重。</li><li>分满总权重 1 后停止；最后一块可以只分到一部分。</li></ol>
+      <div class="formula">max<sub>pᵢ≥0, ∑pᵢ=1, pᵢ≤Λ/B</sub> ∑ pᵢ ℓᵢ = CVaR<sub>1/Λ</sub>(块损失)<span class="explain">这里的下标是<strong>尾部比例</strong>，不是置信水平；取损失最大的 1/Λ 部分做平均。</span></div>
+      <div class="card highlight"><h3>沿候选 A 走一遍：Λ = 2</h3><p>损失按原块顺序为 [1, 1, 1, 9]。先给块 4 分配 ½，再给并列次坏中的块 1 分配 ½。</p><p><strong>权重 [½, 0, 0, ½] → ½ × 1 + ½ × 9 = 5。</strong></p><p>并列块可能有多种最优分配；最坏平均损失相同。</p></div>
+      <p class="source">论文定理：<a href="https://arxiv.org/html/2608.23416v2#S6" target="_blank" rel="noopener noreferrer">§6，Theorem 6.2</a> 上面的四块分配是该机制的教学算例。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-7" tabindex="-1">
+      <p class="eyebrow">07 / 最小实践 · 拖动参数看中间状态</p>
+      <h2 id="title-7">允许更大偏重时，权重怎样移动？</h2>
+      <p>需求：输入两组固定损失和 Λ，输出最坏配比及加权损失；保留原块顺序展示，排序时并列按块编号处理。</p>
+      <div class="control-panel"><label for="lambda">重加权上限 Λ</label><output id="lambda-value" for="lambda">2</output><div class="range"><input id="lambda" type="range" min="1" max="4" step="0.25" value="2" aria-describedby="lambda-details"><div class="range-labels"><span>1 · 等权</span><span>4 · 可集中于一块</span></div></div><p id="lambda-details" style="grid-column:1/-1;margin:0">每块权重上限 50%；上尾比例 50%。</p></div>
+      <div class="grid">
+        <article class="card"><div class="toy-heading"><h3>候选 A</h3><output class="big-number" id="risk-a" aria-label="候选 A 最坏平均损失">5</output></div><table class="toy-table"><caption>原块顺序 · 损失 [1, 1, 1, 9]</caption><thead><tr><th scope="col">块</th><th scope="col">损失</th><th scope="col">权重</th><th scope="col">贡献</th></tr></thead><tbody id="weights-a"></tbody></table></article>
+        <article class="card"><div class="toy-heading"><h3>候选 B</h3><output class="big-number" id="risk-b" aria-label="候选 B 最坏平均损失">3.5</output></div><table class="toy-table"><caption>原块顺序 · 损失 [3, 3, 3, 4]</caption><thead><tr><th scope="col">块</th><th scope="col">损失</th><th scope="col">权重</th><th scope="col">贡献</th></tr></thead><tbody id="weights-b"></tbody></table></article>
+      </div>
+      <p class="toy-result" id="toy-result" role="status" aria-live="polite" aria-atomic="true">Λ = 2：A 为 5，B 为 3.5；本算例中 B 的最坏平均损失较低。</p>
+      <p class="source">教学模拟：无训练、无交易、无论文实验复现。横条表示权重占 100% 的比例；“贡献” = 该块损失 × 权重。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-8" tabindex="-1">
+      <p class="eyebrow">08 / 证据边界 · 理论风险与测量值</p>
+      <h2 id="title-8">能算出 CVaR，不等于知道真实部署风险。</h2>
+      <div class="grid"><article class="card highlight"><h3>定理回答的事</h3><p>在论文声明的假设下，对块损失做最坏混合，与上尾 CVaR 对应。</p><p>这是关于<strong>风险结构</strong>的等式。</p></article><article class="card"><h3>现实还要补的事</h3><p>历史块损失只是有限样本估计；样本可能相关，模型还经历过搜索筛选。</p><p>需要控制<strong>估计误差、容量和筛选偏差</strong>，才能讨论部署风险。</p></article></div>
+      <p class="tagline">把估计的块损失代进公式，得到的是一个经验压力分数；这一步本身没有消除估计误差。</p>
+      <div class="card warning"><h3>论文实证并不支持“稳健聚合总能提高收益”</h3><p>附录 B.3 的股票候选比较中，稳健选择没有显示出对普通均值选择的稳定显著优势。应区分可证明的条件命题与有限数据中的效果。</p></div>
+      <p class="source"><a href="https://arxiv.org/html/2608.23416v2#S8" target="_blank" rel="noopener noreferrer">§8，部署风险</a><a href="https://arxiv.org/html/2608.23416v2#A2.SS3" target="_blank" rel="noopener noreferrer">附录 B.3，实证比较</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-9" tabindex="-1">
+      <p class="eyebrow">09 / 反例 · 机制在哪失效</p>
+      <h2 id="title-9">历史配比再怎么改，也混不出没见过的 20。</h2>
+      <div class="grid"><article class="card"><h3>历史块损失</h3><p class="big-number">[1, 1, 1, 9]</p><p>任何非负、总和为 1 的混合，平均损失都不超过 9。</p><p>即使 Λ = 4，把权重全放在坏块上，仍只能得到 9。</p></article><article class="card warning"><h3>未被覆盖的新状态</h3><p class="big-number" style="color:var(--warm)">20</p><p>若未来真实平均损失变成 20，它不能由上述历史块混合表示。</p><p>这时 recurrence 假设不成立，原来的条件保证不能直接沿用。</p></article></div>
+      <p class="tagline">Λ 允许历史坏状态变得更常见；它不会自动创造对未知状态的保护。</p>
+      <p class="muted">此反例给的是简化模型下的未来平均损失；有限样本里的单次大损失，不能仅凭这一个数就判定理论假设被推翻。</p>
+      <p class="source">反例数字是教学构造。假设与适用范围：<a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4</a><a href="https://arxiv.org/html/2608.23416v2#S13" target="_blank" rel="noopener noreferrer">§13</a></p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-10" tabindex="-1">
+      <p class="eyebrow">10 / 轮到你 · 理解待验证</p>
+      <h2 id="title-10">先预测，再回到滑块验证。</h2>
+      <div class="card highlight"><p class="question">把 Λ 从 1 提高到 2，最坏平均损失会变小吗？为什么？</p></div>
+      <p class="lead" style="margin-top:28px">先用一两句话解释你的判断。你可以引用权重约束，也可以沿四块算例推理。</p>
+      <p>收到你的实际回答后，再检查推理、解释卡点并继续下一步。</p>
+      <p class="muted">材料已准备不等于你已掌握；本页不预填你的回答，也不记录未经验证的学习结论。</p>
+      <p class="source">需要自学核对时，参考答案位于<a href="answers.html">独立答案页</a>。建议完成解释后再打开。</p>
+    </section>
+
+    <section class="slide" aria-labelledby="title-11" tabindex="-1">
+      <p class="eyebrow">11 / 回到原文</p>
+      <h2 id="title-11">带着一个具体问题，查一处原文。</h2>
+      <ul class="source-list"><li><a href="https://arxiv.org/html/2608.23416v2#S4" target="_blank" rel="noopener noreferrer">§4：五条公理</a> —— 检查 A2 与 A3 分别限制了什么。</li><li><a href="https://arxiv.org/html/2608.23416v2#S6" target="_blank" rel="noopener noreferrer">§6：Theorem 6.2</a> —— 将权重约束与上尾 CVaR 对上。</li><li><a href="https://arxiv.org/html/2608.23416v2#S8" target="_blank" rel="noopener noreferrer">§8：部署风险</a> —— 找出经验评估到实际风险之间还差哪些误差项。</li><li><a href="https://arxiv.org/html/2608.23416v2#S10" target="_blank" rel="noopener noreferrer">§10：五阶段标准形</a> —— 把今天的评估机制接回整体。</li><li><a href="https://arxiv.org/html/2608.23416v2#A2.SS3" target="_blank" rel="noopener noreferrer">附录 B.3：实证比较</a> —— 检查条件理论与实证效果之间的距离。</li><li><a href="https://arxiv.org/html/2608.23416v2#S13" target="_blank" rel="noopener noreferrer">§13：讨论与边界</a> —— 回看假设、可证伪性和解释范围。</li></ul>
+      <p><a href="notes.html">继续阅读笔记</a> · <a href="./">返回完整学习包</a></p>
+      <p class="source">所有原文链接固定到 v2。本课研究方法、假设与证据；玩具损失没有实际收益含义。打印本页可输出全部 11 张幻灯片。</p>
+    </section>
+  </main>
+  <footer class="controls" aria-label="翻页控制"><button type="button" id="previous" aria-label="上一页">← 上一页</button><div class="page-count"><span id="counter" role="status" aria-live="polite" aria-atomic="true">1 / 11</span><div class="keyboard-hint">← → 翻页 · Home / End</div></div><button type="button" id="next" aria-label="下一页">下一页 →</button></footer>
+  <script>
+    (() => {
+      "use strict";
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const previous = document.querySelector("#previous");
+      const next = document.querySelector("#next");
+      const counter = document.querySelector("#counter");
+      let current = 0;
+
+      function hashIndex() {
+        const match = /^#([1-9]\d*)$/.exec(window.location.hash);
+        return match ? Math.min(Number(match[1]) - 1, slides.length - 1) : 0;
+      }
+
+      function show(index, focus = false) {
+        current = Math.max(0, Math.min(index, slides.length - 1));
+        slides.forEach((slide, position) => { slide.hidden = position !== current; });
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        counter.textContent = `${current + 1} / ${slides.length}`;
+        if (focus) {
+          slides[current].focus({ preventScroll: true });
+          window.scrollTo({ top: 0, behavior: "auto" });
+        }
+      }
+
+      function navigate(index) {
+        const destination = Math.max(0, Math.min(index, slides.length - 1));
+        if (destination !== current) {
+          history.pushState(null, "", `#${destination + 1}`);
+          show(destination, true);
+        }
+      }
+
+      previous.addEventListener("click", () => navigate(current - 1));
+      next.addEventListener("click", () => navigate(current + 1));
+      window.addEventListener("hashchange", () => show(hashIndex()));
+      window.addEventListener("popstate", () => show(hashIndex()));
+      document.addEventListener("keydown", (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (event.target instanceof Element && event.target.closest("input, textarea, select, button, a, [contenteditable]")) return;
+        const destinations = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: slides.length - 1 };
+        if (Object.hasOwn(destinations, event.key)) {
+          event.preventDefault();
+          navigate(destinations[event.key]);
+        }
+      });
+
+      const lambdaInput = document.querySelector("#lambda");
+      const format = (value) => Number(value.toFixed(4)).toString();
+      const percent = (value) => `${format(value * 100)}%`;
+
+      function worstMix(losses, lambda) {
+        const weights = losses.map(() => 0);
+        const order = losses.map((loss, index) => ({ loss, index }))
+          .sort((left, right) => right.loss - left.loss || left.index - right.index);
+        const cap = lambda / losses.length;
+        let remaining = 1;
+        for (const block of order) {
+          if (remaining <= 1e-12) break;
+          weights[block.index] = Math.min(cap, remaining);
+          remaining -= weights[block.index];
+        }
+        return { weights, risk: losses.reduce((sum, loss, index) => sum + loss * weights[index], 0) };
+      }
+
+      function drawCandidate(name, losses, lambda) {
+        const result = worstMix(losses, lambda);
+        document.querySelector(`#risk-${name}`).textContent = format(result.risk);
+        const rows = losses.map((loss, index) => {
+          const row = document.createElement("tr");
+          const label = document.createElement("th");
+          label.scope = "row";
+          label.textContent = String(index + 1);
+          const lossCell = document.createElement("td");
+          lossCell.textContent = String(loss);
+          const weightCell = document.createElement("td");
+          weightCell.textContent = percent(result.weights[index]);
+          const track = document.createElement("div");
+          track.className = "bar-track";
+          track.setAttribute("aria-hidden", "true");
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.width = percent(result.weights[index]);
+          track.append(bar);
+          weightCell.append(track);
+          const contribution = document.createElement("td");
+          contribution.textContent = format(loss * result.weights[index]);
+          row.append(label, lossCell, weightCell, contribution);
+          return row;
+        });
+        document.querySelector(`#weights-${name}`).replaceChildren(...rows);
+        return result;
+      }
+
+      function updateToy() {
+        const lambda = Number(lambdaInput.value);
+        document.querySelector("#lambda-value").textContent = format(lambda);
+        document.querySelector("#lambda-details").textContent = `每块权重上限 ${percent(lambda / 4)}；上尾比例 ${percent(1 / lambda)}。`;
+        const a = drawCandidate("a", [1, 1, 1, 9], lambda);
+        const b = drawCandidate("b", [3, 3, 3, 4], lambda);
+        const comparison = Math.abs(a.risk - b.risk) < 1e-10 ? "两者的最坏平均损失相同" : `${a.risk < b.risk ? "A" : "B"} 的最坏平均损失较低`;
+        document.querySelector("#toy-result").textContent = `Λ = ${format(lambda)}：A 为 ${format(a.risk)}，B 为 ${format(b.risk)}；本算例中${comparison}。`;
+      }
+
+      lambdaInput.addEventListener("input", updateToy);
+      updateToy();
+      show(hashIndex());
+    })();
+  </script>
+</body>
+</html>

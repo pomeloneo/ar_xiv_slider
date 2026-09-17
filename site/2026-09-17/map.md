@@ -1,0 +1,46 @@
+# 历史重加权与风险：学习关系图
+
+_2026-09-17 · 金融 · arXiv:2608.23416v2_
+
+---
+
+从声明假设到最坏加权风险，是本篇的核心机制；经验分数含噪声和历史覆盖不足，是需要同时记住的两条边界。[^1]
+下面按学习顺序组织关系，不表示公理之间存在逻辑蕴含。
+算例和练习是教学设计，不是原文实验复现。
+
+```mermaid
+flowchart TD
+    accTitle: 历史重加权与风险学习图
+    accDescr: 按学习顺序连接研究问题、声明假设、CVaR计算、教学验证和实证局限；箭头不表示各公理相互推出。
+    research_question(["平均回测较好，未来为何仍会失效？"])
+    subgraph assumptions ["📋 声明条件"]
+        no_lookahead["A1：只用当时已知信息"]
+        fixed_mechanism["A2：给定状态的机制不变<br/>本算例取偏差为零"]
+        bounded_weights["A3有限等权示意：对历史状态块重加权<br/>权重和为1，每块不超过Λ/B"]
+        no_lookahead --> fixed_mechanism --> bounded_weights
+    end
+    subgraph calculation ["🧪 计算与教学验证"]
+        worst_risk["定理6.2：最大加权块风险<br/>等于最差1/Λ尾部的CVaR"]
+        toy_example["教学损失：A=[1,1,1,9]<br/>B=[3,3,3,4]；越小越好"]
+        vertex_check["Λ=1选A；Λ=2选B<br/>独立枚举顶点核对数值"]
+        pending_question["待作答：Λ从1增到2<br/>最坏平均损失会变小吗？为什么？"]
+        worst_risk --> toy_example --> vertex_check --> pending_question
+    end
+    subgraph boundaries ["🔍 证据与边界"]
+        observed_noise["真实块风险不可直接观测<br/>实测分数含噪声"]
+        empirical_evidence["稳健准则没有普遍胜出<br/>B.5在声明Λ=4下无可支持的仓位"]
+        unseen_state["未见状态不在历史支持集中<br/>单靠重加权无法覆盖"]
+        limitations(["条件定理不是盈利保证<br/>教学计算不是实证复现"])
+        observed_noise --> empirical_evidence --> limitations
+        unseen_state --> limitations
+    end
+    research_question --> no_lookahead
+    bounded_weights --> worst_risk
+    bounded_weights --> unseen_state
+    worst_risk --> observed_noise
+```
+
+完整说明见[学习笔记](notes.html)，独立 Mermaid 文件为 [map.mmd](map.mmd)。
+修改关系图时应同步这两个文本版本。
+
+[^1]: Jiayu Li. (2026). The Axiomatic Trader, v2. 核心机制见 §6；实证边界见附录 B.3、B.5 和 §13。https://arxiv.org/html/2608.23416v2
