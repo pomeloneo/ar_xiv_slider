@@ -1,13 +1,11 @@
 # 每日 arXiv 论文带读
 
-这个私有仓库保存每日 arXiv 学习包和 HTML 幻灯片，并已配置 GitHub Pages 发布工作流。
+这个公开仓库保存每日 arXiv 学习包和 HTML 幻灯片，通过 GitHub Pages 发布静态网站。
 
-预定站点地址：<https://pomeloneo.github.io/ar_xiv_slider/>（尚未上线）。
+站点入口：<https://pomeloneo.github.io/ar_xiv_slider/>。
 
-2026-09-17 实测：仓库已设为 private，但创建 Pages 时 GitHub 返回 HTTP 422：`Your current plan does not support GitHub Pages for this repository.`。
-免费私有仓库与私有仓库 Pages 是不同的功能，后者在个人账户下需要 GitHub Pro；参见 [GitHub Pages 官方说明](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)。
-保留仓库私有设置，等待解决 Pages 套餐限制或选定其他托管方式后再进行线上交付。
-仓库私有不代表 Pages 网站私有，发布的学习材料默认仍可公开访问。
+仓库保持公开，以使用 GitHub Free 的 Pages 静态托管；学习材料和站点均可公开访问。
+每篇学习包按日期存放在 `YYYY-MM-DD/`，由首页论文清单链接进入。
 
 ## 发布一天的学习包
 
@@ -42,5 +40,5 @@ git commit -m "Publish arXiv learning package for YYYY-MM-DD"
 git push origin main
 ```
 
-Pages 启用后，推送到 `main` 会触发 GitHub Actions 将 `site/` 部署到 GitHub Pages。
+Pages 已启用，推送到 `main` 且包含站点文件变更时，会触发 GitHub Actions 将 `site/` 部署到 GitHub Pages。
 必须检查部署成功及线上页面可访问，再发送课件链接。
