@@ -7,9 +7,21 @@ import argparse
 import html
 import json
 import shutil
+import tempfile
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from urllib.parse import quote
+
+
+PUBLIC_EXTENSIONS = {
+    ".html", ".htm", ".css", ".js", ".mjs", ".md", ".txt", ".mmd",
+    ".py", ".csv", ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp",
+    ".pdf", ".woff", ".woff2", ".ttf",
+}
+PRIVATE_NAMES = {
+    "config", "configuration", "credentials", "secrets", "tokens", "history",
+    "private", "logs", "auth", "agents", "skill",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -41,39 +53,75 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate(args: argparse.Namespace) -> None:
+def validate_date(value: str) -> None:
     try:
-        parsed_date = date.fromisoformat(args.date)
+        parsed_date = date.fromisoformat(value)
     except ValueError as exc:
-        raise SystemExit(f"Invalid --date value {args.date!r}; expected YYYY-MM-DD") from exc
-    if parsed_date.isoformat() != args.date:
-        raise SystemExit(f"Invalid --date value {args.date!r}; expected YYYY-MM-DD")
+        raise SystemExit(f"Invalid date {value!r}; expected YYYY-MM-DD") from exc
+    if parsed_date.isoformat() != value:
+        raise SystemExit(f"Invalid date {value!r}; expected YYYY-MM-DD")
 
-    if not args.source.is_dir():
+
+def validate_slide_path(value: str) -> None:
+    path = PurePosixPath(value)
+    if (
+        not value
+        or path.is_absolute()
+        or path.as_posix() != value
+        or ".." in path.parts
+        or "\\" in value
+        or ":" in path.parts[0]
+        or path.suffix.lower() not in {".html", ".htm"}
+        or value == "index.html"
+    ):
+        raise SystemExit("--slides must be a normalized relative HTML path other than index.html")
+
+
+def is_public_artifact(path: Path) -> bool:
+    return (
+        path.suffix.lower() in PUBLIC_EXTENSIONS
+        and not any(part.startswith(".") for part in path.parts)
+        and not any(Path(part).stem.lower() in PRIVATE_NAMES for part in path.parts)
+    )
+
+
+def validate(args: argparse.Namespace) -> list[Path]:
+    validate_date(args.date)
+    validate_slide_path(args.slides)
+
+    if args.source.is_symlink() or not args.source.is_dir():
         raise SystemExit(f"Source directory does not exist: {args.source}")
 
-    if args.slides == "index.html":
-        raise SystemExit("--slides cannot be index.html because that path is reserved for the day page")
+    source = args.source.resolve()
+    destination = (args.site_root / args.date).resolve()
+    if source.is_relative_to(destination) or destination.is_relative_to(source):
+        raise SystemExit("Source and publication destination must not overlap")
+    for path in (args.site_root, args.site_root / args.date, args.site_root / "papers.json"):
+        if path.is_symlink():
+            raise SystemExit(f"Publication paths must not be symbolic links: {path}")
+    if (args.site_root / args.date).exists() and not (args.site_root / args.date).is_dir():
+        raise SystemExit("The existing day path must be a directory")
 
-    slides_path = args.source / args.slides
-    if not slides_path.is_file():
-        raise SystemExit(f"Slides file does not exist: {slides_path}")
+    artifacts = []
+    for path in sorted(source.rglob("*")):
+        if path.is_symlink():
+            raise SystemExit(f"Symbolic links are not supported in learning packages: {path}")
+        if not path.is_dir() and not path.is_file():
+            raise SystemExit(f"Unsupported learning package file: {path}")
+        relative = path.relative_to(source)
+        if path.is_file() and relative.as_posix() != "index.html" and is_public_artifact(relative):
+            artifacts.append(relative)
+    if Path(args.slides) not in artifacts:
+        raise SystemExit(f"Slides file is missing or excluded from public artifacts: {args.slides}")
+    return artifacts
 
 
-def copy_artifacts(source: Path, destination: Path) -> None:
-    if destination.exists():
-        shutil.rmtree(destination)
-    destination.mkdir(parents=True, exist_ok=True)
-    for source_path in source.rglob("*"):
-        relative_path = source_path.relative_to(source)
-        destination_path = destination / relative_path
-        if source_path.is_symlink():
-            raise SystemExit(f"Symbolic links are not supported in learning packages: {source_path}")
-        if source_path.is_dir():
-            destination_path.mkdir(parents=True, exist_ok=True)
-        elif source_path.is_file():
-            destination_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source_path, destination_path)
+def copy_artifacts(source: Path, destination: Path, artifacts: list[Path]) -> None:
+    destination.mkdir()
+    for relative in artifacts:
+        destination_path = destination / relative
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source / relative, destination_path)
 
 
 def load_manifest(path: Path) -> list[dict[str, str]]:
@@ -85,6 +133,20 @@ def load_manifest(path: Path) -> list[dict[str, str]]:
         raise SystemExit(f"Cannot read existing manifest {path}: {exc}") from exc
     if not isinstance(value, list):
         raise SystemExit(f"Existing manifest must contain a JSON array: {path}")
+    required = {"date", "title", "arxiv_id", "direction", "summary", "path", "slides"}
+    seen_dates = set()
+    for item in value:
+        if not isinstance(item, dict) or any(not isinstance(item.get(key), str) for key in required):
+            raise SystemExit(f"Existing manifest contains an invalid paper entry: {path}")
+        validate_date(item["date"])
+        validate_slide_path(item["slides"])
+        if (
+            item["path"] != f'{item["date"]}/'
+            or item["direction"] not in {"AI", "金融", "经济"}
+            or item["date"] in seen_dates
+        ):
+            raise SystemExit(f"Existing manifest contains an invalid or duplicate paper entry: {path}")
+        seen_dates.add(item["date"])
     return value
 
 
@@ -145,7 +207,7 @@ def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
     <p class="meta">{html.escape(entry["date"])} · {html.escape(entry["direction"])} · arXiv:{html.escape(entry["arxiv_id"])}</p>
     <h1>{html.escape(entry["title"])}</h1>
     <p>{html.escape(entry["summary"])}</p>
-    <p><a class="primary" href="{html.escape(entry["slides"])}">打开 HTML 幻灯片</a></p>
+    <p><a class="primary" href="{quote(entry["slides"], safe="/")}">打开 HTML 幻灯片</a></p>
     <h2>学习包文件</h2>
     <ul>
       {links_markup}
@@ -156,14 +218,12 @@ def render_day_page(entry: dict[str, str], artifact_names: list[str]) -> str:
 """
 
 
-def main() -> None:
-    args = parse_args()
-    validate(args)
-
+def publish(args: argparse.Namespace) -> None:
+    artifacts = validate(args)
     site_root = args.site_root.resolve()
     destination = site_root / args.date
-    site_root.mkdir(parents=True, exist_ok=True)
-    copy_artifacts(args.source.resolve(), destination)
+    manifest_path = site_root / "papers.json"
+    entries = [item for item in load_manifest(manifest_path) if item["date"] != args.date]
 
     entry = {
         "date": args.date,
@@ -175,31 +235,58 @@ def main() -> None:
         "slides": args.slides,
     }
 
-    manifest_path = site_root / "papers.json"
-    entries = [
-        item
-        for item in load_manifest(manifest_path)
-        if item.get("date") != args.date
-    ]
     entries.append(entry)
-    entries.sort(key=lambda item: item.get("date", ""), reverse=True)
-    manifest_path.write_text(
-        json.dumps(entries, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    entries.sort(key=lambda item: item["date"], reverse=True)
+    site_root.mkdir(parents=True, exist_ok=True)
 
-    artifact_names = sorted(
-        str(path.relative_to(destination))
-        for path in destination.rglob("*")
-        if path.is_file()
-    )
-    (destination / "index.html").write_text(
-        render_day_page(entry, artifact_names),
-        encoding="utf-8",
-    )
+    # Build everything outside the upload tree before touching the previous publication.
+    with tempfile.TemporaryDirectory(prefix=".publish-stage-", dir=site_root.parent) as temporary:
+        stage = Path(temporary)
+        staged_day = stage / args.date
+        staged_manifest = stage / "papers.json"
+        copy_artifacts(args.source.resolve(), staged_day, artifacts)
+        (staged_day / "index.html").write_text(
+            render_day_page(entry, [path.as_posix() for path in artifacts]), encoding="utf-8"
+        )
+        staged_manifest.write_text(
+            json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+
+        # Previous files remain recoverable outside site/, including after a successful rerun.
+        backup = Path(tempfile.mkdtemp(prefix=".publish-backup-", dir=site_root.parent))
+        moved_day = moved_manifest = installed_day = installed_manifest = False
+        try:
+            if destination.exists():
+                destination.rename(backup / args.date)
+                moved_day = True
+            if manifest_path.exists():
+                manifest_path.rename(backup / "papers.json")
+                moved_manifest = True
+            staged_day.rename(destination)
+            installed_day = True
+            staged_manifest.rename(manifest_path)
+            installed_manifest = True
+        except BaseException:
+            if installed_manifest:
+                manifest_path.rename(stage / "failed-papers.json")
+            if installed_day:
+                destination.rename(stage / "failed-day")
+            if moved_day:
+                (backup / args.date).rename(destination)
+            if moved_manifest:
+                (backup / "papers.json").rename(manifest_path)
+            raise
+        if moved_day or moved_manifest:
+            print(f"Previous publication backup: {backup}")
+        else:
+            backup.rmdir()
 
     print(f"Published {args.date} to {destination}")
-    print(f"Slides URL path: /ar_xiv_slider/{args.date}/{args.slides}")
+    print(f'Slides URL path: /ar_xiv_slider/{args.date}/{quote(args.slides, safe="/")}')
+
+
+def main() -> None:
+    publish(parse_args())
 
 
 if __name__ == "__main__":
