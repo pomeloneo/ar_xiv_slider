@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="activation steering 像在模型内部推一把，但过去常靠人工试层数和强度；论文用预测何时成形与哪些注意力头有因果作用来自动选点，并同时发现干预会制造提示注入攻击面。">
+<title>参考答案 · Deep Noir：自动寻找 Transformer 中该在哪一层做行为引导</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20722v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>不同架构的预测成形位置不同，论文也观察到明显不同的层选择分布。</p></li><li><p>同时报告收益、非目标能力泄漏和攻击风险，并按部署损失设阈值，不能只报最高准确率。</p></li><li><p>不足；它只在给定任务和验证集提供证据，复杂推理与更大模型仍需独立测试。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

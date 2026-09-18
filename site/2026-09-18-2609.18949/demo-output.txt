@@ -1,0 +1,4 @@
+真实类别：Counter({'stable': 18, 'watch': 1, 'stress': 1})
+永远稳定：accuracy=90%，Macro-F1=0.316
+识别少数类：accuracy=95%，Macro-F1=0.879
+边界：20条手写标签不测概率校准、时间泄漏、价格偏离、成本或真实稳定币风险。

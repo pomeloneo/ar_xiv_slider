@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用“跟着一个真实排队者进出队伍”理解被动订单如何省去价格预测，以及延迟为何会让继承的信息迅速过期。">
+<title>详细讲解 · 通过订单级影子跟随实现无模型被动执行</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18019v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">金融 · arXiv:2609.18019v1</p>
+<h1>通过订单级影子跟随实现无模型被动执行</h1><p class="original" lang="en">Model-Free Passive Execution via Order-Level Shadowing</p>
+<p class="lead">用“跟着一个真实排队者进出队伍”理解被动订单如何省去价格预测，以及延迟为何会让继承的信息迅速过期。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">不猜下一步，只跟着刚刚真实挂出的钱</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先懂限价单、队列和被动成交</a><a href="#section-3">一条市场消息如何变成一个动作</a><a href="#section-4">为什么撤单和成交要区别处理</a><a href="#section-5">“无模型”不是“没有市场信息”</a><a href="#section-6">跟踪一个 ID 的完整生命周期</a><a href="#section-7">全年回放测到了什么</a><a href="#section-8">回放最重要的缺口是市场不会回应你</a><a href="#section-9">从新增消息到退出队列</a><a href="#section-10">最小实践：用 ID 驱动一个影子单</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>不猜下一步，只跟着刚刚真实挂出的钱</h2><p>大额买卖若一次完成，可能把市场现有报价吃光并推高成本，所以通常拆成许多小单。被动挂单等待别人来成交，能少付价差，却面临“挂在哪里、何时撤”的问题。传统方案常预测成交概率和订单簿变化。</p><p>Shadow-PPOV 换一种做法：看见第三方在某价格、某场所新增订单时，按固定概率在同处挂自己的“影子单”，并记住对方的订单编号；对方撤走时立刻跟撤，对方被成交时短暂等待扫单是否继续。读完后你应能解释它为何“无模型但不无信息”，也知道它不是投资信号或个性化交易建议。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[逐订单行情新增消息] --&gt; B{固定率选择器跟随?}
+B -- 否 --&gt; A
+B -- 是 --&gt; C[复制价格与场所发送影子单]
+C --&gt; D[保存被跟随ID到影子ID]
+D --&gt; E{被跟随单如何结束}
+E -- 撤单或修改 --&gt; F[立即撤影子]
+E -- 成交 --&gt; G[开启短宽限窗]
+G --&gt; H{影子先成交?}
+H -- 是 --&gt; I[计入母单进度]
+H -- 否 --&gt; F
+I --&gt; J[检查完成量与安全护栏]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先懂限价单、队列和被动成交</h2><p>限价买单规定最多愿意付多少，挂在订单簿里等待卖方；主动单则立刻跨过买卖价差成交。在先价后时的 FIFO 队列中，同价后到的影子排在被跟随订单后面：只有扫单先吃掉前面的量，才可能轮到影子。</p><p>POV 是按市场成交量维持参与比例的执行思路。Shadow-PPOV 名字相似，但控制的是“观察到的新增订单中跟随多少”，实际成交占市场量的比例是结果，不是可精确设定的输入。</p></section><section id="section-3"><h2>一条市场消息如何变成一个动作</h2><p>输入是逐订单市场消息：新增、撤单、成交、修改，并带交易所订单 ID、场所、方向、价格和数量。看到合格新增时，算法可按固定概率或每 N 条选择一次，在同一价格和场所发送显示限价单。</p><p>核心状态只是“被跟随 ID → 自己的影子 ID”的关联，加上剩余目标量和安全限制。它不保存对方的价格、排队位置或成交概率来做撤单判断；收到相同 ID 的生命周期结束消息时，依据类型撤单或开启短宽限窗。</p></section><section id="section-4"><h2>为什么撤单和成交要区别处理</h2><p>若对方主动撤单，原有流动性已消失，影子继续留下可能暴露于不利价格，因此立即撤。若对方被市场单成交，扫单可能仍在路上并即将轮到排在后面的影子；立刻撤会永远躲开本来可得到的成交，所以算法等待少量 burst 事件。</p><p>这种规则仍是 ID 驱动，不计算订单簿状态。实际参考实现还叠加完成量、过度对冲和价格漂移等安全护栏；应区分论文的极简核心与生产实现的安全超集。</p></section><section id="section-5"><h2>“无模型”不是“没有市场信息”</h2><p>算法直接继承另一个参与者已经做出的价格和场所选择，相当于免费使用订单流里隐含的判断，却不推断价格方向。它适合作为被动挂单的简单基线：更复杂预测模型至少要在相同条件下超过它。</p><p>若多个场所中新增订单分布为 50:30:20，固定概率跟随会在期望上继承同样分布，但这不是费用、延迟或逆向选择意义上的最优路由。论文只在单一 CME 场所评估，跨场所继承只是分析性主张，未被实测。</p></section><section id="section-6"><h2>跟踪一个 ID 的完整生命周期</h2><p>看到新增单 A：买入、价格 5000、数量 3。选择器决定跟随，发送自己的买单 S 并记录 A→S。若 A 撤单，查表后撤 S；若 A 被成交，给 S 开短宽限窗，若扫单继续则 S 成交，否则窗口结束撤 S。</p><p>关键中间状态只有选择结果、ID 映射、宽限窗和自己已成交数量。若执行异常，要问消息是否延迟、ID 是否匹配、modify 如何定义、护栏是否抢先触发，而不是虚构一个算法根本没有的方向预测。</p></section><section id="section-7"><h2>全年回放测到了什么</h2><p>作者用 2025 年 CME ES 期货逐订单数据做确定性回放。近似匹配参与率时，被动 Shadow-PPOV 与主动 POV 相对滑点分别约 +0.0955 与 +0.0952 tick/合约，区间重叠；被动完成 100 张平均更慢，且约 99% 成交量来自挂单。</p><p>把订单、撤单和行情三条路径共同延迟 0—5 毫秒时，两种方法成本都单调上升；被动从约 0.097 到 0.150 tick，主动从约 0.087 到 0.296。30 秒是故意摧毁信息新鲜度的控制实验：被动成本升到约 0.3673，是无延迟的 3.9 倍。这支持订单流信息真实且易腐。</p></section><section id="section-8"><h2>回放最重要的缺口是市场不会回应你</h2><p>模拟器把影子单插入已记录行情，却不让市场因它的存在改变；自己的成交也不会挤掉别人或改变后续订单。这在约 4.5% 聚合参与率时或许较温和，但参与率更高时假设变紧，不能当成真实大规模执行结果。</p><p>回放是单产品、单场所、特定年份；隐藏流动性、多场所费用和真实排队反馈未覆盖。教学 demo 只执行几条消息，既无真实资金也无价格，不可用作交易策略评价或执行建议。</p></section><section id="section-9"><h2>从新增消息到退出队列</h2><p>市场新增单到达；固定率选择器决定是否跟；影子复制价格与场所并排在后面；ID 映射保存关联；撤单消息触发立即撤，成交消息触发短宽限；自己的成交计入母单进度；安全护栏负责完成或风险退出。</p><p>要评价它，至少同时看成本、完成速度、参与率、成交方式和延迟。只看“被动少付价差”会漏掉逆向选择，只看回放滑点又会漏掉自身市场冲击。</p></section><section id="section-10"><h2>最小实践：用 ID 驱动一个影子单</h2><p>需求：对新增、成交、时间推进和撤单消息跑一个小状态机，显示 A 的成交宽限与 B 的立即撤销。正常例让 A 的影子在宽限期成交；边界说明没有模拟价格、队列深度和自身冲击。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>A: 新增被选中 → 影子挂单，状态=resting
+A: 被跟随单成交 → 开启宽限，状态=grace
+A: 扫单继续 → 影子成交，状态=filled
+B: 新增被选中 → 影子挂单，状态=resting
+B: 被跟随单撤销 → 影子立即撤销，状态=cancelled
+边界：消息顺序为手写示例；没有价格、队列深度、延迟、自身市场冲击或真实交易。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么对方被成交时立刻撤影子，可能导致被动单几乎永远成交不了？</li><li>30 秒延迟实验能否证明 Shadow-PPOV 比所有预测模型好？</li><li>回放没有模拟自身市场冲击，会让高参与率结果产生什么解释风险？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.18019v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18019v1">元数据与版本</a></p><p>已读取机制、算法、实现护栏、全年回放、被动/主动对照、延迟实验与限制；核对算法 1、表 1、表 3—6和图 1—5。</p><p>论文评估的是执行基线，不提供方向预测；本学习包不构成交易指令。小状态机未模拟订单簿、价差、费用或真实成交。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、14 条图表说明，正文约 94,604 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Model-Free Passive Execution via Order-Level Shadowing</p><p>Maciejewski, Vincent</p>
+<p>arXiv:2609.18019v1 · 发布日期：2026-09-16 · 金融</p>
+<p><a href="https://arxiv.org/abs/2609.18019v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18019v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="平台事后可以改费率或路由，开发者会预见到被“套牢”而少投资；可迁移权提供退出价值，但完全开放也可能复制敏感资产、碎片化生态。">
+<title>详细讲解 · AI 智能体平台该开放多少：可迁移性如何改变开发者投资</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.17558v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.17558v1</p>
+<h1>AI 智能体平台该开放多少：可迁移性如何改变开发者投资</h1><p class="original" lang="en">Developer Investment in Agentic Platforms: Capability Spillovers, Hold-Up, and Portability</p>
+<p class="lead">平台事后可以改费率或路由，开发者会预见到被“套牢”而少投资；可迁移权提供退出价值，但完全开放也可能复制敏感资产、碎片化生态。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">先从一个普通人会遇到的问题开始</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先补两块必要基础</a><a href="#section-3">论文接收什么，输出什么</a><a href="#section-4">第一步：可迁移的退出选项提高事前可保护回报</a><a href="#section-5">第二步：平台比较投资增益、租金与治理泄漏</a><a href="#section-6">跟着一个小例子看中间状态</a><a href="#section-7">作者拿什么证据支持主张</a><a href="#section-8">哪些结论不能顺手扩大</a><a href="#section-9">把整条因果链重新接起来</a><a href="#section-10">最小实践：把核心机制跑一遍</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>先从一个普通人会遇到的问题开始</h2><p>平台事后可以改费率或路由，开发者会预见到被“套牢”而少投资；可迁移权提供退出价值，但完全开放也可能复制敏感资产、碎片化生态。</p><p>今天读完《AI 智能体平台该开放多少：可迁移性如何改变开发者投资》，目标不是记住论文名，而是能用自己的话回答：开发者担心工作流、工具连接和任务记录被平台锁住时，允许带走多少能力才能鼓励投资，又不会造成过度泄漏和安全成本？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[退出价值缓解套牢]
+C --&gt; D[求封闭部分开放或全开]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先补两块必要基础</h2><p>hold-up（攫取/套牢）是投资先发生、条款后重谈时，投资者拿不到自己创造的足够回报，于是事前少投入。</p><p>portability 不是把所有数据原样导出，而是目的平台在可验证规则下承认多少工作流、记录、授权记忆或能力。论文用 0 到 1 表示保护强度。</p></section><section id="section-3"><h2>论文接收什么，输出什么</h2><p>输入是开发者投资成本、直接能力收益、对其他智能体的溢出、原平台事后抽取能力、目的平台认可、验证质量和泄漏治理成本。输出是投资水平与最优开放程度。</p><p>中间状态包括开发者的可保护外部回报、平台因更多投资得到的价值、额外留给开发者的租金及迁移造成的真实或纯分配成本。</p></section><section id="section-4"><h2>第一步：可迁移的退出选项提高事前可保护回报</h2><p>平台无法完全承诺未来费率时，封闭关系让开发者预期成果会被抽取；可验证迁移提高离开后的回报，因此增加投资。</p><p>即便平台不能完全抽走事后剩余，结论仍成立；而能力对其他开发者的生产性溢出还会留下另一层投资不足。</p></section><section id="section-5"><h2>第二步：平台比较投资增益、租金与治理泄漏</h2><p>更开放扩大能力和收费基础，却也要给开发者更多回报，并承担验证、复制、竞争泄漏和安全成本。</p><p>验证既能降低危险迁移，又能让目的平台更愿意认可资产、抬高开发者外部租金，所以验证不必单调增加最优开放度。</p></section><section id="section-6"><h2>跟着一个小例子看中间状态</h2><p>开发者要花 100 单位构建工作流。完全封闭时预期平台改费后只能保留 30，于是放弃；若经验证可迁移使外部回报升到 80，投资更可能发生。</p><p>若迁移只是把利润从原平台转给目的平台，社会成本可能小；若会复制敏感授权、制造兼容碎片，真实成本会让完全开放过头。</p></section><section id="section-7"><h2>作者拿什么证据支持主张</h2><p>论文建立原平台、目的平台和开发者的理论模型，刻画封闭、部分与完全可迁移的边界条件，并给出投资、验证和工具组合的比较静态。</p><p>作者证明投资随可保护回报上升，但最优迁移取决于诱导投资收益是否超过租金、竞争泄漏和治理成本。没有平台级实证数据验证参数或福利大小。</p></section><section id="section-8"><h2>哪些结论不能顺手扩大</h2><p>单期抽象模型把复杂资产压成一个能力存量，现实还涉及用户同意、数据权属、动态创新、多平台接入和安全审计。</p><p>“竞争泄漏”若只是私人利润转移与若是真实重复成本，政策含义完全不同；必须先实证区分，不能先验认定越开放或越封闭越好。</p></section><section id="section-9"><h2>把整条因果链重新接起来</h2><p>研究问题“开发者担心工作流、工具连接和任务记录被平台锁住时，允许带走多少能力才能鼓励投资，又不会造成过度泄漏和安全成本？”先被拆成可观察输入，再经过“第一步：可迁移的退出选项提高事前可保护回报”与“第二步：平台比较投资增益、租金与治理泄漏”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section id="section-10"><h2>最小实践：把核心机制跑一遍</h2><p>需求：用一组明确标为教学设定的小数据演示“比较封闭和可验证迁移下开发者的预期可保护回报”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 投资成本：100
+- 封闭时可保留：30
+- 迁移时可保留：80
+- 额外生态价值：40
+中间状态：
+1. 开发者比较私有回报与成本
+2. 封闭时投资不足
+3. 迁移提高退出价值
+4. 平台再扣除验证与真实泄漏成本
+正常例：可迁移可诱导更多投资，但是否应完全开放取决于治理成本。
+边界：数字不来自平台数据，没有计算任何真实产品的最优权限或迁移方案。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么平台自己也可能自愿给予一定迁移权？</li><li>验证更强为什么不一定让最优开放度更高？</li><li>若泄漏只是利润转移，社会福利判断会怎样变化？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/pdf/2609.17558">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.17558v1">元数据与版本</a></p><p>已读能力存量与溢出、套牢基准、可迁移投资结果、平台最优选择、验证与目的平台、费率承诺组合、福利与结论。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 pdf_text，提取到 65 个相关章节、0 条图表说明，正文约 98,088 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Developer Investment in Agentic Platforms: Capability Spillovers, Hold-Up, and Portability</p><p>Xie, Chupeng</p>
+<p>arXiv:2609.17558v1 · 发布日期：2026-07-21 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.17558v1">arXiv 论文信息</a> · <a href="https://arxiv.org/pdf/2609.17558">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

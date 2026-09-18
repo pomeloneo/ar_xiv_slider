@@ -15,31 +15,78 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 BASE_URL = 'https://pomeloneo.github.io/ar_xiv_slider/'
+PRIMARY_DIRECTIONS = ('AI', '金融', '经济', '社会研究', '科技与产业')
 
 
 def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
+PROGRESS_FIELDS = ('learner_status', 'learner_answer', 'mastery_verified', 'pending_question')
+
+
+def notification_idempotency_key(day: Path, commit: str) -> str:
+    return f'arxiv-batch-{day.name}-{commit[:12]}'
+
+
+def successful_receipt_for_commit(receipt: dict | None, commit: str) -> bool:
+    return bool(receipt and receipt.get('ok') is True and receipt.get('publication_commit') == commit)
+
+
+def history_key(row: dict) -> str:
+    # Each publication is its own event; a later re-selection of the same paper on
+    # another day keeps a distinct record instead of overwriting past deliveries.
+    return row.get('publication_key') or row['arxiv_base_id']
+
+
 def update_history(path: Path, papers: list[dict]) -> None:
     old = [json.loads(line) for line in path.read_text().splitlines() if line.strip()] if path.exists() else []
-    by_id = {row['arxiv_base_id']: row for row in old}
+    by_key = {history_key(row): row for row in old}
+    # A learner's mastery status belongs to the paper, so the newest record of the
+    # same base ID seeds progress even across separate publication events.
+    progress_by_base: dict[str, dict] = {}
+    for row in old:
+        progress_by_base[row['arxiv_base_id']] = {key: row[key] for key in PROGRESS_FIELDS if key in row}
     for paper in papers:
-        prior = by_id.get(paper['arxiv_base_id'], {})
+        key = history_key(paper)
+        prior = by_key.get(key, {})
+        # Notification continuity is per publication event: only a prior send of this
+        # same event may mark it already delivered.
         if (prior.get('notification_status') == 'sent'
                 and paper.get('notification_status') != 'sent'):
             paper['notification_status'] = 'sent'
             paper['notification'] = prior.get('notification', {})
             paper['delivery_status'] = 'materials_ready_published_and_notified'
         # A republish must never erase a learner's actual answer or verified progress.
-        progress = {key: prior[key] for key in ('learner_status', 'learner_answer', 'mastery_verified', 'pending_question') if key in prior}
+        progress = {**progress_by_base.get(paper['arxiv_base_id'], {}),
+                    **{field: prior[field] for field in PROGRESS_FIELDS if field in prior}}
         paper.update(progress)
-        by_id[paper['arxiv_base_id']] = {**prior, **paper}
+        by_key[key] = {**prior, **paper}
     with tempfile.NamedTemporaryFile(mode='w', dir=path.parent, encoding='utf-8', delete=False) as out:
-        for row in by_id.values():
+        for row in by_key.values():
             out.write(json.dumps(row, ensure_ascii=False) + '\n')
         temporary = out.name
     os.replace(temporary, path)
+
+
+def build_digest(papers: list[dict]) -> str:
+    counts = {}
+    for paper in papers:
+        direction = paper['direction']
+        counts[direction] = counts.get(direction, 0) + 1
+    ordered = [direction for direction in PRIMARY_DIRECTIONS if direction in counts]
+    ordered.extend(sorted(set(counts) - set(ordered)))
+    breakdown = '、'.join(f'{direction} {counts[direction]} 篇' for direction in ordered)
+    message = [f'新增 {len(papers)} 篇完整论文学习包：{breakdown}。',
+        '[打开论文列表](' + BASE_URL + ')',
+        '每篇均有中文完整讲解、图解课件、Mermaid、已运行的小算例和独立参考答案。任选文章版或图解版即可。',
+        '列表与阅读页可手动标记已读／未读；状态仅保存在当前浏览器。']
+    for direction in ordered:
+        message.append('\n' + direction)
+        for paper in papers:
+            if paper['direction'] == direction:
+                message.append('- [' + paper['title_zh'] + '](' + paper['publication']['overview_url'] + ')')
+    return '\n\n'.join(message)
 
 
 def finalize(day: Path, site: Path, commit: str, send: bool, recipient: str | None, cli: str | None) -> None:
@@ -47,8 +94,8 @@ def finalize(day: Path, site: Path, commit: str, send: bool, recipient: str | No
         raise SystemExit('--send requires --recipient and an available --lark-cli executable')
     batch = json.loads((day / 'batch-prepared.json').read_text())
     papers = batch['papers']
-    if len(papers) != 30:
-        raise SystemExit('Expected 30 prepared papers')
+    if len(papers) != batch.get('count') or not papers:
+        raise SystemExit('Prepared paper count does not match the batch manifest')
     audit = day / '.source'
     audit.mkdir(exist_ok=True)
     paths = ['index.html', 'papers.json', 'assets/read-state.js', 'assets/paper-list.js', 'assets/lesson.js', 'assets/lesson.css']
@@ -78,27 +125,21 @@ def finalize(day: Path, site: Path, commit: str, send: bool, recipient: str | No
     receipt_path = audit / 'batch-lark-receipt.json'
     if send:
         receipt = json.loads(receipt_path.read_text()) if receipt_path.exists() else None
-        if not receipt or receipt.get('ok') is not True:
-            message = ['新增 30 篇完整论文学习包：AI 13 篇、金融 7 篇、经济 10 篇。',
-                '[打开论文列表](' + BASE_URL + ')',
-                '每篇均有中文完整讲解、图解课件、Mermaid、已运行的小算例和独立参考答案。任选文章版或图解版即可。',
-                '列表与阅读页可手动标记已读／未读；状态仅保存在当前浏览器。']
-            for direction in ('AI', '金融', '经济'):
-                message.append('\n' + direction)
-                for paper in papers:
-                    if paper['direction'] == direction:
-                        message.append('- [' + paper['title_zh'] + '](' + paper['publication']['overview_url'] + ')')
-            text = '\n\n'.join(message)
+        if not successful_receipt_for_commit(receipt, commit):
+            text = build_digest(papers)
             (audit / 'batch-message.md').write_text(text, encoding='utf-8')
             result = subprocess.run([cli, 'im', '+messages-send', '--as', 'bot', '--user-id', recipient,
-                '--markdown', text, '--idempotency-key', 'arxiv-batch-' + day.name + '-30'], capture_output=True, text=True, timeout=90)
+                '--markdown', text, '--idempotency-key', notification_idempotency_key(day, commit)],
+                capture_output=True, text=True, timeout=90)
             if result.returncode != 0:
                 (audit / 'batch-notification-error.txt').write_text(result.stderr)
                 raise SystemExit('Site verified and history saved, but bot send failed; see local notification error')
             receipt = json.loads(result.stdout)
-            write_json(receipt_path, receipt)
             if receipt.get('ok') is not True:
+                write_json(receipt_path, receipt)
                 raise SystemExit('Bot did not return ok:true; publication remains recorded without notification success')
+            receipt['publication_commit'] = commit
+            write_json(receipt_path, receipt)
         for paper in papers:
             paper['notification_status'] = 'sent'
             paper['delivery_status'] = 'materials_ready_published_and_notified'

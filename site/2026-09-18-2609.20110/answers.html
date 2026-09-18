@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用“看清、找对位置、通过规则”三张体检表，理解为什么模型自报 95% 信心仍不够自动放行发票字段。">
+<title>参考答案 · 感知、版面与校验：为金融单据直通处理校准可信度</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20110v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>不能。AUROC 是整体排序指标；目标风险下的覆盖还取决于分数校准、错误分布和阈值选择，必须直接看风险—覆盖曲线。</p></li><li><p>版面通道最直接感知位置分布变化，感知与规则也可能受影响。校准保证依赖分布可比，模板变化后旧风险估计可能失效。</p></li><li><p>送人工复核。规则通过可能是偶然或由其他错误值共同造成；无法在原页面 grounded 是关键缺口，不能被单一强规则覆盖。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="买家账单上两边都多同样一项，看似会抵消；关键是这笔钱不是交给第三方政府，而是由同时卖芯片的高通收取，因此两家调价后的收益变化不对称。">
+<title>图解全文 · 同样向所有手机收费，为何仍可能偏向自家芯片</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18161v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 经济</p><h1 tabindex="-1">同样向所有手机收费，为何仍可能偏向自家芯片</h1><p class="lead">买家账单上两边都多同样一项，看似会抵消；关键是这笔钱不是交给第三方政府，而是由同时卖芯片的高通收取，因此两家调价后的收益变化不对称。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 经济</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>买家账单上两边都多同样一项，看似会抵消；关键是这笔钱不是交给第三方政府，而是由同时卖芯片的高通收取，因此两家调价后的收益变化不对称。</p><p>今天读完《同样向所有手机收费，为何仍可能偏向自家芯片》，目标不是记住论文名，而是能用自己的话回答：一笔专利附加费对使用高通或竞争对手芯片的手机都同额收取，为什么“表面不歧视”仍不代表芯片选择不受扭曲？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 经济</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[追踪被转移销量的收费归属]
+C --&gt; D[求相对价格与销量变化]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 经济</p><h1 tabindex="-1">先补两块必要基础</h1><p>all-in price 是芯片标价加上与选择相关的许可或附加成本。facial neutrality 只看收费规则文字相同；economic neutrality 要求两家相对价格和销量选择不被改变。</p><p>diversion ratio 是一家涨价失去的销量中有多少转给对手，通常小于 1，因为一部分买家会退出、延迟或转向其他方案。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 经济</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是两家芯片企业的需求、交叉价格反应、成本、FRAND 基础许可费，以及每台或按手机收入比例收取的附加费。输出是均衡总价、利润和销量变化。</p><p>论文把同额政府税与高通收取的附加费作基准比较：对竞争对手二者相似，对收费并卖芯片的一方则不同。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 经济</p><h1 tabindex="-1">第一步：沿着涨价后流失销量的钱流看激励</h1><p>政府税由财政拿走；高通附加费即使在对手芯片手机上也归高通。高通提高自家芯片总价、把部分销量推给对手时，仍可从那些对手手机收附加费。</p><p>因为只有部分销量转给对手，高通在附加费制度下的最优调价激励与政府税不同，不能用“买家两边都付”直接判中立。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 经济</p><h1 tabindex="-1">第二步：比较两家均衡总价和产量而非收费条文</h1><p>模型表明，在原本可让政府税中立的条件下，附加费对竞争对手总价的提高严格更多；对称需求下，对手产量下降也更多。</p><p>按收入比例收费时问题更强：只要 FRAND 许可率为正，所谓非歧视税本身通常也不满足芯片中立。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 经济</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>教学例中，两种芯片手机都付 10 元附加费。若高通芯片涨价流失 100 台，只有 60 台转到对手，高通仍从这 60 台各收附加费；另外 40 台退出市场，钱流与政府税情形不同。</p><p>所以分析不能只从手机厂“无论选谁都付 10 元”出发，还要把收费归属带回两家芯片商的利润函数。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 经济</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>论文建立价格竞争均衡模型，以一系列命题比较无附加费、政府税、非歧视附加费和歧视性附加费；核心结果来自一阶条件和比较静态。</p><p>作者把模型用于批评 FTC v. Qualcomm 上诉判决中的芯片中立论证，并讨论每台收费和从价收费。论文没有重新估计案件中的真实需求、转移率或损害金额。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 经济</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>结论依赖需求可微、均衡存在、局部比较及文中曲率和转移条件；现实还有多家对手、谈判、专利价值、长期研发和手机下游定价。</p><p>论文作者披露曾在高通相关案件中担任对高通不利的专家；模型能指出法律论证中的经济漏洞，不等同于对案件全部事实或法律责任的最终判决。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 经济</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“一笔专利附加费对使用高通或竞争对手芯片的手机都同额收取，为什么“表面不歧视”仍不代表芯片选择不受扭曲？”先被拆成可观察输入，再经过“第一步：沿着涨价后流失销量的钱流看激励”与“第二步：比较两家均衡总价和产量而非收费条文”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 经济</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“比较政府收税与兼营芯片者收附加费时流失销量的钱流”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 附加费：10
+- 高通涨价流失销量：100
+- 转向对手：60
+- 退出市场：40
+中间状态：
+1. 政府税情形税款归第三方
+2. 附加费情形对手手机仍向高通付费
+3. 高通从转移的60台保留收费
+4. 因此两制度的调价激励不同
+正常例：收费文字相同不等于收款方的竞争激励相同。
+边界：数字是钱流类比，没有求均衡、估计真实转移率或评价个案损害。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 经济</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么从买家账单看“同额”还不足以证明中立？</li><li>diversion ratio 小于 1 在机制中有什么作用？</li><li>理论模型能否直接给出案件赔偿金额？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 经济</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/pdf/2609.18161">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18161v1">元数据与版本</a></p><p>已读案件背景、两企业模型、政府税基准、每台附加费核心命题、销量比较、从价扩展与结论；核对关键命题及作者利益背景。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 pdf_text，提取到 40 个相关章节、0 条图表说明，正文约 101,078 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 同样向所有手机收费，为何仍可能偏向自家芯片</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：沿着涨价后流失销量的钱流看激励</option><option value="7">7. 第二步：比较两家均衡总价和产量而非收费条文</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Why a Non-Discriminatory Royalty Surcharge Is Not Chip-Neutral: The Error in FTC v. Qualcomm</p><p>Yi, Sang-Seung</p>
+<p>arXiv:2609.18161v1 · 发布日期：2026-09-16 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.18161v1">arXiv 论文信息</a> · <a href="https://arxiv.org/pdf/2609.18161">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/pdf/2609.18161">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18161v1">元数据与版本</a></p><p>已读案件背景、两企业模型、政府税基准、每台附加费核心命题、销量比较、从价扩展与结论；核对关键命题及作者利益背景。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 pdf_text，提取到 40 个相关章节、0 条图表说明，正文约 101,078 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

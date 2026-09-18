@@ -90,18 +90,27 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: path.join(out, 'home-mobile.png') });
   const entries = JSON.parse(await readFile(path.join(root, 'papers.json'), 'utf8'));
+  const newestDate = entries.map((entry) => entry.date).sort().at(-1);
   let capturedLesson = false;
   for (const entry of entries) {
     if (entry.path === '2026-09-17/') continue;
     await page.goto(base + '/' + entry.path + 'notes.html');
     assert.equal(await page.locator('pre.mermaid').count(), 0, entry.path + ' unrendered diagram markup');
+    if (entry.date === newestDate) {
+      assert.equal(await page.locator('div.mermaid').count(), 0, entry.path + ' unrendered diagram container');
+    }
     await page.waitForFunction(() => [...document.querySelectorAll('[data-mermaid]')].every((figure) => ['ready', 'error'].includes(figure.dataset.mermaidState)));
     assert.equal(await page.locator('[data-mermaid-state="error"]').count(), 0, entry.path + ' Mermaid');
     assert.ok(await page.locator('[data-mermaid-output] svg').count(), entry.path + ' diagram');
+    assert.equal(await page.locator('[data-mermaid-output]').evaluateAll((outputs) =>
+      outputs.every((output) => output.scrollWidth <= output.clientWidth + 1)), true, entry.path + ' initial diagram fit');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, entry.path + ' article overflow');
     if (!capturedLesson) await page.screenshot({ path: path.join(out, 'lesson-notes-mobile.png') });
     await page.goto(base + '/' + entry.path + 'slides.html');
     assert.equal(await page.locator('pre.mermaid').count(), 0, entry.path + ' unrendered slide diagram');
+    if (entry.date === newestDate) {
+      assert.equal(await page.locator('div.mermaid').count(), 0, entry.path + ' unrendered slide diagram container');
+    }
     assert.equal(await page.locator('.slide:visible').count(), 1);
     await page.locator('#next').click();
     assert.equal(await page.locator('#slide-2').isVisible(), true);

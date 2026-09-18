@@ -10,6 +10,11 @@ import shutil
 from pathlib import Path
 
 MERMAID_PRE = re.compile(r'''<pre\b[^>]*\bclass=["'][^"']*\bmermaid\b[^"']*["'][^>]*>(.*?)</pre>''', re.I | re.S)
+MERMAID_DIV = re.compile(r'''<div\b[^>]*\bclass=["'][^"']*\bmermaid\b[^"']*["'][^>]*>(.*?)</div>''', re.I | re.S)
+EXECUTABLE_HTML = re.compile(
+    r'''<script\b|<[^>]*\s+on[a-z0-9_-]+\s*=|javascript:''',
+    re.I,
+)
 
 
 def esc(value: object) -> str:
@@ -25,7 +30,13 @@ def diagram(source: str) -> str:
 
 
 def render_fragment(fragment: str) -> str:
-    return MERMAID_PRE.sub(lambda match: diagram(html.unescape(match.group(1))), fragment)
+    rendered = MERMAID_PRE.sub(lambda match: diagram(html.unescape(match.group(1))), fragment)
+    return MERMAID_DIV.sub(lambda match: diagram(html.unescape(match.group(1))), rendered)
+
+
+def validate_authored_html(fragment: str, source: Path, location: str) -> None:
+    if EXECUTABLE_HTML.search(fragment):
+        raise ValueError(f'{source}: executable code in authored HTML at {location}')
 
 
 def shell(meta: dict, title: str, body: str, deck: bool = False) -> str:
@@ -62,16 +73,17 @@ def render(source: Path, target: Path) -> None:
         raise ValueError(f'{source}: incomplete lesson structure')
     if len(content.get('answers_html', '').strip()) < 50:
         raise ValueError(f'{source}: missing separate reference answers')
+    validate_authored_html(content['answers_html'], source, 'answers_html')
     if not content.get('mermaid', '').strip():
         raise ValueError(f'{source}: missing Mermaid overview')
     for filename in ('demo.py', 'demo-output.txt'):
         if not (source / filename).is_file():
             raise ValueError(f'{source}: missing verified practice artifact {filename}')
-    for section in content['sections'] + content['slides']:
-        if not section.get('title') or not section.get('html'):
-            raise ValueError(f'{source}: empty learning section')
-        if re.search(r'<script\b|\bon\w+\s*=|javascript:', section['html'], re.I):
-            raise ValueError(f'{source}: executable code in authored HTML')
+    for group_name, group in (('sections', content['sections']), ('slides', content['slides'])):
+        for index, section in enumerate(group):
+            if not section.get('title') or not section.get('html'):
+                raise ValueError(f'{source}: empty learning section')
+            validate_authored_html(section['html'], source, f'{group_name}[{index}].html')
     target.mkdir(parents=True, exist_ok=True)
     for filename in ('content.json', 'demo.py', 'demo-output.txt', 'selection.json', 'selection.md', 'test_demo.py', 'notes.md'):
         if (source / filename).is_file():
@@ -89,7 +101,10 @@ def render(source: Path, target: Path) -> None:
         f'<a href="#section-{i}">{esc(s["title"])}</a>' for i, s in enumerate(content['sections'])
     ) + '</nav>'
     sections = []
-    has_article_diagram = any(MERMAID_PRE.search(section['html']) for section in content['sections'])
+    has_article_diagram = any(
+        MERMAID_PRE.search(section['html']) or MERMAID_DIV.search(section['html'])
+        for section in content['sections']
+    )
     for i, section in enumerate(content['sections']):
         sections.append(f'<section id="section-{i}"><h2>{esc(section["title"])}</h2>{render_fragment(section["html"])}</section>')
         if i == 0 and not has_article_diagram:

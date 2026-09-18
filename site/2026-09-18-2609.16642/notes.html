@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="“新闻出来了”不是合约证据。规则版本、指定来源、发布对象、修订历史和所有未完成条件都要同时满足；论文提出首次可判定与稳定可判定两个时钟，并坦诚当前历史资料不足以完成全量估计。">
+<title>详细讲解 · 公开证据何时足够结算：Kalshi 的首次与稳定可判定时间</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.16642v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">金融 · arXiv:2609.16642v1</p>
+<h1>公开证据何时足够结算：Kalshi 的首次与稳定可判定时间</h1><p class="original" lang="en">From Public Evidence to Contractual Outcome: First and Stable Decidability on Kalshi</p>
+<p class="lead">“新闻出来了”不是合约证据。规则版本、指定来源、发布对象、修订历史和所有未完成条件都要同时满足；论文提出首次可判定与稳定可判定两个时钟，并坦诚当前历史资料不足以完成全量估计。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">先从一个普通人会遇到的问题开始</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先补两块必要基础</a><a href="#section-3">论文接收什么，输出什么</a><a href="#section-4">第一步：按规则版本把公开证据映射成候选结果</a><a href="#section-5">第二步：保留不可测，不用技术时间戳填空</a><a href="#section-6">跟着一个小例子看中间状态</a><a href="#section-7">作者拿什么证据支持主张</a><a href="#section-8">哪些结论不能顺手扩大</a><a href="#section-9">把整条因果链重新接起来</a><a href="#section-10">最小实践：把核心机制跑一遍</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>先从一个普通人会遇到的问题开始</h2><p>“新闻出来了”不是合约证据。规则版本、指定来源、发布对象、修订历史和所有未完成条件都要同时满足；论文提出首次可判定与稳定可判定两个时钟，并坦诚当前历史资料不足以完成全量估计。</p><p>今天读完《公开证据何时足够结算：Kalshi 的首次与稳定可判定时间》，目标不是记住论文名，而是能用自己的话回答：官方数据已经发布时，怎样判断它是否真的满足某份预测合约的精确规则，而且之后不会被修订推翻？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[规则与证据逐项对齐]
+C --&gt; D[不可测案例显式留空]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先补两块必要基础</h2><p>first decidability 是当时第一次出现唯一合约结果的最早时刻；stable decidability 是回头看，从某时刻以后结果再未因修订或新条件改变。后者是事后概念，不能冒充交易者实时知识。</p><p>contractual outcome 由规则—证据映射决定，不等于现实世界的宽泛“真相”。同一经济问题换了规则版本或数据来源，最早可判定时刻可能不同。</p></section><section id="section-3"><h2>论文接收什么，输出什么</h2><p>理想输入包括准确规则版本、官方发布对象、来源优先级、修订历史和未完成条件。输出是 YES/NO/其他结果的唯一集合，或区间、冲突、不可测。</p><p>论文先建立分层抽样与盲审流程，再检查历史 Kalshi 数据是否保存足够的规则和发布对象；并开展前瞻性 shakedown 验证未来可捕获来源。</p></section><section id="section-4"><h2>第一步：按规则版本把公开证据映射成候选结果</h2><p>审阅者不能只看最终平台判定，而要在不被结果诱导的情况下读取当时有效规则、指定来源和原始发布，逐项排除尚未满足的条件。</p><p>当映射结果第一次只剩一个值时记 first decidability；若发布后来修订，旧时间不能继续算稳定边界。</p></section><section id="section-5"><h2>第二步：保留不可测，不用技术时间戳填空</h2><p>历史普通数据虽能看到平台侧状态，却无法稳定给出绑定版本的规则对象与官方发布对象，不能用 determination timestamp 替代证据充分时刻。</p><p>论文把未测、冲突、区间和支持不足作为正式输出。这种负面识别比制造一个虚假精确延迟更可靠。</p></section><section id="section-6"><h2>跟着一个小例子看中间状态</h2><p>合约问“官方年报中的全年值是否超过 5%”。新闻稿先给初值 5.2%，一周后官方修订为 4.9%。首次可判定可能在初值发布时，稳定可判定只能在修订后回溯确定。</p><p>若历史档案只保留当前网页，没有当时规则版本和初始发布，研究者应标为不可测，而不是拿平台最终时间减新闻时间。</p></section><section id="section-7"><h2>作者拿什么证据支持主张</h2><p>论文完成历史可行性检查，发现普通历史框架不能提供注册设计要求的版本绑定规则与官方发布对象，因此没有报告最终人工 adjudication、延迟估计或价格研究。</p><p>前瞻性 shakedown 证明来源观察与主动登记可运行；最终样本仍取决于预注册的支持阈值。该论文此阶段最重要的结果是识别哪些时钟不可由现有数据替代。</p></section><section id="section-8"><h2>哪些结论不能顺手扩大</h2><p>公共页面可能覆盖旧版本，场所可能使用研究者看不到的证据；人工判断即使盲审仍带主观性，抽样结果不能自动外推全平台。</p><p>stable decidability 是事后时钟；所谓较长公共证据残差不是场所低效的因果估计。当前版本没有给出最终时延数字。</p></section><section id="section-9"><h2>把整条因果链重新接起来</h2><p>研究问题“官方数据已经发布时，怎样判断它是否真的满足某份预测合约的精确规则，而且之后不会被修订推翻？”先被拆成可观察输入，再经过“第一步：按规则版本把公开证据映射成候选结果”与“第二步：保留不可测，不用技术时间戳填空”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section id="section-10"><h2>最小实践：把核心机制跑一遍</h2><p>需求：用一组明确标为教学设定的小数据演示“区分初次唯一结果与修订后稳定结果”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 规则：官方全年值&gt;5%则YES
+- 初值：5.2%
+- 修订值：4.9%
+- 历史规则版本：缺失
+中间状态：
+1. 按当时规则读取初值
+2. 首次映射为 YES
+3. 官方修订后映射为 NO
+4. 历史版本缺失时标记不可测
+正常例：first 和 stable decidability 可以不同，且历史证据不足时两者都不能伪造。
+边界：示例未对应真实 Kalshi 合约，也没有测量市场价格或延迟。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么平台首次 determination 时间不能替代 first decidability？</li><li>stable decidability 能否描述交易者当时知道什么？</li><li>论文没有最终延迟估计是否等于研究失败？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.16642v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.16642v1">元数据与版本</a></p><p>已读规则—证据形式化、历史可行性、抽样与盲审设计、限制和结论；确认论文没有把未执行的人类判定与价格分析包装成结果。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 7 个相关章节、3 条图表说明，正文约 31,109 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">From Public Evidence to Contractual Outcome: First and Stable Decidability on Kalshi</p><p>Nechepurenko, Maksym</p>
+<p>arXiv:2609.16642v1 · 发布日期：2026-09-15 · 金融</p>
+<p><a href="https://arxiv.org/abs/2609.16642v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.16642v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="模型参数也有日期：即使输入只看到当时数据，使用后来训练的模型回测历史，仍已把未来信息带进规则。">
+<title>详细讲解 · 用未来数据训练真的有用吗？预训练预测模型中的前视偏差</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20554v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">经济 · arXiv:2609.20554v1</p>
+<h1>用未来数据训练真的有用吗？预训练预测模型中的前视偏差</h1><p class="original" lang="en">Does Training on Future Data Pay? Look-Ahead Bias in Forecasting with Pretrained Models</p>
+<p class="lead">模型参数也有日期：即使输入只看到当时数据，使用后来训练的模型回测历史，仍已把未来信息带进规则。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">锁住输入日期，还漏了一扇“参数时间”的窗</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">两条时间线：输入截止与训练截止</a><a href="#section-3">年度模型版本如何形成配对实验</a><a href="#section-4">先验证 PIT 规则本身有没有信息</a><a href="#section-5">大改预测不等于纠正错误</a><a href="#section-6">用审计表逐项查时间</a><a href="#section-7">主要结果为何反直觉</a><a href="#section-8">年度版本比较仍不是纯粹的数据增量实验</a><a href="#section-9">回测可信度的最短检查链</a><a href="#section-10">最小实践：泄漏模型可以改很多、却预测更差</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>锁住输入日期，还漏了一扇“参数时间”的窗</h2><p>你让模型预测 2010 年收益，输入确实只到 2009 年；但模型权重是在看过 2010—2015 年许多市场序列后学成。它不一定记住答案，却已经不是当时可拥有的预测规则。</p><p>论文利用按年份独立训练的五类金融时间序列基础模型，把同一历史、同一目标交给不同年份的参数状态。读完后你应能区分 temporal exposure（时间暴露）和它是否改善预测；本文不提供交易策略。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[历史预测任务] --&gt; B[锁定输入截止日]
+A --&gt; C[锁定模型训练截止日]
+B --&gt; D{两者都不晚于预测时点?}
+C --&gt; D
+D -- 是 --&gt; E[PIT预测]
+D -- 否 --&gt; F[时间暴露预测]
+E --&gt; G[同目标月份配对]
+F --&gt; G
+G --&gt; H[预测修订D]
+G --&gt; I[误差与下游决策]
+H --&gt; J[对齐收益减移动惩罚]
+I --&gt; J
+J --&gt; K[暴露存在不等于表现改善]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>两条时间线：输入截止与训练截止</h2><p>forecast origin 是作出预测的历史时点；输入历史必须止于此处。model vintage 是某次训练得到的参数版本，也有自己的训练截止日。只有两条截止线都不越过 origin，历史回测才满足 point-in-time（PIT）信息约束。</p><p>前视暴露是设计属性：参数接触了未来。预测增益是结果属性：误差是否变小。泄漏可以让预测改变但变差，因此“没赚到”绝不能反推“没有泄漏”。</p></section><section id="section-3"><h2>年度模型版本如何形成配对实验</h2><p>作者使用 Chronos 三个尺寸和 TimesFM 两个尺寸的年度独立版本，在美国、全球、全球加因子三种训练环境下，预测美国股权溢价及 13 个非美市场，期限为 1、3、6、12 个月。</p><p>每个配对固定市场、预测时点、数值历史和推理过程，只替换模型年份。T-1 是 origin-aligned PIT；T、T+1、T+2 含未来训练覆盖。固定版本设计则让目标窗口穿过同一训练截止线。</p></section><section id="section-4"><h2>先验证 PIT 规则本身有没有信息</h2><p>若 PIT 模型本来就不优于简单历史平均，后来版本更差没有多少经济含义。论文先验证 PIT：美国样本中 Chronos Tiny 相对历史平均的 MSFE 在 1 个月降低 3.45%，6 个月降低 15.12%。</p><p>然后才问替换参数版本会怎样。TimesFM 20M 的一个月美国预测在首次跨越 origin 时，27.9% 的月份连预测正负号都改变，说明变化不是简单缩放。</p></section><section id="section-5"><h2>大改预测不等于纠正错误</h2><p>令 PIT 误差为 e、后来版本相对 PIT 的修订为 D。平方损失改善可拆成“修订是否朝 PIT 错误的反方向移动”的对齐收益，减去“修订幅度平方”的移动惩罚。方向不准时，动得越大反而越差。</p><p>美国训练环境下，后来版本在 20 个模型—期限组合中的 18 个劣于 PIT，中位 MSFE 差为历史平均 MSFE 的 -5.94 个百分点。加入的只是 origin 前数据时平均改善 0.72 点；首次越过 origin 时反而恶化 5.65 点。</p></section><section id="section-6"><h2>用审计表逐项查时间</h2><p>对每个预测单元记录：目标开始和结束、输入最后日期、模型训练最后日期、模型版本、训练市场范围、匹配样本。训练日期只决定是否暴露，实际误差和投资效用另算。</p><p>国际市场即使没直接进入美国训练集，也可能从共同因子和相关市场间接接触未来。论文称其 indirect exposure，所以“删掉目标列”不能自动修复时间泄漏。</p></section><section id="section-7"><h2>主要结果为何反直觉</h2><p>美国训练环境下，20 个美国组合中 18 个的 pooled later vintage 不如 PIT；13 个非美市场的中位效果在 20 个组合中全部偏向 PIT。无交易成本的约束均值—方差策略中，后来版本相对 PIT 的年化确定性等价收益中位差为美国 -1.77 点、国际 -2.14 点。</p><p>但训练内容会改结论：美国目标使用全球训练时，中位滚动效果从 -5.94 转为 +1.37 点，加因子后又为 -3.64 点。暴露不是单向“作弊加分器”，其后果取决于后来参数与早期市场结构是否对齐。</p></section><section id="section-8"><h2>年度版本比较仍不是纯粹的数据增量实验</h2><p>每个年度版本独立训练，所以替换 vintage 同时改变随机训练结果与拟合规则，不能把差异全部解释为“多看一年数据”的因果效应。PIT 只描述训练信息时间，不表示当年的投资者真的拥有这些后来发布的架构。</p><p>市场、模型家族、配置和资产分配规则有限；投资结果未扣交易成本。教学 demo 使用人造目标和预测，只验证时间审计与损失分解，不重现任何论文收益。</p></section><section id="section-9"><h2>回测可信度的最短检查链</h2><p>先固定历史任务；同时锁住输入截止和参数训练截止；在相同目标月份上配对 PIT 与替代版本；先确认 PIT 有预测信息；再分别报告预测修订、误差和下游决策；最后按直接与间接训练范围解释暴露。</p><p>结论不是“未来训练无害”，而是“泄漏存在与泄漏是否帮助是两个问题”。即使后来版本表现更差，它仍不属于当时可执行的回测。</p></section><section id="section-10"><h2>最小实践：泄漏模型可以改很多、却预测更差</h2><p>需求：固定同一组真实值，比较 PIT 预测和一个带未来训练暴露的版本；逐期打印修订、平方误差和净改善。正常例显示暴露版总体更差，边界说明人工数组不能代表真实市场。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>期  真值  PIT  暴露版  修订D  PIT误差平方  暴露版误差平方
+ 1   1.0   0.6     1.3     0.7        0.16            0.09
+ 2  -0.5  -0.1     0.4     0.5        0.16            0.81
+ 3   0.7   0.4    -0.2    -0.6        0.09            0.81
+ 4   1.4   0.8     1.8     1.0        0.36            0.16
+ 5  -0.2   0.1     0.5     0.4        0.09            0.49
+PIT MSE=0.172；暴露版 MSE=0.472
+边界：数据为教学数组；它只说明时间暴露与准确率是两件事，不代表任何真实资产表现。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么输入数据完全按历史截断，仍不能保证回测无前视偏差？</li><li>后来版本预测更差，能否把它当成无泄漏版本继续使用？</li><li>若目标市场未进入训练集，还要审计哪些间接信息？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20554v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20554v1">元数据与版本</a></p><p>已读取时间定义、滚动与固定版本设计、PIT 基准、预测修订、误差分解、组合评价和限制；核对表 1—8及图 1—7。</p><p>作者证据来自年度金融 TSFM 的历史配对。教学数组为自造；不构成投资建议，也未复现模型推理或组合。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 3 个相关章节、53 条图表说明，正文约 338,629 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Does Training on Future Data Pay? Look-Ahead Bias in Forecasting with Pretrained Models</p><p>Chen, Haiqiang、Chen, Li、Chen, Yunlong、Huang, Difang、Zhang, Bo</p>
+<p>arXiv:2609.20554v1 · 发布日期：2026-09-17 · 经济</p>
+<p><a href="https://arxiv.org/abs/2609.20554v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20554v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

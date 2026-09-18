@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="从“99% 准确却漏掉危机”理解稀有金融风险评测为何必须同时看压力召回、校准、格式可靠性和成本。">
+<title>图解全文 · StableEval Arena：兼顾成本的稳定币价格稳定性智能体基准</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18949v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 金融</p><h1 tabindex="-1">StableEval Arena：兼顾成本的稳定币价格稳定性智能体基准</h1><p class="lead">从“99% 准确却漏掉危机”理解稀有金融风险评测为何必须同时看压力召回、校准、格式可靠性和成本。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 金融</p><h1 tabindex="-1">总猜“没事”也能很准，但危机来时没有用</h1><p>假设 100 天里 96 天稳定、4 天出现严重脱锚。系统每天都说“稳定”，准确率是 96%，却漏掉全部真正需要预警的日子。稳定币风险是稀有但后果重的事件，单一 accuracy 会奖励这种无用策略。</p><p>StableEval Arena 用冻结的历史回放，让智能体看过去 30 天，预测隐藏的未来 7 天，并同时记录标签、概率、偏离幅度、格式、延迟、token 和估算费用。读完你应能设计不会被类别不平衡骗过的评测；这不是买卖稳定币建议。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 金融</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[固定历史预测时点] --&gt; B[只提供过去30天]
+B --&gt; C[代理输出标签概率偏离与理由]
+C --&gt; D[校验结构格式并记录成本]
+D --&gt; E[打开隐藏未来7天]
+E --&gt; F[形成stable watch stress真值]
+F --&gt; G[分类与少数类召回]
+F --&gt; H[概率校准与偏离误差]
+D --&gt; I[延迟token与费用]
+G --&gt; J[压力富集块]
+G --&gt; K[自然分布块]
+J --&gt; L[多维结论而非单一冠军]
+K --&gt; L
+I --&gt; L</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 金融</p><h1 tabindex="-1">先分清稳定、观察与压力</h1><p>美元稳定币承诺价格靠近 1 美元。基准把未来窗口分成 stable、watch、stress，并要求预测脱锚概率、最大偏离、方向、信心和理由。严重压力召回问真正 stress 中抓到多少，误报则问正常期被吓成压力多少。</p><p>Macro-F1 先分别计算每类 F1 再平均，使少数 stress 类不被多数 stable 淹没。概率还要看 calibration：声称 20% 风险的一批事件，长期应约有 20% 发生。结构化输出有效率只是流程可靠性，不等于金融判断可靠。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 金融</p><h1 tabindex="-1">怎样避免未来信息泄漏</h1><p>每个案例只给预测时点之前冻结的 30 日价格—成交量与市场背景，未来七日作为隐藏标签。模型和工具不得看到窗口后的数据，提示、预算和输出 schema 统一，才能比较代理框架而不是比较谁偷看得更多。</p><p>作者设置两个互补块：120 个压力富集验证案例便于观察少数类，507 个自然分布案例反映真实类别比例。前者不能代表日常误报成本，后者又会让 raw accuracy 被稳定类主导，所以必须一起看。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 金融</p><h1 tabindex="-1">预测质量要拆成一组指标</h1><p>标签指标包括 Macro-F1、压力召回与漏掉持续脱锚；概率指标看 Brier 或校准误差；数值指标看最大偏离预测；运行指标看合法 JSON、延迟、token 和费用。一个系统可能格式从不出错，却风险判断很差。</p><p>成本也不能脱离质量单独排名。更贵的智能体若只多写长理由、没有增加压力召回，不值得；很便宜但漏掉全部严重事件也不能称为最佳。Pareto 视角更合适：寻找在质量、可靠性和成本上不被另一个方案全面压过的系统。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 金融</p><h1 tabindex="-1">为什么需要两种分布</h1><p>压力富集集人为增加困难案例，使差异更可见，也能较稳定地估计 stress recall；但它改变了先验概率，准确率和校准不能直接代表部署环境。自然集保留多数稳定状态，能暴露简单基线其实很强，以及误报的实际负担。</p><p>论文结果显示智能体能以适中成本稳定生成合法结构，但稀有严重压力和持续脱锚仍大量漏掉。校准后的代理在压力富集块 Macro-F1 有改善；到 507 案例自然分布中，简单基线仍具竞争力。程序守规矩与风险可靠是两个问题。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 金融</p><h1 tabindex="-1">一个案例从截断到评分</h1><p>预测日为 t：系统只能看到 t-29 到 t 的数据，生成 stable/watch/stress、风险概率和偏离预测；评估器在运行结束后打开 t+1 到 t+7，依据最大偏离等规则形成真实标签，再计算分类、校准和成本。</p><p>中间日志应包含输入版本、时间截点、工具调用和 token。若结果异常好，先检查泄漏；若格式有效率低，修 schema 与重试；若格式很好但 stress recall 低，问题是金融信号与决策阈值，不能用解析成功掩盖。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 金融</p><h1 tabindex="-1">基准得出的核心诊断</h1><p>论文比较六种 LLM 代理配置和简单基线，分别在 120 案例压力富集块与 507 案例自然块中评估。作者没有只给冠军，而是强调原始准确率会受 stable 主导、不同块回答不同问题。</p><p>共同现象是结构化输出可靠性高于金融风险可靠性：代理通常能按协议返回结果，成本也可测，但仍漏掉多数稀有严重压力与持续脱锚。这个负结果正是基准价值——提醒部署者不能把“能跑”误作“会预警”。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 金融</p><h1 tabindex="-1">历史回放仍不是未来部署</h1><p>标签阈值、选币范围、价格来源和时代环境会改变排名；同一时期案例也可能相关。估算 API 费用会随价格变化，提示与代理版本也会漂移。公开历史还可能进入模型训练语料，即使输入窗口严格截断。</p><p>基准没有证明代理可自主交易或控制真实风险。教学 demo 用 20 个手写标签比较 accuracy 与 Macro-F1，不包含价格数据、语言模型或真实费用，不能生成任何投资行动。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 金融</p><h1 tabindex="-1">一个可信评测应该怎样串起来</h1><p>固定预测时点；只开放过去 30 天；冻结提示、工具和预算；收集结构化七日预测；打开隐藏未来生成标签；同时评分少数类、概率、数值、格式、延迟与成本；在压力富集和自然分布中分别解释。</p><p>若有人只报准确率，先看类别占比；只报 JSON 成功率，追问压力召回；只报压力集，追问自然分布误报；只报成本，追问相同预算与质量。任何单一数字都不足以支持部署。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 金融</p><h1 tabindex="-1">最小实践：96% 准确的坏预警器</h1><p>需求：构造 20 个真实标签，其中 18 个 stable、1 个 watch、1 个 stress；比较“永远 stable”和能识别少数类的系统，计算 accuracy 与三类 Macro-F1。边界说明样本太小且没有概率校准。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>真实类别：Counter({&#x27;stable&#x27;: 18, &#x27;watch&#x27;: 1, &#x27;stress&#x27;: 1})
+永远稳定：accuracy=90%，Macro-F1=0.316
+识别少数类：accuracy=95%，Macro-F1=0.879
+边界：20条手写标签不测概率校准、时间泄漏、价格偏离、成本或真实稳定币风险。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 金融</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么压力富集集上的 accuracy 不能直接预测日常部署 accuracy？</li><li>一个代理 100% 输出合法 JSON，但 stress recall 为 0，能否称为可靠？</li><li>自然分布中简单基线很强，可能是模型真的优秀，还是类别结构造成？怎样区分？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 金融</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.18949v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18949v1">元数据与版本</a></p><p>已读取问题定义、历史回放协议、两个评测块、指标、六类代理与结果讨论；核对 120/507 案例设置及结构可靠与风险可靠的差距。</p><p>论文是评测框架，不是稳定币预测服务；教学分类表为手写数据，未运行任何代理、抓取市场数据或产生交易信号。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 2 个相关章节、2 条图表说明，正文约 8,588 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. StableEval Arena：兼顾成本的稳定币价格稳定性智能体基准</option><option value="2">2. 总猜“没事”也能很准，但危机来时没有用</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先分清稳定、观察与压力</option><option value="5">5. 怎样避免未来信息泄漏</option><option value="6">6. 预测质量要拆成一组指标</option><option value="7">7. 为什么需要两种分布</option><option value="8">8. 一个案例从截断到评分</option><option value="9">9. 基准得出的核心诊断</option><option value="10">10. 历史回放仍不是未来部署</option><option value="11">11. 一个可信评测应该怎样串起来</option><option value="12">12. 最小实践：96% 准确的坏预警器</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">StableEval Arena: A Cost-Aware Agentic Benchmark for Stablecoin Price Stability Prediction</p><p>Wan, Sean、Liu, Dongping、Zhang, Luyao</p>
+<p>arXiv:2609.18949v1 · 发布日期：2026-08-07 · 金融</p>
+<p><a href="https://arxiv.org/abs/2609.18949v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18949v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.18949v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18949v1">元数据与版本</a></p><p>已读取问题定义、历史回放协议、两个评测块、指标、六类代理与结果讨论；核对 120/507 案例设置及结构可靠与风险可靠的差距。</p><p>论文是评测框架，不是稳定币预测服务；教学分类表为手写数据，未运行任何代理、抓取市场数据或产生交易信号。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 2 个相关章节、2 条图表说明，正文约 8,588 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="局部置信度像是分别问“每个座位最可能坐谁”，但整排座位可能受“家庭必须坐在一起”这类联合约束；论文证明边缘概率不能告诉采样器多个位置是否可独立并行。">
+<title>图解全文 · 离散扩散模型的“高置信并行填词”为何可能改变整体分布</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20581v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · AI</p><h1 tabindex="-1">离散扩散模型的“高置信并行填词”为何可能改变整体分布</h1><p class="lead">局部置信度像是分别问“每个座位最可能坐谁”，但整排座位可能受“家庭必须坐在一起”这类联合约束；论文证明边缘概率不能告诉采样器多个位置是否可独立并行。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · AI</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>局部置信度像是分别问“每个座位最可能坐谁”，但整排座位可能受“家庭必须坐在一起”这类联合约束；论文证明边缘概率不能告诉采样器多个位置是否可独立并行。</p><p>今天读完《离散扩散模型的“高置信并行填词”为何可能改变整体分布》，目标不是记住论文名，而是能用自己的话回答：每个空位都很有把握时，把多个 token 一次填上，为什么仍可能生成训练数据中不该出现的组合？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · AI</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[边缘置信不等于联合独立]
+C --&gt; D[检测分布偏移与硬约束]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · AI</p><h1 tabindex="-1">先补两块必要基础</h1><p>marginal（边缘分布）只描述单个位置各取值的概率；joint distribution（联合分布）描述多个位置的组合概率。两个联合分布可以有完全相同的边缘概率，却允许不同组合。</p><p>离散 diffusion/remasking 从全遮罩开始，多轮选择若干位置并从每个位置的分布独立采样。一步写多个位置等价于使用这些边缘分布的乘积。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · AI</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是当前已固定 token、每个未定位置的预测分布和调度器选择的写入位置组。输出是这一轮新写入的 token 以及最终序列分布。</p><p>核心判据是：给定当前上下文，被同时写入的位置必须条件独立，乘积分布才可能与训练联合分布一致。置信排名本身不包含这种依赖信息。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · AI</p><h1 tabindex="-1">第一步：区分“每格很确定”和“组合可独立”</h1><p>即使位置 A 与 B 各自都是 90% 置信，训练数据也可能只允许 A、B 同值。独立抽样会产生一个高边缘概率但联合上禁止的异值组合。</p><p>论文证明任何逐位置乘积都无法精确表示一个依赖位置组；更强的是，只看各位置分布甚至无法判断这个组有没有依赖。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · AI</p><h1 tabindex="-1">第二步：用联合分布或硬约束检查真实偏移</h1><p>在联合分布可计算的 ScanAndAdd 合成任务上，可以用 total variation 距离与采样噪声地板比较；只看单样本“看起来正确”会漏掉整体频率偏移。</p><p>在真实语料无法写出完整联合分布时，可检查已知硬约束，如固定计数、校验和或括号配对；并行写入依赖组若越出支持集，会留下直接违规。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · AI</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>教学分布只允许 00 和 11，各占一半。单看两个位置，每个都是 0/1 各半；独立并行采样却会把 01 和 10 各生成四分之一。</p><p>若先采第一个位置，再让第二个条件于第一个，组合仍只会是 00 或 11。代价是少了并行速度，这正是论文讨论的准确分布与并行度边界。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · AI</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>在 ScanAndAdd 上，论文能闭式计算联合分布，并验证置信调度器写入的任意两个以上未定位置都存在依赖；生成分布的 total variation 距离达到采样噪声地板的 29 倍。</p><p>同时，well-formedness、correctness 和 uniqueness 等逐样本指标可达到 1.0，说明“样本都合法”仍不能推出出现频率与训练分布一致。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · AI</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>主要证据来自合成数据和研究模型，不等同于任何产品级图像或文本扩散架构；一个额外学习联合依赖的调度器不被排除。</p><p>定理限制的是依赖组上的独立乘积步骤；温度、搜索等其他干预也会改变分布。真实语料的联合分布通常不可得，因此误差规模未必能直接测出。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · AI</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“每个空位都很有把握时，把多个 token 一次填上，为什么仍可能生成训练数据中不该出现的组合？”先被拆成可观察输入，再经过“第一步：区分“每格很确定”和“组合可独立””与“第二步：用联合分布或硬约束检查真实偏移”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · AI</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“展示相同的逐位置 50/50 边缘如何对应完全不同的联合组合”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 训练允许组合：[&#x27;00&#x27;, &#x27;11&#x27;]
+- 独立乘积组合：[&#x27;00&#x27;, &#x27;01&#x27;, &#x27;10&#x27;, &#x27;11&#x27;]
+- 各边缘：0/1 各 50%
+中间状态：
+1. 检查位置一的边缘为 50/50
+2. 检查位置二的边缘也为 50/50
+3. 独立相乘产生四种组合
+4. 01 与 10 违反训练支持集
+正常例：逐个条件采样能保留两位置相同的约束，并行独立采样不能。
+边界：这是二位分布算例，不是论文的 ScanAndAdd 模型训练或真实扩散系统测试。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>若每个位置的最高置信度都是 0.99，能否据此证明两位置可并行？</li><li>为什么 correctness=1.0 仍可能有严重分布偏移？</li><li>真实文本不知道联合分布时，可以先检查哪类信号？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20581v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20581v1">元数据与版本</a></p><p>已读理论条件、反例构造、ScanAndAdd 实验、限制与结论；核对图 1—2、表 1—3 及 total variation 噪声地板。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、12 条图表说明，正文约 74,682 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 离散扩散模型的“高置信并行填词”为何可能改变整体分布</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：区分“每格很确定”和“组合可独立”</option><option value="7">7. 第二步：用联合分布或硬约束检查真实偏移</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Limits of Confidence in Diffusion</p><p>Webb, Russ、Shidani, Amitis、Bizeul, Alice、Busbridge, Dan</p>
+<p>arXiv:2609.20581v1 · 发布日期：2026-09-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20581v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20581v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20581v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20581v1">元数据与版本</a></p><p>已读理论条件、反例构造、ScanAndAdd 实验、限制与结论；核对图 1—2、表 1—3 及 total variation 噪声地板。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、12 条图表说明，正文约 74,682 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

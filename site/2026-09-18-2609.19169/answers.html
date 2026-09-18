@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="一个引擎跑得快，却可能把内存吃到系统无法做别的事、在并发时丢请求，或因聊天模板错误让回答质量下降；论文提供一套不被单一速度数字骗过的审计方法。">
+<title>参考答案 · 在桌面电脑上跑大模型，为什么只看每秒生成多少字会选错引擎</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.19169v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>完成的输出可能质量退化、模板错误、内存几乎耗尽或不支持新模型，因此还要看 fidelity、余量与覆盖。</p></li><li><p>请求更可能只是排队，服务路径没有把并发转化为有效批处理吞吐。</p></li><li><p>不能；证据只覆盖论文记录的机器、构建、模型、提示和时间点。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

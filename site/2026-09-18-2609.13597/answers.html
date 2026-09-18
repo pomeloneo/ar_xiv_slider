@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="L2 行情告诉你队伍总长度，却不告诉每张订单的先后位置；中间有人撤单时，撤的是你前面还是后面，会让同一公开订单簿路径对应不同成交结果。">
+<title>参考答案 · 同一张订单簿，可能成交得完全不同：L2 数据的部分识别</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.13597v2" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>因为不知道撤单来自队列前方还是后方，聚合数量没有订单身份。</p></li><li><p>主动单立即与现有对手方成交，不依赖自己的 FIFO 排队位置。</p></li><li><p>策略选择只被部分识别，对不可观测队列假设敏感，不能报告为唯一最优。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

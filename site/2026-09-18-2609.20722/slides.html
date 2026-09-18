@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="activation steering 像在模型内部推一把，但过去常靠人工试层数和强度；论文用预测何时成形与哪些注意力头有因果作用来自动选点，并同时发现干预会制造提示注入攻击面。">
+<title>图解全文 · Deep Noir：自动寻找 Transformer 中该在哪一层做行为引导</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20722v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · AI</p><h1 tabindex="-1">Deep Noir：自动寻找 Transformer 中该在哪一层做行为引导</h1><p class="lead">activation steering 像在模型内部推一把，但过去常靠人工试层数和强度；论文用预测何时成形与哪些注意力头有因果作用来自动选点，并同时发现干预会制造提示注入攻击面。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · AI</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>activation steering 像在模型内部推一把，但过去常靠人工试层数和强度；论文用预测何时成形与哪些注意力头有因果作用来自动选点，并同时发现干预会制造提示注入攻击面。</p><p>今天读完《Deep Noir：自动寻找 Transformer 中该在哪一层做行为引导》，目标不是记住论文名，而是能用自己的话回答：想在不重新训练模型的情况下改变分类行为，怎样自动找到干预层、注意力头和强度，又不把模型其他能力一起弄坏？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · AI</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[定位预测成形的层]
+C --&gt; D[筛选因果头与强度]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · AI</p><h1 tabindex="-1">先补两块必要基础</h1><p>activation steering（激活引导）是在推理时给中间表示加一个方向向量，让输出更偏向某种行为，不改模型权重。Logit Lens 把中间层投影成词概率，用来观察预测何时稳定。</p><p>相关不等于因果。某个注意力头与目标相关，未必是改变结果的关键；论文用 head-level causal attribution 筛出真正影响目标的头，再搜索引导强度。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · AI</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是少量探针样本、目标行为、模型各层中间激活和候选引导方向。输出是层、头掩码、强度组成的干预配置。</p><p>中间状态包括 Logit Lens 收敛位置、各头的因果贡献、候选配置准确率、对非目标任务的泄漏和提示注入脆弱性。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · AI</p><h1 tabindex="-1">第一步：用预测收敛时间缩小候选层</h1><p>若模型在某层之前还没有形成目标判断，太早推可能被后续计算冲淡；太晚推又没有传播空间。Deep Noir 观察中间层输出何时开始稳定来选择搜索区域。</p><p>不同架构的最佳区域不同：论文报告 Llama 偏早/中层、OLMo 偏后层、Gemma 偏深层，因此固定“第几层最好”不能跨模型照搬。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · AI</p><h1 tabindex="-1">第二步：因果筛头并搜索最小有效强度</h1><p>系统测试哪些头真正改变分类，再只对选中结构施加方向。这样比无掩码的表示工程更有针对性，也能观察非目标能力是否受损。</p><p>强度越大不一定越好。论文显示引导可形成可预测的提示注入攻击面，脆弱性随强度上升，因此优化必须同时看目标增益和安全泄漏。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · AI</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>假设垃圾邮件判断在第 8—12 层趋于稳定，因果测试发现其中两个头最影响结果。系统比较强度 0.5、1.0、1.5：准确率上升，但 1.5 的注入绕过明显增加，于是不能只选最高准确率。</p><p>同一配置迁移到情感分类时，收敛层和方向可能不同；“零代码改任务”是框架接口不变，不代表无需新探针与重新发现参数。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · AI</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>1B 规模的 39 次垃圾邮件运行平均提高 16.7 个百分点，标准差 4.7；在 7—9B 的四种架构上增益为 21—42 个百分点。SST-2 情感任务提高 13.1 个百分点。</p><p>50 个探针发现的配置在完整 872 样本 SST-2 验证集上从 76.9% 提到 84.3%。论文还报告脆弱性随引导幅度单调变化，并检查 MMLU 泄漏。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · AI</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>优势最明确的是二元分类；复杂推理、数学和指令跟随尚未证明。每个模型家族/规模组合样本有限，7B 模型使用 4-bit 量化。</p><p>线性方向可能漏掉非线性边界，跨折方差高于对照，且更大模型尚未测试。引导方向可被推断时，安全攻击面无法仅靠提高准确率解决。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · AI</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“想在不重新训练模型的情况下改变分类行为，怎样自动找到干预层、注意力头和强度，又不把模型其他能力一起弄坏？”先被拆成可观察输入，再经过“第一步：用预测收敛时间缩小候选层”与“第二步：因果筛头并搜索最小有效强度”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · AI</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“用三组候选层和强度说明为何要联合看目标增益与注入风险”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 候选层：[6, 10, 14]
+- 候选强度：[0.5, 1.0, 1.5]
+- 选择指标：准确率增益与攻击风险
+中间状态：
+1. 用中间预测找收敛区域
+2. 用干预筛选因果头
+3. 比较不同强度收益
+4. 在风险过高前停止
+正常例：选择能提升目标且未越过风险阈值的配置，而不是最大强度。
+边界：没有加载 Transformer 或复现论文准确率；数值只演示多目标选择。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么固定在所有模型的第 10 层引导不可靠？</li><li>准确率继续升高但注入脆弱性也升高时，应该怎样报告？</li><li>50 个探针有效是否足以证明对所有任务泛化？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20722v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20722v1">元数据与版本</a></p><p>已读自动发现算法、跨规模/任务实验、保持能力与注入测试、讨论和限制；核对算法 1、表 1—2、图 1—2。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、20 条图表说明，正文约 54,274 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. Deep Noir：自动寻找 Transformer 中该在哪一层做行为引导</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：用预测收敛时间缩小候选层</option><option value="7">7. 第二步：因果筛头并搜索最小有效强度</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Deep Noir: Autonomous Steering Discovery via Architectural Chronometry in Transformer Models</p><p>Bobe III, Frank E.、Vetaw, Gregory D.、Bryner, Darshan W.、Cook, Matthew G.、Salas-Vernis, Jose L.</p>
+<p>arXiv:2609.20722v1 · 发布日期：2026-09-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20722v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20722v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20722v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20722v1">元数据与版本</a></p><p>已读自动发现算法、跨规模/任务实验、保持能力与注入测试、讨论和限制；核对算法 1、表 1—2、图 1—2。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、20 条图表说明，正文约 54,274 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="把模型比作司机、Harness 比作仪表盘与道路规则，理解计划、工具和上下文为何要按模型能力与预算搭配。">
+<title>图解全文 · 编码智能体的 Harness 设计：一项组件级实证研究</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20804v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · AI</p><h1 tabindex="-1">编码智能体的 Harness 设计：一项组件级实证研究</h1><p class="lead">把模型比作司机、Harness 比作仪表盘与道路规则，理解计划、工具和上下文为何要按模型能力与预算搭配。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · AI</p><h1 tabindex="-1">不是只换模型：车手相同，驾驶舱也会改变结果</h1><p>编码智能体不是模型裸奔。外层软件决定每轮给它看哪些历史、能调用什么工具、计划怎样保存、命令结果怎样回填。这个外层称为 harness，可理解为把模型能力变成可执行工作流的“驾驶舱”。</p><p>论文固定执行循环，只改变计划、动作空间和上下文管理，在四个模型、两个基准中做组件级比较。读完你应能解释每个组件改变了哪种中间行为，并拒绝“某个组件永远最好”的简单结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · AI</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[用户修复任务] --&gt; B[固定ReAct执行循环]
+P[计划] --&gt; B
+T[结构化工具或Bash] --&gt; B
+B --&gt; C[工具观察进入历史]
+C --&gt; D{上下文是否接近预算}
+D -- 否 --&gt; B
+D -- 软阈值 --&gt; E[省略旧大输出并可选外存]
+E --&gt; F{仍超过硬阈值}
+F -- 是 --&gt; G[摘要最旧中段]
+F -- 否 --&gt; B
+G --&gt; B
+B --&gt; H[修改与验证]
+H --&gt; I[成功率成本与轨迹分析]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · AI</p><h1 tabindex="-1">Harness 的三个旋钮</h1><p>计划组件维护显式任务清单；动作空间要么给 read_file、edit_file 等结构化工具，要么主要依赖 bash；上下文管理决定长轨迹里哪些原文保留、哪些工具输出省略、何时用模型摘要。</p><p>执行循环采用 ReAct 风格：模型看到当前上下文，发工具调用，环境执行并把观察追加到历史。权限、卡死检测和其他机制保持固定，因此对照更接近在问“这个组件在当前条件下有什么边际作用”。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · AI</p><h1 tabindex="-1">176 个设置怎样组成</h1><p>作者测试 Nemotron-3 的 30B、120B、550B 三种规模和 Mistral-Medium-3.5-128B，在 SWE-Bench Verified 与 Terminal-Bench 2.1 上运行。上下文预算为 32k、64k、96k、128k，管理策略从 T0 到 T4。</p><p>T0 不压缩，超窗就终止；T1 省略旧的大工具输出；T2 让省略内容可通过 recall_event 找回；T3 只用模型摘要；T4 先省略、必要时再摘要，并保留前言与最近轮次。计划和动作空间的消融在 T4/128k 条件下进行。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · AI</p><h1 tabindex="-1">上下文管理主要救的是“还没做完就被截断”</h1><p>当窗口很小时，未管理历史会在智能体定位、修改或验证前塞满。管理策略不一定让模型变聪明，而是让轨迹活得足够长。论文发现所有受管理层级在各预算中都没有上下文溢出终止。</p><p>SWE-Bench 上，四种管理策略相对 T0 的平均成功率差在 32k 时为 35.7 个百分点，到 128k 只剩 2.7；Terminal-Bench 对应从 9.5 降到 2.8。收益随预算变大而收窄，支持“主要机制是防溢出”，而非普遍推理增强。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · AI</p><h1 tabindex="-1">计划和工具的价值随模型与任务改变</h1><p>较弱模型启用计划后，更可能走到实际编辑阶段，成功率提高但也花更多；较强模型本就能推进，计划主要减少重复验证和成本，准确率变化小。计划因此可能是能力脚手架，也可能只是效率工具。</p><p>预定义工具帮助 bash 能力弱的模型，把意图约束成清晰操作；bash 熟练的强模型可用更低成本完成命令行任务。动作接口还改变写代码的粒度。若只比较最终成功率，容易看不到它通过何种行为路径起作用。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · AI</p><h1 tabindex="-1">T4 到底怎样处理一条变长的历史</h1><p>历史被分成稳定前言、较旧中段和最近轮次。超过软阈值时，T4 先把中段庞大工具输出换成短占位并存到外部；超过硬阈值时，再摘要更旧事件。最近操作保持原文，避免模型忘掉刚改了什么。</p><p>论文中可找回机制极少被调用，且相对只省略没有提高准确率。这不等于所有系统都应删除 recall：在需要精确回查长日志的任务上可能不同。它只说明被测模型和任务没有利用这层额外机器。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · AI</p><h1 tabindex="-1">怎样读成功率表而不挑一个冠军</h1><p>实验有 176 个匹配设置，并用任务配对的 McNemar 检验及多重比较校正。T4 在八个模型—基准组合中有七个平均成本最低，成功率与其他管理层级相近；这支持“先便宜省略、后昂贵摘要”的效率解释。</p><p>但表中最佳配置随模型、窗口和基准变化。例如 32k 的管理收益巨大，128k 就小得多；bash-only 对某些强模型有利、对另一些模型伤害明显。正确产出是条件化设计规则，不是一张永恒排行榜。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · AI</p><h1 tabindex="-1">这不是所有编码智能体的万能配方</h1><p>计划只有一种提示与更新方式，工具和摘要也只有特定实现；模型、定价、基准与最大 300 步会变化。组件还有交互，单独消融不能覆盖所有组合。论文估计的是这些实现的条件效果。</p><p>成功基准不等于真实代码可维护性、安全性或团队协作。教学 demo 只计算字符预算并模拟省略/摘要，不能重现模型行为、成本或 SWE-Bench 成绩。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · AI</p><h1 tabindex="-1">从用户任务到提交补丁的全链</h1><p>用户任务进入固定循环；计划维持目标；动作空间把意图变成命令；工具观察累积成历史；上下文策略在阈值处省略或摘要；模型继续定位、修改、验证；基准判定结果，同时记录成本、溢出和轨迹阶段。</p><p>排错时先看终止原因：若超窗，调上下文；若长期停在定位，计划或工具可能不足；若反复大块重写，动作粒度有问题；若成功但成本高，再看冗余验证和摘要频率。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · AI</p><h1 tabindex="-1">最小实践：先省略，再摘要</h1><p>需求：给一串不同大小的历史事件，比较不管理时是否超过 100 字符预算，以及教学版 T4 怎样先将旧工具输出替换为占位，再在仍超限时摘要。正常例避免溢出；边界说明语义是否保留没有被字符计数验证。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>T0 原始上下文：106 字符，是否溢出=True
+T4 省略后：55 字符；分阶段处理后：55 字符
+保留状态：前言: 修复测试失败 | [旧工具输出已省略] | [旧工具输出已省略] | 最近: 已定位文件 | 最近: 准备改动
+边界：字符变少不证明摘要保留了修复语义，也不复现模型成功率、调用成本或真实上下文计数。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么 32k 窗口中上下文管理的成功率收益通常比 128k 大？</li><li>T2 的 recall_event 很少被用，能否推出可找回存储在所有智能体中都没价值？</li><li>一个强模型用 bash-only 更便宜，是否应给弱模型也立刻删掉结构化工具？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20804v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20804v1">元数据与版本</a></p><p>已读取架构、实验协议、主结果、轨迹分析和限制；核对图 1—9、表 2—7，以及附录中的提示、工具和失败阶段定义。</p><p>论文证据来自四个模型、两个基准和 176 个设置；教学字符压缩器只展示阈值顺序，不是智能体或摘要质量复现。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、56 条图表说明，正文约 124,771 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 编码智能体的 Harness 设计：一项组件级实证研究</option><option value="2">2. 不是只换模型：车手相同，驾驶舱也会改变结果</option><option value="3">3. 先看整篇的关系</option><option value="4">4. Harness 的三个旋钮</option><option value="5">5. 176 个设置怎样组成</option><option value="6">6. 上下文管理主要救的是“还没做完就被截断”</option><option value="7">7. 计划和工具的价值随模型与任务改变</option><option value="8">8. T4 到底怎样处理一条变长的历史</option><option value="9">9. 怎样读成功率表而不挑一个冠军</option><option value="10">10. 这不是所有编码智能体的万能配方</option><option value="11">11. 从用户任务到提交补丁的全链</option><option value="12">12. 最小实践：先省略，再摘要</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">An Empirical Study of Harness Design for Coding Agents</p><p>Fan, Run-Ze、Zhang, Zihao、Ma, Simin、Hu, Yebowen、Wang, Shouju、Song, Kaiqiang、Liu, Fei、Zamani, Hamed、Wang, Xiaoyang</p>
+<p>arXiv:2609.20804v1 · 发布日期：2026-09-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20804v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20804v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20804v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20804v1">元数据与版本</a></p><p>已读取架构、实验协议、主结果、轨迹分析和限制；核对图 1—9、表 2—7，以及附录中的提示、工具和失败阶段定义。</p><p>论文证据来自四个模型、两个基准和 176 个设置；教学字符压缩器只展示阈值顺序，不是智能体或摘要质量复现。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、56 条图表说明，正文约 124,771 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

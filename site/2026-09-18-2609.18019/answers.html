@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用“跟着一个真实排队者进出队伍”理解被动订单如何省去价格预测，以及延迟为何会让继承的信息迅速过期。">
+<title>参考答案 · 通过订单级影子跟随实现无模型被动执行</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18019v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>影子排在对方之后；触发对方成交的扫单可能还在继续，立即撤会在扫单抵达影子前退出，因此宽限窗用于保留这次成交机会。</p></li><li><p>不能。它只在同一算法上破坏订单流新鲜度，说明继承信息会过期；没有与所有预测模型做公平对照。</p></li><li><p>算法的订单本应改变队列、成交归属和后续参与者行为。忽略这些反馈可能低估冲击或高估可成交量，参与率越高越严重。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

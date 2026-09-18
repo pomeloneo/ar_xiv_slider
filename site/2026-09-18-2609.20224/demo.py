@@ -1,0 +1,14 @@
+inputs = {'固定跨年楔子': '2.5 bp', '三个月期限': 0.25, '一年期限': 1.0}
+steps = ['把固定价格楔子除以剩余年数', '三个月得到约 10 bp 年化', '一年得到约 2.5 bp 年化', '比较固定楔子与平滑利率']
+normal = '相同固定费用在短期限的年化数字更大，因此期限图形呈 1/τ。'
+boundary = '只是单位换算，没有用真实期权报价估计 put-call parity 或因果效应。'
+
+print("教学输入：")
+for name, value in inputs.items():
+    print(f"- {name}：{value}")
+print("中间状态：")
+for index, step in enumerate(steps, 1):
+    print(f"{index}. {step}")
+print("正常例：" + normal)
+assert inputs and steps and normal
+print("边界：" + boundary)

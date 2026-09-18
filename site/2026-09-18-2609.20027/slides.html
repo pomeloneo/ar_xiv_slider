@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="内容审核看不见与文本含义无关的隐藏行为传递，训练数据归因似乎能按“谁导致了行为”筛选；论文的价值在于展示它有时有效、但跨模型和目标不稳定，不能当成可靠安全过滤器。">
+<title>图解全文 · 训练数据归因能过滤“潜意识学习”吗？目前并不可靠</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20027v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · AI</p><h1 tabindex="-1">训练数据归因能过滤“潜意识学习”吗？目前并不可靠</h1><p class="lead">内容审核看不见与文本含义无关的隐藏行为传递，训练数据归因似乎能按“谁导致了行为”筛选；论文的价值在于展示它有时有效、但跨模型和目标不稳定，不能当成可靠安全过滤器。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · AI</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>内容审核看不见与文本含义无关的隐藏行为传递，训练数据归因似乎能按“谁导致了行为”筛选；论文的价值在于展示它有时有效、但跨模型和目标不稳定，不能当成可靠安全过滤器。</p><p>今天读完《训练数据归因能过滤“潜意识学习”吗？目前并不可靠》，目标不是记住论文名，而是能用自己的话回答：训练样本表面上完全不提“偏爱狗”，模型却学会偏爱狗时，能否靠梯度归因找出该删哪些样本或 token？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · AI</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[按行为影响给数据排序]
+C --&gt; D[高低分数据分别重训]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · AI</p><h1 tabindex="-1">先补两块必要基础</h1><p>subliminal learning 指教师模型通过语义上无关的数据，把某种行为偏好传给学生模型。训练数据 attribution 给样本或 token 打分，估计它们对目标行为的影响。</p><p>好的排序应让高分数据比低分数据更能重现目标行为。论文用累计筛选和按十分位单独训练来检查排序，而不是只看归因分数本身。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · AI</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是带隐藏传递效果的训练集、学生模型和目标行为测量。方法包括 GradCos、对比版 GradCos、EK-FAC，以及需要反事实教师模型的 divergence-token 强基线。</p><p>输出是样本级或 token 级影响排名；中间验证是分别用高分、低分或不同十分位数据微调，再测 subliminal response rate。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · AI</p><h1 tabindex="-1">第一步：归因分数只产生候选排名</h1><p>梯度方法比较训练数据对目标输出梯度的方向或二阶近似影响。token 级能定位稀疏信号，样本级把有用与无关 token 混在一起。</p><p>divergence token 直接比较目标教师与反事实教师在哪些 token 上分歧，通常更接近真正载体，但它假设你已知攻击目标并能访问反事实教师。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · AI</p><h1 tabindex="-1">第二步：必须重训验证排序是否真能隔离行为</h1><p>若归因可靠，只用最高分数据应保留更多隐藏行为，只用最低分数据应接近基础模型；十分位结果还应大致单调。</p><p>实验中“狗”目标的分离较清楚，“大象”等组合却曲折甚至区间重叠，说明单次成功不能推出方法在未知攻击上稳定。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · AI</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>把 100 个 token 按影响分成十组。若最高 10% 单独训练几乎恢复完整效果、最低 10% 不产生效果，排序有信息；若各组忽高忽低，就不能安全地只删最高组。</p><p>token 级 EK-FAC 通常比样本级更一致，但仍多半不及 divergence token；而后者在现实未知攻击目标中可能无法构造。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · AI</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>论文在三个模型、多个动物偏好与长短回复上比较三种梯度归因。EK-FAC 在 token 级最一致，能缓解显著一部分效果；其他梯度方法收益较小，且多数设置不及 divergence token。</p><p>Qwen2.5-3B 的“狗”设置中，最高归因 10% token 可产生接近全数据的效果；“大象”设置分离弱、置信区间部分重叠。图 3 显示方法、模型、目标和粒度之间差异很大。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · AI</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>实验只覆盖有限模型、人工构造偏好和 LoRA 微调；归因近似质量与计算成本会影响结果，未知现实攻击可能完全不同。</p><p>divergence token 需要反事实教师，假设很强；梯度归因偶尔成功不构成安全保证。删除高分数据还可能损害正常能力，论文没有解决所有效用权衡。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · AI</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“训练样本表面上完全不提“偏爱狗”，模型却学会偏爱狗时，能否靠梯度归因找出该删哪些样本或 token？”先被拆成可观察输入，再经过“第一步：归因分数只产生候选排名”与“第二步：必须重训验证排序是否真能隔离行为”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · AI</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“用十分位结果判断一个归因排序是单调可信还是忽高忽低”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 高分十分位响应率：0.8
+- 中间十分位响应率：0.35
+- 低分十分位响应率：0.1
+- 另一目标：0.4、0.7、0.3（不单调）
+中间状态：
+1. 按归因分十分位
+2. 分别训练并测目标行为
+3. 检查高分到低分是否单调下降
+4. 不单调时拒绝把排序当过滤保证
+正常例：第一组排序有方向性证据；第二目标不稳定，不能照搬过滤阈值。
+边界：响应率是教学数字，没有训练模型，也不表示归因方法的真实效果。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么样本级归因可能不如 token 级？</li><li>某个目标上最高组效果很强，能否宣布方法可靠？</li><li>divergence token 为什么难直接用于未知攻击？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20027v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20027v1">元数据与版本</a></p><p>已读归因与筛选设置、累计与十分位实验、跨模型比较和讨论；核对图 1—3 及附录主要消融。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、18 条图表说明，正文约 33,455 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 训练数据归因能过滤“潜意识学习”吗？目前并不可靠</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：归因分数只产生候选排名</option><option value="7">7. 第二步：必须重训验证排序是否真能隔离行为</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Can Data Attribution Filter Out Subliminal Learning? Not Reliably</p><p>Weckbecker, Moritz、Jena, Sweta、Müller, Jonas、Kumaraguru, Ponnurangam、Lapuschkin, Sebastian、Samek, Wojciech、Jaburi, Louis、Paulo, Gonçalo</p>
+<p>arXiv:2609.20027v1 · 发布日期：2026-09-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20027v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20027v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20027v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20027v1">元数据与版本</a></p><p>已读归因与筛选设置、累计与十分位实验、跨模型比较和讨论；核对图 1—3 及附录主要消融。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、18 条图表说明，正文约 33,455 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

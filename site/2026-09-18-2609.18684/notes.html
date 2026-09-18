@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="简单“接触一个人就模仿”的传播忽略了行为常需多人强化，也忽略行为会反过来改变危机；论文把两条反馈放入一个可分析的模型。">
+<title>详细讲解 · 危机与舆论会互相推：复杂传染如何生成反复疫情波动</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18684v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">社会研究 · arXiv:2609.18684v1</p>
+<h1>危机与舆论会互相推：复杂传染如何生成反复疫情波动</h1><p class="original" lang="en">Modelling opinion dynamics during crises as complex contagion with feedback</p>
+<p class="lead">简单“接触一个人就模仿”的传播忽略了行为常需多人强化，也忽略行为会反过来改变危机；论文把两条反馈放入一个可分析的模型。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">先从一个普通人会遇到的问题开始</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先补两块必要基础</a><a href="#section-3">论文接收什么，输出什么</a><a href="#section-4">第一步：危机水平改变跨过社会强化门槛的难度</a><a href="#section-5">第二步：群体行为改变危机，再反馈回行为</a><a href="#section-6">跟着一个小例子看中间状态</a><a href="#section-7">作者拿什么证据支持主张</a><a href="#section-8">哪些结论不能顺手扩大</a><a href="#section-9">把整条因果链重新接起来</a><a href="#section-10">最小实践：把核心机制跑一遍</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>先从一个普通人会遇到的问题开始</h2><p>简单“接触一个人就模仿”的传播忽略了行为常需多人强化，也忽略行为会反过来改变危机；论文把两条反馈放入一个可分析的模型。</p><p>今天读完《危机与舆论会互相推：复杂传染如何生成反复疫情波动》，目标不是记住论文名，而是能用自己的话回答：为什么人们看到危机严重才集体采取保护行为，保护奏效后又放松，最终出现一轮轮反复？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[危机调节复杂传染]
+C --&gt; D[行为反过来改变危机]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先补两块必要基础</h2><p>simple contagion 一次接触即可传播；complex contagion 要多个邻居或更强社会强化才转变。戴口罩、疏远或恐慌通常受到重复确认影响。</p><p>bidirectional feedback 指危机水平改变采用难度，群体行为又改变危机增长；这可能产生稳定点、滞后、突变或周期。</p></section><section id="section-3"><h2>论文接收什么，输出什么</h2><p>输入是两种竞争行为的人口比例、社会强化强度、采用复杂度、危机状态、宣传影响和行为对危机的保护效果。输出是行为与危机随时间的轨迹及平衡稳定性。</p><p>作者先在均匀混合人口中写随机切换率并分析平衡，再把机制接到按澳大利亚人口校准的 COVID-19 agent-based model。</p></section><section id="section-4"><h2>第一步：危机水平改变跨过社会强化门槛的难度</h2><p>感染上升或宣传加强时，保护行为所需的社会确认可降低；感染下降时，继续保持行为的动力又减弱。</p><p>竞争状态不是被一次接触线性传染，而是转变概率随群体支持和复杂度非线性变化。</p></section><section id="section-5"><h2>第二步：群体行为改变危机，再反馈回行为</h2><p>更多疏远降低传播，危机回落；回落又降低采用和维持疏远的压力，放松后感染再升，形成闭环。</p><p>论文求解平衡和稳定条件，并用少参数 CCF 与既有意见模型比较重现多波疫情的能力。</p></section><section id="section-6"><h2>跟着一个小例子看中间状态</h2><p>教学例从感染高、保护行为 30% 开始；危机信号使采用门槛下降，保护升到 70%，感染随后回落；人们感到安全后保护降到 40%，感染又反弹。</p><p>若保护行为对危机几乎无效，反馈环会断一半；若采用始终很难，即使危机高也不一定形成集体转变。</p></section><section id="section-7"><h2>作者拿什么证据支持主张</h2><p>论文给出均匀混合 CCF 方程、平衡点和稳定性条件，再与澳大利亚人口校准的 COVID-19 agent-based transmission 模型耦合。</p><p>案例中，CCF 用更少参数重现反复感染波的表现与一个已有 opinion dynamics 模型相当，说明机制具备拟合能力；这不证明现实人群确实按该方程转变。</p></section><section id="section-8"><h2>哪些结论不能顺手扩大</h2><p>均匀混合忽略真实社交网络、群体异质、媒体平台与政策执行；疫情数据中多种行为和变异株同时变化，参数可识别性有限。</p><p>能重现波形不等于模型机制被因果验证，其他机制也可能给出相似曲线；模型不应用来直接制定个人健康决策。</p></section><section id="section-9"><h2>把整条因果链重新接起来</h2><p>研究问题“为什么人们看到危机严重才集体采取保护行为，保护奏效后又放松，最终出现一轮轮反复？”先被拆成可观察输入，再经过“第一步：危机水平改变跨过社会强化门槛的难度”与“第二步：群体行为改变危机，再反馈回行为”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section id="section-10"><h2>最小实践：把核心机制跑一遍</h2><p>需求：用一组明确标为教学设定的小数据演示“沿四个时间点演示危机—保护行为负反馈造成的反复”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 初始危机：高
+- 初始保护：30%
+- 保护有效性：降低危机
+- 放松条件：危机下降
+中间状态：
+1. 危机高降低采用门槛
+2. 保护升至70%使危机下降
+3. 危机低使保护降至40%
+4. 保护下降后危机反弹
+正常例：行为与危机互推可形成多轮变化，而非单向扩散到终点。
+边界：百分比为教学轨迹，没有运行疫情模型、估计参数或预测感染。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>复杂传染与一次接触传播的关键区别是什么？</li><li>为什么保护成功反而可能为下一轮反弹创造条件？</li><li>拟合多波曲线是否证明了行为机制？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.18684v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18684v1">元数据与版本</a></p><p>已读 CCF 状态与转移率、双向反馈、平衡和稳定分析、澳大利亚 COVID-19 案例、模型比较和局限。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、13 条图表说明，正文约 87,279 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Modelling opinion dynamics during crises as complex contagion with feedback</p><p>Huang, Junxiang、Prokopenko, Mikhail</p>
+<p>arXiv:2609.18684v1 · 发布日期：2026-09-16 · 社会研究</p>
+<p><a href="https://arxiv.org/abs/2609.18684v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18684v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

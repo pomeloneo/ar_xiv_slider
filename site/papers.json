@@ -1,5 +1,1005 @@
 [
   {
+    "date": "2026-09-18",
+    "title": "Rethinking Multi-Agent Collaboration: When More Is Less",
+    "title_zh": "多智能体何时反而更差：任务依赖结构比人数更重要",
+    "arxiv_id": "2609.19759v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "多智能体",
+      "协作",
+      "上下文",
+      "任务分解"
+    ],
+    "summary": "多叫几个人不一定更聪明：可以并行的独立子任务适合分工，前一步不断决定后一步的紧耦合流程却会产生大量同步与信息丢失；论文把这个直觉形式化并做系统实验。",
+    "path": "2026-09-18-2609.19759/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Can Data Attribution Filter Out Subliminal Learning? Not Reliably",
+    "title_zh": "训练数据归因能过滤“潜意识学习”吗？目前并不可靠",
+    "arxiv_id": "2609.20027v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "训练数据",
+      "归因",
+      "安全",
+      "Subliminal Learning"
+    ],
+    "summary": "内容审核看不见与文本含义无关的隐藏行为传递，训练数据归因似乎能按“谁导致了行为”筛选；论文的价值在于展示它有时有效、但跨模型和目标不稳定，不能当成可靠安全过滤器。",
+    "path": "2026-09-18-2609.20027/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Perception, Layout, and Validation: Calibrated Confidence for Reliable Straight-Through Processing of Financial Documents",
+    "title_zh": "感知、版面与校验：为金融单据直通处理校准可信度",
+    "arxiv_id": "2609.20110v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "文档理解",
+      "风险控制",
+      "金融科技"
+    ],
+    "summary": "用“看清、找对位置、通过规则”三张体检表，理解为什么模型自报 95% 信心仍不够自动放行发票字段。",
+    "path": "2026-09-18-2609.20110/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "When AI Agents Commit: Cognitive Serializability Across Data, Evidence, Policy, and Authority",
+    "title_zh": "AI 智能体提交操作时：如何保证证据、政策与权限仍然有效",
+    "arxiv_id": "2609.20261v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "智能体",
+      "数据库",
+      "安全",
+      "事务"
+    ],
+    "summary": "普通数据库事务只能保证数据库里的读写顺序，却不知道智能体在外部看过的证据或权限是否已经变化；这篇论文把这个“想的时候对、做的时候已过期”的风险变成可检查的提交契约。",
+    "path": "2026-09-18-2609.20261/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "AgentPProf: Semantic Profiler for Long Horizon AI Agents",
+    "title_zh": "AgentPProf：把长周期智能体的工作画成“火焰图”",
+    "arxiv_id": "2609.20301v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "智能体",
+      "可观测性",
+      "性能分析",
+      "成本"
+    ],
+    "summary": "传统 trace 适合看一次执行，长期优化却要跨许多运行聚合；论文借用软件 profiler 的思想，把不稳定的自然语言步骤归并成语义操作栈，让成本和失败能按责任层级累积。",
+    "path": "2026-09-18-2609.20301/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "SkillAA: Attribution-Guided Skill-Graph Updating with Targeted Validation and Rollback",
+    "title_zh": "SkillAA：失败后只修技能图中最可能出错的一小块",
+    "arxiv_id": "2609.20455v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "技能",
+      "Agent Skill",
+      "归因",
+      "回滚"
+    ],
+    "summary": "直接根据一次失败重写整份技能，像修一处漏水却把整屋管道换掉；论文给技能节点和关系稳定地址，用成功/失败对比定位最小编辑面，再经过局部与全局两道门决定是否提交。",
+    "path": "2026-09-18-2609.20455/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "How Do Agent Harnesses Create Value? Planning Information and Release Control in Stateful LLM Agents",
+    "title_zh": "智能体 Harness 为什么有价值：计划信息与放行控制要分开算",
+    "arxiv_id": "2609.20474v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "智能体",
+      "Harness",
+      "评估",
+      "风险"
+    ],
+    "summary": "很多团队把“计划、工具编排、完成检查”打包成一个 harness 后只报总成功率；这篇论文把计划带来的成功增量、验证器避免的误放行和额外成本分开，普通读者也能看清权衡。",
+    "path": "2026-09-18-2609.20474/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Limits of Confidence in Diffusion",
+    "title_zh": "离散扩散模型的“高置信并行填词”为何可能改变整体分布",
+    "arxiv_id": "2609.20581v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "扩散模型",
+      "生成模型",
+      "概率",
+      "可靠性"
+    ],
+    "summary": "局部置信度像是分别问“每个座位最可能坐谁”，但整排座位可能受“家庭必须坐在一起”这类联合约束；论文证明边缘概率不能告诉采样器多个位置是否可独立并行。",
+    "path": "2026-09-18-2609.20581/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Deep Noir: Autonomous Steering Discovery via Architectural Chronometry in Transformer Models",
+    "title_zh": "Deep Noir：自动寻找 Transformer 中该在哪一层做行为引导",
+    "arxiv_id": "2609.20722v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "Transformer",
+      "可解释性",
+      "Activation Steering",
+      "安全"
+    ],
+    "summary": "activation steering 像在模型内部推一把，但过去常靠人工试层数和强度；论文用预测何时成形与哪些注意力头有因果作用来自动选点，并同时发现干预会制造提示注入攻击面。",
+    "path": "2026-09-18-2609.20722/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Q&A on Any Spreadsheet Requires Interpreting Its Grid Structure",
+    "title_zh": "回答任意电子表格问题，需要先读懂网格结构",
+    "arxiv_id": "2609.20732v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "电子表格",
+      "RAG",
+      "结构理解"
+    ],
+    "summary": "从一个孤零零的“51.5”出发，理解表头层级如何让检索到的数字重新获得含义。",
+    "path": "2026-09-18-2609.20732/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "RAFT: A Stateful Retrieval-Augmented Framework for Troubleshooting Agents",
+    "title_zh": "RAFT：面向故障排查智能体的有状态检索增强框架",
+    "arxiv_id": "2609.20754v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "RAG",
+      "智能体",
+      "故障排查"
+    ],
+    "summary": "用“病程而不是病历袋”理解：检索系统为什么应匹配故障调查的当前阶段，并带回完整解决轨迹。",
+    "path": "2026-09-18-2609.20754/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "An Empirical Study of Harness Design for Coding Agents",
+    "title_zh": "编码智能体的 Harness 设计：一项组件级实证研究",
+    "arxiv_id": "2609.20804v1",
+    "direction": "AI",
+    "tags": [
+      "AI",
+      "编码智能体",
+      "上下文管理",
+      "软件工程"
+    ],
+    "summary": "把模型比作司机、Harness 比作仪表盘与道路规则，理解计划、工具和上下文为何要按模型能力与预算搭配。",
+    "path": "2026-09-18-2609.20804/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "The hierarchical organization of urban social overlap: How shared social spaces diverge from physical mobility",
+    "title_zh": "人流中心不等于相遇中心：13 座巴西城市的社会重叠网络",
+    "arxiv_id": "2609.12888v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "城市",
+      "移动数据",
+      "社会互动",
+      "网络科学"
+    ],
+    "summary": "移动记录告诉我们人从哪到哪，却不直接告诉谁与谁反复同处、不同地点是否服务同一社会群体；论文把流动、同处和跨地点社会重叠分成三层。",
+    "path": "2026-09-18-2609.12888/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Unveiling healthcare-access inequality in Ghana using a multiscale approach",
+    "title_zh": "离医院远只是第一层：加纳医疗可及性为何要沿道路网络逐级看",
+    "arxiv_id": "2609.14510v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "医疗可及性",
+      "加纳",
+      "空间不平等",
+      "道路网络"
+    ],
+    "summary": "最近距离告诉我们哪里服务差，却不能判断贫困点是孤立小洞还是更大断裂的一部分；论文把街道级可及性放到道路网络的多尺度层级中。",
+    "path": "2026-09-18-2609.14510/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Global Poverty Beyond the Official Line: A bounded estimate of material insufficiency",
+    "title_zh": "全球到底有多少贫困人口？先问你用哪把尺子",
+    "arxiv_id": "2609.16203v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "贫困测量",
+      "社会政策",
+      "数据质量"
+    ],
+    "summary": "8.47 亿、11 亿、37 亿和 39 亿并非谁对谁错：它们用不同门槛回答不同问题，重叠人群也不能直接相加。",
+    "path": "2026-09-18-2609.16203/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Unified framework for measuring segregation resolves how social and geographical space jointly shape connections",
+    "title_zh": "住得分开与交往分开不是一回事：把地理隔离和社会隔离拆开测",
+    "arxiv_id": "2609.16469v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "社会隔离",
+      "地理",
+      "社交网络",
+      "测量方法"
+    ],
+    "summary": "只看居住分布会把机会结构当成社交偏好，只看朋友网络又会把距离影响算成同类偏好；论文用反事实网络分别关闭地理和群体通道。",
+    "path": "2026-09-18-2609.16469/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "An Integrative Multidimensional Conceptualization of Telework Behavior: A Systematic Review and Grounded Theory Approach",
+    "title_zh": "远程办公不能只问“在不在办公室”：六类行为怎样连接条件与结果",
+    "arxiv_id": "2609.17409v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "远程办公",
+      "组织行为",
+      "系统综述",
+      "概念框架"
+    ],
+    "summary": "远程办公天数只是安排，不是行为；论文把工作表现、沟通、环境、任务、政策和身心健康六类可观察行为放进同一框架，帮助避免把所有结果都归因于“远程”两个字。",
+    "path": "2026-09-18-2609.17409/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Why Some Strikes Last Longer: The Resilience Paradox of Partially Functional Institutions",
+    "title_zh": "机构还能部分运转，为何罢工有时反而拖得更久",
+    "arxiv_id": "2609.17761v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "劳工",
+      "罢工",
+      "动力系统",
+      "制度韧性"
+    ],
+    "summary": "“韧性总能稳定系统”忽略了反馈：残余运行直接压低参与，却也缓冲损失、减弱回应；论文用最小动力模型找出两条力量正好抵消的阈值。",
+    "path": "2026-09-18-2609.17761/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Overlap and topology shape synergy in collective knowledge integration",
+    "title_zh": "团队知识重合多少最好：共同语言与新信息之间的中间地带",
+    "arxiv_id": "2609.18140v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "集体智慧",
+      "知识网络",
+      "协作",
+      "复杂系统"
+    ],
+    "summary": "“多样性越高越好”和“共同背景越多越好”都过于简单；论文把个人知识画成同一知识网络中的连通子图，区分内部路径缩短和外部新概念两种协同。",
+    "path": "2026-09-18-2609.18140/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Modelling opinion dynamics during crises as complex contagion with feedback",
+    "title_zh": "危机与舆论会互相推：复杂传染如何生成反复疫情波动",
+    "arxiv_id": "2609.18684v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "舆论动力学",
+      "复杂传染",
+      "危机",
+      "疫情模型"
+    ],
+    "summary": "简单“接触一个人就模仿”的传播忽略了行为常需多人强化，也忽略行为会反过来改变危机；论文把两条反馈放入一个可分析的模型。",
+    "path": "2026-09-18-2609.18684/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Towards stratified sampling for redistricting plans",
+    "title_zh": "如何从海量选区方案中抽到罕见类型：先给方案造“字母”和“单词”",
+    "arxiv_id": "2609.18741v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "选区重划",
+      "抽样",
+      "聚类",
+      "公共政策"
+    ],
+    "summary": "论文没有宣称已经解决选区公平，而是完成分层抽样的前置工作：把相似选区聚成字母、整套方案写成单词，再检查各层是否覆盖且相互连通。",
+    "path": "2026-09-18-2609.18741/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Experienced partisan segregation across patterns of mobility behavior in US cities",
+    "title_zh": "住在政治同温层里，日常出行能让人遇见不同观点吗？",
+    "arxiv_id": "2609.19285v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "城市流动",
+      "政治隔离",
+      "空间行为"
+    ],
+    "summary": "住址决定了政治暴露的底色，但走得更远与较弱的同温层相关；只是去更多新地点，并不自动带来跨阵营接触。",
+    "path": "2026-09-18-2609.19285/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Tailored to you: longitudinal effects of personalising language models",
+    "title_zh": "AI 越来越懂你：是个性化的效果，还是只是用久了？",
+    "arxiv_id": "2609.20077v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "个性化AI",
+      "纵向实验",
+      "隐私与披露"
+    ],
+    "summary": "五天里亲近感、能力评价和披露普遍上升，许多变化来自重复接触；记忆式与问卷式个性化又在披露和后悔上走出不同路径。",
+    "path": "2026-09-18-2609.20077/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Ownership in AI-Assisted Everyday Tasks",
+    "title_zh": "AI 帮我做的作品，什么时候还算“我的”？",
+    "arxiv_id": "2609.20658v1",
+    "direction": "社会研究",
+    "tags": [
+      "社会研究",
+      "人机协作",
+      "心理所有权",
+      "AI使用"
+    ],
+    "summary": "所有权感更取决于谁主导过程、是否保留个人声音和能否理解结果，而不是 AI 完成了多少表面工作。",
+    "path": "2026-09-18-2609.20658/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Artificial Intelligence: Supply-Chain Chokepoints and the Reach of Industrial Policy",
+    "title_zh": "AI 产业真正卡在哪里：从模型一路追到光刻、封装、电力和矿产",
+    "arxiv_id": "2607.29572v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "AI基础设施",
+      "半导体",
+      "关键矿产",
+      "产业政策"
+    ],
+    "summary": "竞争讨论常盯着最下游的模型公司；论文把模型、云、芯片、电力和矿产放到同一浓度尺上，显示真正难替代的环节集中在更上游。",
+    "path": "2026-09-18-2607.29572/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Techno-Economic Boundary Analysis of Small Modular Reactor Cogeneration for Hyperscale Data Center IT and Cooling Loads",
+    "title_zh": "小型核反应堆给数据中心供电制冷，什么条件下才算得过账",
+    "arxiv_id": "2608.10999v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "核电",
+      "数据中心",
+      "能源经济",
+      "制冷"
+    ],
+    "summary": "“核电稳定低碳、余热免费”是直觉，不是完整经济账；论文逐小时计算反应堆资本、融资、弃发电量、税收抵免、冷机效率和电网买卖，找出竞争边界。",
+    "path": "2026-09-18-2608.10999/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "OreProof: Verifiable Provenance with Limited Disclosure for Critical-Minerals Supply Chains Using Zero-Knowledge Proofs",
+    "title_zh": "不公开供应商也能证明矿产来源吗：OreProof 的零知识溯源",
+    "arxiv_id": "2609.00340v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "关键矿产",
+      "供应链",
+      "零知识证明",
+      "数字产品护照"
+    ],
+    "summary": "传统透明账本要求把商业秘密摊开，封闭账本又让外部人只能相信运营者；论文用承诺和零知识证明，让验证者检查一个具体条件，而不直接看到原始值。",
+    "path": "2026-09-18-2609.00340/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "From Grid to Chip: Power Architecture, Stability, and Flexibility of AI Data Centers",
+    "title_zh": "从电网到芯片：AI 数据中心为什么不能只看总耗电量",
+    "arxiv_id": "2609.11649v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "AI基础设施",
+      "数据中心",
+      "电力系统"
+    ],
+    "summary": "AI 数据中心不是一只稳定的大灯泡：芯片负载、层层变流器、储能和电网控制互相作用，稳定性必须沿电网到芯片分层检查。",
+    "path": "2026-09-18-2609.11649/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "CATS: A Carbon-Aware Task Simulator for Reducing AI Data Center Emissions",
+    "title_zh": "同一个 AI 请求换个地点或时间，碳排为什么会不同",
+    "arxiv_id": "2609.14775v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "AI基础设施",
+      "数据中心",
+      "碳排放",
+      "任务调度"
+    ],
+    "summary": "一度电在煤电边际机组和清洁电源充足的电网中对应的新增排放不同；论文把实际 GPU 能耗、五分钟电网信号、容量和 SLA 放在同一个模拟器中。",
+    "path": "2026-09-18-2609.14775/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Cnuas: A Software-Defined AI/HPC Rack-scale Emulation Platform and Hyperscale Data Center Facility Twin",
+    "title_zh": "没有昂贵整机也能开发 AI 机架软件吗：Cnuas 的功能仿真边界",
+    "arxiv_id": "2609.15889v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "AI基础设施",
+      "数据中心",
+      "数字孪生",
+      "HPC"
+    ],
+    "summary": "硬件仿真最容易把“接口能工作”和“性能像真机”混为一谈；论文建立一条明确的 emulation seam，并把功能测试、虚拟时间估计和物理校准分开。",
+    "path": "2026-09-18-2609.15889/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Rect3D: A Unified Analytical Framework for 3D-IC Rectilinear Floorplanning",
+    "title_zh": "两层芯片怎样一起排版：先别过早决定每个模块放哪一层",
+    "arxiv_id": "2609.18946v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "半导体",
+      "3D-IC",
+      "芯片设计",
+      "布局优化"
+    ],
+    "summary": "芯片模块谁和谁连接，会影响它们该靠多近，也会影响放在哪一层；论文把原本先分层后布局的两步，变成可连续搜索、最后再合法化的一条流程。",
+    "path": "2026-09-18-2609.18946/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Detection of Synchronized AI Data Center Load Episodes Using SCADA Telemetry",
+    "title_zh": "三座数据中心同时跳功率，电网怎样用现有遥测发现",
+    "arxiv_id": "2609.18997v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "数据中心",
+      "电网监测",
+      "异常检测"
+    ],
+    "summary": "单站阈值看不见“大家一起动”；滑动相关矩阵的最大特征值量化同步程度，CUSUM 累积弱信号并触发告警，特征向量指出来源。",
+    "path": "2026-09-18-2609.18997/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "SiliconBench: Speed, Memory, and Fidelity for LLM Serving on Unified-Memory Desktops",
+    "title_zh": "在桌面电脑上跑大模型，为什么只看每秒生成多少字会选错引擎",
+    "arxiv_id": "2609.19169v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "AI基础设施",
+      "本地大模型",
+      "推理服务",
+      "Apple Silicon"
+    ],
+    "summary": "一个引擎跑得快，却可能把内存吃到系统无法做别的事、在并发时丢请求，或因聊天模板错误让回答质量下降；论文提供一套不被单一速度数字骗过的审计方法。",
+    "path": "2026-09-18-2609.19169/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "MeshKV: A Network-on-Chip KV Cache Fabric for Scalable Transformer Decoding Accelerators",
+    "title_zh": "让 KV 缓存不再堵车：长上下文芯片上的分布、组播与流水线",
+    "arxiv_id": "2609.19207v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "半导体",
+      "AI芯片",
+      "KV缓存"
+    ],
+    "summary": "长上下文解码不只受外部显存限制，片上 KV 数据也会堵在共享入口；分散存放、一次组播和计算传输重叠可把等待链变成流水线。",
+    "path": "2026-09-18-2609.19207/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Resilient Design and Optimal Operation of Battery Energy Storage Systems for Behind-the-Meter Data Center Microgrids",
+    "title_zh": "两组电池怎样同时保护 AI 数据中心和自备电厂",
+    "arxiv_id": "2609.19342v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "数据中心",
+      "储能",
+      "微电网"
+    ],
+    "summary": "负载侧电池拦住秒级算力尖峰，发电侧电池保留小时级应急能量；位置、功率和电量解决的是不同问题。",
+    "path": "2026-09-18-2609.19342/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "The Roadmap of Inorganic Computational Materials Databases: Capabilities, Credibility, Coverage, and the Open Frontier",
+    "title_zh": "材料数据库缺的不是计算公式，而是把昂贵结果做得可信又规模化",
+    "arxiv_id": "2609.19833v1",
+    "direction": "科技与产业",
+    "tags": [
+      "科技与产业",
+      "材料科学",
+      "数据库",
+      "DFT",
+      "科研基础设施"
+    ],
+    "summary": "“能为一个材料算出来”与“能为十万种材料稳定、便宜、可比较地算出来”相差很远；论文用能力、成本、可信度和覆盖率四张账解释基础设施该先补哪里。",
+    "path": "2026-09-18-2609.19833/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Redistributive Policies for the Times of Transformative AI",
+    "title_zh": "如果 AI 让资本成为收入主体，再分配该盯工资还是资本所有权",
+    "arxiv_id": "2609.14750v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "人工智能",
+      "收入分配",
+      "税收",
+      "理论综述"
+    ],
+    "summary": "今天很多再分配围绕工资设计；论文先假设一个高度自动化的未来，再比较政策究竟改变资本所有权、资本租金还是只对丰富的 AI 软件收费。",
+    "path": "2026-09-18-2609.14750/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Developer Investment in Agentic Platforms: Capability Spillovers, Hold-Up, and Portability",
+    "title_zh": "AI 智能体平台该开放多少：可迁移性如何改变开发者投资",
+    "arxiv_id": "2609.17558v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "AI平台",
+      "平台治理",
+      "可迁移性",
+      "理论模型"
+    ],
+    "summary": "平台事后可以改费率或路由，开发者会预见到被“套牢”而少投资；可迁移权提供退出价值，但完全开放也可能复制敏感资产、碎片化生态。",
+    "path": "2026-09-18-2609.17558/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "AI and the Market for Signals",
+    "title_zh": "AI 能代写产出后，学历和早期工作还在传递什么信号",
+    "arxiv_id": "2609.17752v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "人工智能",
+      "劳动力市场",
+      "教育",
+      "信号模型"
+    ],
+    "summary": "作业和早期工作既创造真实技能，也向雇主传递能力；AI 降低了制造可见产出的成本，却不必立刻消灭筛选，可能先把“证明自己”的军备竞赛推高。",
+    "path": "2026-09-18-2609.17752/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Why a Non-Discriminatory Royalty Surcharge Is Not Chip-Neutral: The Error in FTC v. Qualcomm",
+    "title_zh": "同样向所有手机收费，为何仍可能偏向自家芯片",
+    "arxiv_id": "2609.18161v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "半导体",
+      "反垄断",
+      "许可费",
+      "产业组织"
+    ],
+    "summary": "买家账单上两边都多同样一项，看似会抵消；关键是这笔钱不是交给第三方政府，而是由同时卖芯片的高通收取，因此两家调价后的收益变化不对称。",
+    "path": "2026-09-18-2609.18161/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Global Reallocation of Capital in the Era of Geo-Economic Fragmentation and Artificial Intelligence",
+    "title_zh": "地缘经济分裂与 AI 时代的全球资本再配置",
+    "arxiv_id": "2609.18976v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "AI资本",
+      "地缘经济",
+      "HANK"
+    ],
+    "summary": "把跨境 AI 投资想成一条越来越贵的运输线：摩擦不仅减少资本流动，还会经汇率、融资约束和工资把损失传给不同国家与家庭。",
+    "path": "2026-09-18-2609.18976/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "A Tale of Two Cities: The Announcement Effect of Northern Metropolis Plan",
+    "title_zh": "规划还没动工，房价和消费先动了：香港北部都会区的公告效应",
+    "arxiv_id": "2609.19032v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "中国经济",
+      "房地产",
+      "区域政策",
+      "双重差分"
+    ],
+    "summary": "普通人常把政策效果等同于工程落地后的变化；这篇论文利用 2021 年 10 月香港北部都会区规划公告，观察预期本身如何先进入房价、消费和企业登记。",
+    "path": "2026-09-18-2609.19032/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Omitted Variable Bias in Difference-in-Differences Designs",
+    "title_zh": "双重差分怕漏掉什么：把“隐藏混杂要多强才推翻结论”算出来",
+    "arxiv_id": "2609.19386v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "因果推断",
+      "双重差分",
+      "敏感性分析",
+      "统计"
+    ],
+    "summary": "平行趋势无法由处理后的数据直接证明；论文不假装隐藏因素不存在，而是把偏误拆成可解释的几部分，报告研究对多强混杂仍然稳健。",
+    "path": "2026-09-18-2609.19386/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "The Behavior of Inventories over the Business Cycle: Evidence across Levels of Development",
+    "title_zh": "商业周期中的库存：不同发展阶段经济体的证据",
+    "arxiv_id": "2609.19455v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "库存",
+      "商业周期",
+      "小型开放经济"
+    ],
+    "summary": "库存既是仓库里的货，也是企业吸收需求、生产和融资冲击的缓冲垫；这种缓冲在不同收入国家的速度并不一样。",
+    "path": "2026-09-18-2609.19455/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Tradeable Import Certificates for Strategic Supply Security",
+    "title_zh": "可交易进口证书：把供应安全目标变成一个会自动调价的市场",
+    "arxiv_id": "2609.20282v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "贸易政策",
+      "供应链",
+      "产业政策",
+      "理论模型"
+    ],
+    "summary": "芯片、药品或稀土的安全目标通常写成“至少多少来自国内或可靠伙伴”；论文提出给不同流向记证书、进口时交证书，让证书价格自动反映目标有多难达到。",
+    "path": "2026-09-18-2609.20282/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "An Arbitrarily Precise Global Closed Form Approximation for the Neoclassical Growth Model",
+    "title_zh": "新古典增长模型的任意精度全局闭式近似",
+    "arxiv_id": "2609.20405v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "增长模型",
+      "资本积累",
+      "闭式解"
+    ],
+    "summary": "从“先保生存、再起飞”理解资本、消费与储蓄路径，以及为什么同一个稳态可以有前快后慢或前慢后快的靠近方式。",
+    "path": "2026-09-18-2609.20405/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Unpriced Internal Externalities and Structural Inefficiency in Organizations",
+    "title_zh": "组织为什么越努力越没效果：内部目标互相抵消的结构性低效",
+    "arxiv_id": "2609.20462v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "组织管理",
+      "治理",
+      "外部性",
+      "理论框架"
+    ],
+    "summary": "管理问题常被诊断为努力不足；论文提出先把机制对多个目标的正负影响放在同一张表上，若它们大量抵消，瓶颈是结构冲突而不是投入。",
+    "path": "2026-09-18-2609.20462/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Does Training on Future Data Pay? Look-Ahead Bias in Forecasting with Pretrained Models",
+    "title_zh": "用未来数据训练真的有用吗？预训练预测模型中的前视偏差",
+    "arxiv_id": "2609.20554v1",
+    "direction": "经济",
+    "tags": [
+      "经济",
+      "预测",
+      "时间序列模型",
+      "前视偏差"
+    ],
+    "summary": "模型参数也有日期：即使输入只看到当时数据，使用后来训练的模型回测历史，仍已把未来信息带进规则。",
+    "path": "2026-09-18-2609.20554/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "The Favorite-Longshot Bias in Prediction Markets: Evidence from Polymarket",
+    "title_zh": "预测市场的热门—冷门偏差：结论为何随统计单位改变",
+    "arxiv_id": "2609.12878v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "预测市场",
+      "行为偏差",
+      "Polymarket",
+      "数据分析"
+    ],
+    "summary": "一个总统选举事件可拆出许多候选人子合约；若每张合约、每个大事件和每一美元投资分别等权，回答的是不同问题。论文用 5.88 亿笔交易展示聚合口径本身就是经济结论的一部分。",
+    "path": "2026-09-18-2609.12878/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Same Book, Different Fills: Partial Identification of FIFO Execution from Aggregate Order Books",
+    "title_zh": "同一张订单簿，可能成交得完全不同：L2 数据的部分识别",
+    "arxiv_id": "2609.13597v2",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "订单簿",
+      "执行",
+      "部分识别",
+      "回测"
+    ],
+    "summary": "L2 行情告诉你队伍总长度，却不告诉每张订单的先后位置；中间有人撤单时，撤的是你前面还是后面，会让同一公开订单簿路径对应不同成交结果。",
+    "path": "2026-09-18-2609.13597/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Resolution Is Not Settlement, Part I: Oracle Adjudication and Semantic Governance on Polymarket",
+    "title_zh": "预测市场“裁决”不是一个时间戳：Polymarket 的 Oracle 状态机",
+    "arxiv_id": "2609.15368v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "预测市场",
+      "Oracle",
+      "治理",
+      "Polymarket"
+    ],
+    "summary": "只存“最终结果 + 时间”会把规则澄清、争议与后继请求抹掉；论文以 request generation 为关键单位，重建 50 多万条 Oracle 生命周期事件，说明技术时钟不能冒充事实已足够判断的语义时钟。",
+    "path": "2026-09-18-2609.15368/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Resolution Is Not Settlement, Part II: Protocol Finality and Observed Redemption on Polymarket",
+    "title_zh": "结果已公布不等于钱已到账：Polymarket 的协议结算与赎回链",
+    "arxiv_id": "2609.15373v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "预测市场",
+      "区块链",
+      "结算",
+      "Polymarket"
+    ],
+    "summary": "“答案确定”“协议写入赔付”“头寸可赎回”“持有人实际赎回”是不同事件；论文用链上事件逐层重建，防止把一个时间戳误当整条结算完成。",
+    "path": "2026-09-18-2609.15373/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "From Public Evidence to Contractual Outcome: First and Stable Decidability on Kalshi",
+    "title_zh": "公开证据何时足够结算：Kalshi 的首次与稳定可判定时间",
+    "arxiv_id": "2609.16642v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "预测市场",
+      "Kalshi",
+      "合约规则",
+      "测量设计"
+    ],
+    "summary": "“新闻出来了”不是合约证据。规则版本、指定来源、发布对象、修订历史和所有未完成条件都要同时满足；论文提出首次可判定与稳定可判定两个时钟，并坦诚当前历史资料不足以完成全量估计。",
+    "path": "2026-09-18-2609.16642/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Financial Contagion Networks as Annealing-Ready Ising Systems Cascades, Bailout Optimization, and Susceptibility",
+    "title_zh": "把金融传染网络写成可退火求解的 Ising 系统：级联、救助优化与易感性",
+    "arxiv_id": "2609.17415v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "系统性风险",
+      "网络模型",
+      "优化"
+    ],
+    "summary": "用相互拖累的三家机构理解：一次局部失败为何会形成自洽级联，以及有限救助为何要看网络而不只看规模。",
+    "path": "2026-09-18-2609.17415/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "On-Demand Combinatorial Event Markets on Kalshi: Instantiation, Concentration, and Effective Market Breadth",
+    "title_zh": "Kalshi 按需组合事件市场：实例化、集中度与有效市场广度",
+    "arxiv_id": "2609.17610v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "预测市场",
+      "市场结构",
+      "集中度"
+    ],
+    "summary": "用“菜单组合数不等于菜系丰富度”理解 761 万个市场对象背后为何可能只有很窄的经济结构。",
+    "path": "2026-09-18-2609.17610/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "SAiFE-gym: Model-based Environments for Automated Market Making with Concentrated Liquidity",
+    "title_zh": "SAiFE-gym：在集中流动性 AMM 中训练与压力测试做市策略",
+    "arxiv_id": "2609.17788v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "自动做市商",
+      "DeFi",
+      "强化学习",
+      "模拟"
+    ],
+    "summary": "集中流动性像只在某一段路上开收费站：车流经过时资本效率高，价格跑出区间后就不再收费；论文搭建模块化仿真环境，让不同策略在可控市场条件下比较。",
+    "path": "2026-09-18-2609.17788/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Model-Free Passive Execution via Order-Level Shadowing",
+    "title_zh": "通过订单级影子跟随实现无模型被动执行",
+    "arxiv_id": "2609.18019v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "市场微观结构",
+      "订单执行",
+      "回放实验"
+    ],
+    "summary": "用“跟着一个真实排队者进出队伍”理解被动订单如何省去价格预测，以及延迟为何会让继承的信息迅速过期。",
+    "path": "2026-09-18-2609.18019/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "StableEval Arena: A Cost-Aware Agentic Benchmark for Stablecoin Price Stability Prediction",
+    "title_zh": "StableEval Arena：兼顾成本的稳定币价格稳定性智能体基准",
+    "arxiv_id": "2609.18949v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "稳定币",
+      "AI评测",
+      "稀有事件"
+    ],
+    "summary": "从“99% 准确却漏掉危机”理解稀有金融风险评测为何必须同时看压力召回、校准、格式可靠性和成本。",
+    "path": "2026-09-18-2609.18949/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "Herding and Liquidity in Order-Book Markets. III. Leverage and the Onset of Endogenous Liquidity Crises under Weak Anchoring",
+    "title_zh": "杠杆怎样点燃流动性危机：弱基本面锚定下的订单簿模拟",
+    "arxiv_id": "2609.20192v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "流动性",
+      "订单簿",
+      "杠杆",
+      "复杂系统"
+    ],
+    "summary": "价格偏离基本面后，保证金追缴会迫使卖出，订单簿变薄又放大价格变化；论文用可调的“基本面锚”隔离这个反馈，找到危机只在弱锚、高杠杆和适度羊群的窄区域出现。",
+    "path": "2026-09-18-2609.20192/",
+    "slides": "slides.html"
+  },
+  {
+    "date": "2026-09-18",
+    "title": "The Year-End Toll: Frictions Embedded in Option-Implied Rates",
+    "title_zh": "年末过路费：期权隐含利率里也藏着资产负债表摩擦",
+    "arxiv_id": "2609.20224v1",
+    "direction": "金融",
+    "tags": [
+      "金融",
+      "期权",
+      "融资成本",
+      "年末效应",
+      "实证研究"
+    ],
+    "summary": "看起来能锁定固定收益的期权组合仍要占用现金、保证金和机构资产负债表；论文用到期日刚好跨年这一不连续边界，识别一笔约 2—3 个基点的固定“过路费”。",
+    "path": "2026-09-18-2609.20224/",
+    "slides": "slides.html"
+  },
+  {
     "date": "2026-09-17",
     "title": "The Axiomatic Trader: Latent Regularity, Information Budgets, and the Canonical Form of a Quantitative Investment System",
     "title_zh": "公理化交易者：潜在规律、信息预算与量化投资系统的标准形式",

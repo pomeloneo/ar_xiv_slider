@@ -22,6 +22,9 @@ const result = await build({
   metafile: true,
   logLevel: "info",
 });
+const bundle = path.join(output, "renderer.js");
+const bundledSource = await readFile(bundle, "utf8");
+await writeFile(bundle, bundledSource.replace(/[ \t]+$/gm, ""));
 
 // Copy the license notices of every package whose code entered the bundle.
 // This supplements legal comments preserved by esbuild, including packages

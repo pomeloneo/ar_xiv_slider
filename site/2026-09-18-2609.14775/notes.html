@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="一度电在煤电边际机组和清洁电源充足的电网中对应的新增排放不同；论文把实际 GPU 能耗、五分钟电网信号、容量和 SLA 放在同一个模拟器中。">
+<title>详细讲解 · 同一个 AI 请求换个地点或时间，碳排为什么会不同</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.14775v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">科技与产业 · arXiv:2609.14775v1</p>
+<h1>同一个 AI 请求换个地点或时间，碳排为什么会不同</h1><p class="original" lang="en">CATS: A Carbon-Aware Task Simulator for Reducing AI Data Center Emissions</p>
+<p class="lead">一度电在煤电边际机组和清洁电源充足的电网中对应的新增排放不同；论文把实际 GPU 能耗、五分钟电网信号、容量和 SLA 放在同一个模拟器中。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">先从一个普通人会遇到的问题开始</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先补两块必要基础</a><a href="#section-3">论文接收什么，输出什么</a><a href="#section-4">第一步：把每个候选执行位置换算成预计碳排</a><a href="#section-5">第二步：用容量账本和期限约束可延迟任务</a><a href="#section-6">跟着一个小例子看中间状态</a><a href="#section-7">作者拿什么证据支持主张</a><a href="#section-8">哪些结论不能顺手扩大</a><a href="#section-9">把整条因果链重新接起来</a><a href="#section-10">最小实践：把核心机制跑一遍</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>先从一个普通人会遇到的问题开始</h2><p>一度电在煤电边际机组和清洁电源充足的电网中对应的新增排放不同；论文把实际 GPU 能耗、五分钟电网信号、容量和 SLA 放在同一个模拟器中。</p><p>今天读完《同一个 AI 请求换个地点或时间，碳排为什么会不同》，目标不是记住论文名，而是能用自己的话回答：推理任务的计算量不变，怎样利用不同电网和不同时段的边际碳强度，在不无限拖延用户的前提下降低运营碳排？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[能耗乘边际碳强度]
+C --&gt; D[在SLA内寻找更干净窗口]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先补两块必要基础</h2><p>边际碳强度 MOER 估计额外增加一单位用电会带来多少新增排放，比电网总排放除以总发电量更适合判断“把这一个任务移走”会怎样。</p><p>空间迁移把任务送到别的区域，时间迁移让它在本区域等到更干净的时段。两者都需要富余 GPU、网络与合规允许，并以延迟和 SLA 为代价。</p></section><section id="section-3"><h2>论文接收什么，输出什么</h2><p>输入包括 145 个电网的五分钟碳强度、140 个云区域、六类 AI 推理任务在四种 GPU 上的实测时间与能耗、60 万任务的 24 小时合成轨迹、区域容量和各任务延迟上限。</p><p>输出是速度优先、能耗/碳优先、空间迁移和时间迁移四种策略的总碳排、能耗、运行与排队时间、迁移比例、SLA 违约和调度开销。</p></section><section id="section-4"><h2>第一步：把每个候选执行位置换算成预计碳排</h2><p>模拟器先用任务—GPU 实测能耗估计一次执行需要多少电，再乘执行地点与时刻的 MOER；快 GPU 不一定最省电，低碳电网也可能只有较慢设备。</p><p>空间调度只有在预计节省超过相对和绝对门槛、目标区有容量时才迁移，否则留在原区，避免为微小碳收益增加大量搜索和延迟。</p></section><section id="section-5"><h2>第二步：用容量账本和期限约束可延迟任务</h2><p>时间策略在任务允许的延迟窗内搜索更低碳时段，并用速率、容量和积压上限防止大家一起挤到未来；交互任务只有几十秒容忍度，视频任务可等数小时。</p><p>延迟任务会与新任务争 GPU，优先队列也会挤压原本未延迟的任务，所以模拟必须报告所有任务的 SLA 违约，而不能只算被主动推迟的那一小部分。</p></section><section id="section-6"><h2>跟着一个小例子看中间状态</h2><p>教学例中任务在 A 区需 2 kWh、碳强度 600 g/kWh，排放 1,200 g；B 区的 GPU 较慢需 2.2 kWh，但碳强度 300 g/kWh，排放 660 g。能源增加 10%，碳排仍下降 45%。</p><p>若 B 区已满或传输后超过 SLA，调度器必须留在 A 区。碳最小不是无条件目标，而是在容量、数据位置和服务期限内比较。</p></section><section id="section-7"><h2>作者拿什么证据支持主张</h2><p>位置分析显示 140 个站点中只有 29 个位于低于 900 lbs CO2/MWh 的电网，70 个位于至少 1,200 的区间；新建站点整体也未明显纠正这种错配。</p><p>在平均利用率约 0.37、峰值约 0.67 的 60 万任务模拟中，空间迁移相对速度优先减碳 38.4%，迁移约 59% 的任务，但平均排队升到 126.18 秒；时间迁移减碳 16.1%，只主动延迟 0.4% 的任务，却出现 3.27% SLA 违约。</p></section><section id="section-8"><h2>哪些结论不能顺手扩大</h2><p>任务到达、模型比例和延迟上限是合理但合成的设定；碳信号是历史数据，不含预测误差，固定 GPU 容量也没有建模弹性扩容。</p><p>模拟省略电价、跨区网络能耗、数据主权和迁移成本。结果说明特定宽松容量场景的潜力，不能直接当成生产系统的减排承诺。</p></section><section id="section-9"><h2>把整条因果链重新接起来</h2><p>研究问题“推理任务的计算量不变，怎样利用不同电网和不同时段的边际碳强度，在不无限拖延用户的前提下降低运营碳排？”先被拆成可观察输入，再经过“第一步：把每个候选执行位置换算成预计碳排”与“第二步：用容量账本和期限约束可延迟任务”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section id="section-10"><h2>最小实践：把核心机制跑一遍</h2><p>需求：用一组明确标为教学设定的小数据演示“比较同一任务在高效高碳 GPU 与稍低效低碳 GPU 上的能耗和碳排”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- A区：2.0kWh × 600g/kWh
+- B区：2.2kWh × 300g/kWh
+- 约束：B区有容量且不超SLA
+中间状态：
+1. 算A区为1200g
+2. 算B区为660g
+3. 比较能源增加10%
+4. 确认碳排下降45%后再检查SLA
+正常例：能耗更高的执行位置也可能因电网更干净而总碳排更低。
+边界：未计网络、电价、预测误差与数据合规，不是论文60万任务仿真的复现。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么最低能耗 GPU 不一定产生最低碳排？</li><li>时间迁移只延迟 0.4% 任务，为什么 SLA 违约可达 3.27%？</li><li>空间迁移减碳 38.4% 是否说明真实数据中心都能达到？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.14775v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.14775v1">元数据与版本</a></p><p>已读全球站点—电网对齐、CATS 架构、任务与 GPU 测量、四种调度策略、容量和 SLA、主要结果与局限；核对图 2—12 和表 I、V—VIII。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、20 条图表说明，正文约 80,690 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">CATS: A Carbon-Aware Task Simulator for Reducing AI Data Center Emissions</p><p>Chen, Dayuan、Zong, Ziliang</p>
+<p>arXiv:2609.14775v1 · 发布日期：2026-09-13 · 科技与产业</p>
+<p><a href="https://arxiv.org/abs/2609.14775v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.14775v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

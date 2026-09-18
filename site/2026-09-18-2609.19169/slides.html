@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="一个引擎跑得快，却可能把内存吃到系统无法做别的事、在并发时丢请求，或因聊天模板错误让回答质量下降；论文提供一套不被单一速度数字骗过的审计方法。">
+<title>图解全文 · 在桌面电脑上跑大模型，为什么只看每秒生成多少字会选错引擎</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.19169v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 科技与产业</p><h1 tabindex="-1">在桌面电脑上跑大模型，为什么只看每秒生成多少字会选错引擎</h1><p class="lead">一个引擎跑得快，却可能把内存吃到系统无法做别的事、在并发时丢请求，或因聊天模板错误让回答质量下降；论文提供一套不被单一速度数字骗过的审计方法。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 科技与产业</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>一个引擎跑得快，却可能把内存吃到系统无法做别的事、在并发时丢请求，或因聊天模板错误让回答质量下降；论文提供一套不被单一速度数字骗过的审计方法。</p><p>今天读完《在桌面电脑上跑大模型，为什么只看每秒生成多少字会选错引擎》，目标不是记住论文名，而是能用自己的话回答：同一台统一内存电脑上的大模型服务引擎，怎样同时比较速度、内存余量、回答质量和模型兼容性？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 科技与产业</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[固定负载测并发和内存]
+C --&gt; D[完成质量兼容三道门]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 科技与产业</p><h1 tabindex="-1">先补两块必要基础</h1><p>大模型先读取提示词并建立 KV cache，叫 prefill；之后逐个生成 token，叫 decode。并发服务要把许多请求的这两阶段穿插调度，吞吐量、首字延迟和内存会一起变化。</p><p>统一内存表示 CPU 与 GPU 共用同一池内存。模型能装进去不等于还有安全余量：系统压缩、换页或前台应用争用内存时，完成请求的服务也可能明显变慢。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 科技与产业</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是九种 Apple Silicon 服务栈、三代模型、聊天与智能体两类提示、并发 1/8/16、统一硬件与固定请求。输出包括完成数、输出吞吐、首字延迟、系统峰值内存、分类任务 fidelity 和模型覆盖。</p><p>审计的中间状态不是一张总榜，而是三个最低门槛：每一档并发至少完成 90/100 个请求、分类结果在 NVIDIA 参考的观测带内、并支持三个模型版本；速度只在通过门槛后用于理解差异。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 科技与产业</p><h1 tabindex="-1">第一步：用长短不同的真实请求压出调度差异</h1><p>短聊天提示可能掩盖 prefill 调度问题，智能体提示更长并包含工具调用，因此论文在两类负载上逐级增加并发，并同时记录完成率、吞吐、首字延迟和内存轨迹。</p><p>packed prefill、paged KV 和把 prefill/decode 混在同一步只是架构能力声明；真正是否扩展仍由实测决定。声明了内存预算也不代表引擎总占用会被严格限制。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 科技与产业</p><h1 tabindex="-1">第二步：把“能跑完”与“结果仍可信”分开验收</h1><p>论文用同权重同精度的分类任务，与 NVIDIA A100 上的 vLLM 输出比较 weighted F1；这样可以发现请求全部成功、生成 token 很多，但模板或实现已经改变任务结果的情况。</p><p>最后再检查新模型架构能否加载。一次快跑不能替代这三道门，因为用户真正需要的是在内存有余量时，持续完成正确请求并跟上模型更新。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 科技与产业</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>教学例有 A、B 两个引擎：A 为 200 token/s、完成 100/100、峰值 35 GB、质量通过；B 为 230 token/s、完成 100/100、峰值 61 GB、质量失败。64 GB 机器上，B 的速度第一并不代表更可用。</p><p>若把并发从 1 提到 16，吞吐没有增加而首字延迟持续上升，说明请求只是在排队；若吞吐上升但内存逼近物理容量，则扩展收益以系统余量为代价。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 科技与产业</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>在一台 64 GB Apple M5 Pro 的主审计中，vllm-metal 是唯一在聊天和智能体负载上从并发 1 到 16 都超过两倍吞吐增长的栈，智能体并发 16 的中位首字延迟为 219 ms。</p><p>llama.cpp、vllm-metal 和 omlx 通过完成、fidelity 与三代模型覆盖三道门。两个声明内存预算的栈完成全部 600 个请求，却在高占用下吞吐下降；双机实验中，Thunderbolt RDMA 上的张量并行提高解码约 1.28—1.37 倍，而 TCP 流水并行反而退化。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 科技与产业</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>主审计只有一台 M5 Pro，fidelity 只有一个分类任务且没有正式的重复运行方差；较大模型、DGX Spark 和双机实验覆盖的引擎更少，构建版本与量化格式也不完全相同。</p><p>这是 2026 年特定软件快照，排名会随版本迅速变化。论文证明的是评估方法和当时配置结果，不能推出某引擎在所有机器、模型和业务上永久最好。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 科技与产业</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“同一台统一内存电脑上的大模型服务引擎，怎样同时比较速度、内存余量、回答质量和模型兼容性？”先被拆成可观察输入，再经过“第一步：用长短不同的真实请求压出调度差异”与“第二步：把“能跑完”与“结果仍可信”分开验收”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 科技与产业</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“用速度、完成率、内存和质量四项门槛比较两个玩具服务引擎”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 机器内存：64GB
+- 引擎A：200 tok/s, 100/100, 35GB, 质量通过
+- 引擎B：230 tok/s, 100/100, 61GB, 质量失败
+中间状态：
+1. 先检查完成率
+2. 再保留系统内存余量
+3. 核对任务质量
+4. 最后才比较速度
+正常例：A 虽然慢 30 tok/s，却通过可用性门槛；B 不能因速度第一直接胜出。
+边界：数字是教学设定，没有运行论文引擎，也不代表任何真实版本的性能。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 科技与产业</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么请求 100% 完成仍不足以证明引擎可用？</li><li>并发提高后吞吐不变、首字延迟上升通常说明什么？</li><li>论文能否证明 vllm-metal 在所有 Apple 机器和未来版本上都最好？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 科技与产业</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.19169v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.19169v1">元数据与版本</a></p><p>已读工作负载、实验协议、并发与延迟、完成率、内存轨迹、fidelity、模型覆盖、多节点结果、讨论与局限；核对图 2—8 和表 3—5。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、21 条图表说明，正文约 65,864 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 在桌面电脑上跑大模型，为什么只看每秒生成多少字会选错引擎</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：用长短不同的真实请求压出调度差异</option><option value="7">7. 第二步：把“能跑完”与“结果仍可信”分开验收</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">SiliconBench: Speed, Memory, and Fidelity for LLM Serving on Unified-Memory Desktops</p><p>Zhang, Ranran Haoran、Fan, Aysa Xuemo、Correia, David Munhá、Cheema, Alex、Zhang, Rui</p>
+<p>arXiv:2609.19169v1 · 发布日期：2026-09-12 · 科技与产业</p>
+<p><a href="https://arxiv.org/abs/2609.19169v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.19169v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.19169v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.19169v1">元数据与版本</a></p><p>已读工作负载、实验协议、并发与延迟、完成率、内存轨迹、fidelity、模型覆盖、多节点结果、讨论与局限；核对图 2—8 和表 3—5。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、21 条图表说明，正文约 65,864 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

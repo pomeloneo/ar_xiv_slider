@@ -1,0 +1,13 @@
+flowchart LR
+A[新token的Query] --> B[请求历史KV段]
+B --> C[TaKV按层和段分散home]
+C --> D[相近相同请求合并]
+D --> E[Mare组播一份到多个tile]
+E --> F[Pad预取下一段]
+E --> G[当前段矩阵乘]
+G --> H[在线Softmax累计状态]
+F --> G
+H --> I[当前token注意力输出]
+J[credit与FIFO] --> F
+K[重复抑制与虚拟网络] --> E
+I --> L[收益受共享度拓扑和系统边界限制]

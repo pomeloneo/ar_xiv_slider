@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="五天里亲近感、能力评价和披露普遍上升，许多变化来自重复接触；记忆式与问卷式个性化又在披露和后悔上走出不同路径。">
+<title>图解全文 · AI 越来越懂你：是个性化的效果，还是只是用久了？</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20077v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 社会研究</p><h1 tabindex="-1">AI 越来越懂你：是个性化的效果，还是只是用久了？</h1><p class="lead">五天里亲近感、能力评价和披露普遍上升，许多变化来自重复接触；记忆式与问卷式个性化又在披露和后悔上走出不同路径。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 社会研究</p><h1 tabindex="-1">熟悉感和个性化是两种同时发生的变化</h1><p>每天找同一个 AI 聊关系建议，即使它不记得你，你也可能更熟悉界面、更会提问、更相信它有能力。如果只比较第五天和第一天，就会把重复接触的共同变化错算给个性化。</p><p>论文把 992 名完成者随机分到无个性化、对话记忆和入组问卷画像三组，连续五天各聊一次。读完后你应能分开 session effect、condition effect 和二者交互，并理解两种个性化不能被当成同一种处理。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 社会研究</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[992名完成者随机分组] --&gt; B[无个性化对照]
+A --&gt; C[前次对话记忆]
+A --&gt; D[入组问卷画像]
+B --&gt; E[连续5天关系建议]
+C --&gt; E
+D --&gt; E
+E --&gt; F[所有组共同时间趋势]
+E --&gt; G[组间整体差异]
+E --&gt; H[组别乘时间交互]
+F --&gt; I[重复接触效应]
+G --&gt; J[个性化实现差异]
+H --&gt; J
+J --&gt; K[日志行为与自报分开]
+K --&gt; L[效用披露后悔和人际外溢共同评估]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 社会研究</p><h1 tabindex="-1">三种效应对应三个不同问题</h1><p>session effect 问所有组是否随天数一起变化；condition effect 问某个组整体是否与对照不同；condition × session interaction 问某组的变化速度是否不同。只有看到交互或适当的组间差异，才更像个性化额外产生的效果。</p><p>记忆式个性化把前几天对话摘要放进上下文；问卷式个性化把一次性入组资料生成画像放进上下文；对照组不保留个人信息。三者使用系统提示也有差异。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 社会研究</p><h1 tabindex="-1">一个五天随机对照实验怎样运行</h1><p>研究预注册并通过 Prolific 招募。1107 人完成第一天，999 人完成五天，剔除注意检查失败和一名主动删数者后分析 992 人，共 4960 次对话；流失率 9.75%，三组流失差异不显著。</p><p>每天围绕一个关系建议主题聊 15—20 分钟，再测亲近感、建议采纳、披露等；第五天还有过度依赖任务和事后态度。问卷画像与记忆摘要都是以文本注入上下文，不是微调模型。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 社会研究</p><h1 tabindex="-1">先找所有组共同上升的重复接触效应</h1><p>亲近感随 session 上升，β=0.15、d=0.19，但两种个性化与时间的交互都不显著。能力评价和有用性也随时间上升，却没有个性化加速证据。</p><p>这说明“用几天后感觉更好”不能自动归因于模型记得用户。重复参与、学习如何使用以及同一研究环境，都可能形成共同轨迹。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 社会研究</p><h1 tabindex="-1">再看两种个性化在哪里分叉</h1><p>记忆组把模型评为较不诡异，β=-0.19、d=-0.10；日志中的离散自我披露次数在个性化组可能更高，记忆组最一致，但自报的深度和亲密度没有组间差异。行为记录和主观感受并不总一致。</p><p>问卷组事后分享后悔略高，并在第一天较不愿采纳建议，后来增速更快。两种实现常只有一种出现差异，因此不能用“个性化”一个词覆盖所有数据来源和交互方式。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 社会研究</p><h1 tabindex="-1">产品监测要保存组别、时间和数据来源</h1><p>至少记录：用户在哪一组、第几次交互、个性化材料来自何处、模型实际引用了什么、自报感受、日志行为和事后态度。只看最终满意度，会同时丢掉共同时间趋势和实施差异。</p><p>还要给用户查看、编辑和删除画像或记忆的能力。作者用 reflective endorsement 表达一个问题：用户今天仍愿意认可过去披露的数据被这样使用吗？</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 社会研究</p><h1 tabindex="-1">最重要的结果包含大量“没有差异”</h1><p>两种个性化都被用户明显感知为更个性化，说明操纵有效；但亲近感、错误建议接受、自报披露深度、一般自我效能和友好评价等许多指标并未相对对照显著改变。null result 也是校准风险判断的重要证据。</p><p>五天后所有组普遍更认可向聊天机器人寻求建议、关怀和友谊，并更接受分享亲密信息。部分人类求助舒适度下降，但机制解释仍是作者推测，不能由同时变化直接推出因果链。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 社会研究</p><h1 tabindex="-1">五天关系建议实验不等于长期日常使用</h1><p>参与者被指定主题、被提醒每天完成并获得报酬；系统提示限制了情感升级。真实用户会自由选题、间断使用，并可能让模型读取邮件、浏览记录或推断属性，结论未覆盖这些情景。</p><p>统计检验很多，效应多数较小，部分只是边缘显著；第一天记忆组还没有历史记忆，却已经用了不同个性化指令，可能造成起始差异。教学 demo 使用人造均值，不复现原始个体模型。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 社会研究</p><h1 tabindex="-1">判断个性化影响的完整实验链</h1><p>随机分组后保留每日重复测量；先估计所有组共同的时间趋势；再比较条件起点和变化速度；把自报与日志行为分开；最后按记忆、问卷或其他实现解释，不能只给一个“个性化有效”结论。</p><p>产品决策也应同时问效用、披露行为、后悔、诡异感和对人类关系的外溢。某一项变好不代表总风险下降。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 社会研究</p><h1 tabindex="-1">最小实践：共同时间趋势不等于个性化效果</h1><p>需求：用三组虚构的五日亲近感均值，计算各组首尾变化与相对对照的额外变化；再展示问卷组后悔可与记忆组诡异感走不同方向。边界说明数字不是论文数据。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>对照：3.0 → 3.6，五日变化 +0.6
+记忆：3.1 → 3.7，五日变化 +0.6
+问卷：3.2 → 3.8，五日变化 +0.6
+记忆相对对照的额外变化：+0.0
+问卷相对对照的额外变化：-0.0
+不同结果不能合并：对照后悔=2.0，记忆组诡异感=1.7，问卷组后悔=2.4
+边界：所有均值均为教学构造，只演示时间效应与组别交互的区别，不是论文结果复算。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 社会研究</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>三组亲近感都上升且上升速度相似，为什么不能说记忆功能让人更亲近？</li><li>日志显示披露次数更多，自报却说亲密度没变，两者谁错了？</li><li>问卷个性化与记忆个性化为何不能合并成一个处理组？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 社会研究</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20077v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20077v1">元数据与版本</a></p><p>已读取预注册问题、三组实施、招募与流失、每日与事后指标、混合模型结果、null effects、讨论和外推限制；核对图 1—2。</p><p>论文证据是五日随机对照条件下的平均效应。demo 数字为教学构造，不是原始数据再分析，也不证明长期心理后果。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、4 条图表说明，正文约 106,973 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. AI 越来越懂你：是个性化的效果，还是只是用久了？</option><option value="2">2. 熟悉感和个性化是两种同时发生的变化</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 三种效应对应三个不同问题</option><option value="5">5. 一个五天随机对照实验怎样运行</option><option value="6">6. 先找所有组共同上升的重复接触效应</option><option value="7">7. 再看两种个性化在哪里分叉</option><option value="8">8. 产品监测要保存组别、时间和数据来源</option><option value="9">9. 最重要的结果包含大量“没有差异”</option><option value="10">10. 五天关系建议实验不等于长期日常使用</option><option value="11">11. 判断个性化影响的完整实验链</option><option value="12">12. 最小实践：共同时间趋势不等于个性化效果</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Tailored to you: longitudinal effects of personalising language models</p><p>Akbulut, Canfer、Breuch, Justine、Manzini, Arianna、Ibrahim, Lujain、Franklin, Matija、Patel, Roma、Gabriel, Iason、Lum, Kristian、Weidinger, Laura</p>
+<p>arXiv:2609.20077v1 · 发布日期：2026-09-17 · 社会研究</p>
+<p><a href="https://arxiv.org/abs/2609.20077v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20077v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20077v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20077v1">元数据与版本</a></p><p>已读取预注册问题、三组实施、招募与流失、每日与事后指标、混合模型结果、null effects、讨论和外推限制；核对图 1—2。</p><p>论文证据是五日随机对照条件下的平均效应。demo 数字为教学构造，不是原始数据再分析，也不证明长期心理后果。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、4 条图表说明，正文约 106,973 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

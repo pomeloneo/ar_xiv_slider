@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="长上下文解码不只受外部显存限制，片上 KV 数据也会堵在共享入口；分散存放、一次组播和计算传输重叠可把等待链变成流水线。">
+<title>图解全文 · 让 KV 缓存不再堵车：长上下文芯片上的分布、组播与流水线</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.19207v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 科技与产业</p><h1 tabindex="-1">让 KV 缓存不再堵车：长上下文芯片上的分布、组播与流水线</h1><p class="lead">长上下文解码不只受外部显存限制，片上 KV 数据也会堵在共享入口；分散存放、一次组播和计算传输重叠可把等待链变成流水线。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 科技与产业</p><h1 tabindex="-1">仓库搬进工厂，货车仍可能全堵在一个门口</h1><p>把 KV 缓存放到片上，好比把仓库搬进工厂，但若所有计算单元都向同一个入口取货，网格中线仍会堵死。长上下文越长，每步要搬的历史块越多，集中式路径的等待会比计算更突出。</p><p>MeshKV 把 KV 块当作片上网络中的数据流：TaKV 决定分散存在哪里，Mare 让同一块只发送一次再组播，Pad 则在搬下一块时计算当前块。读完后你应能区分数据布局、路由复用和流水线隐藏延迟。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 科技与产业</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart LR
+A[新token的Query] --&gt; B[请求历史KV段]
+B --&gt; C[TaKV按层和段分散home]
+C --&gt; D[相近相同请求合并]
+D --&gt; E[Mare组播一份到多个tile]
+E --&gt; F[Pad预取下一段]
+E --&gt; G[当前段矩阵乘]
+G --&gt; H[在线Softmax累计状态]
+F --&gt; G
+H --&gt; I[当前token注意力输出]
+J[credit与FIFO] --&gt; F
+K[重复抑制与虚拟网络] --&gt; E
+I --&gt; L[收益受共享度拓扑和系统边界限制]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 科技与产业</p><h1 tabindex="-1">KV 缓存是什么，为什么每步都要读</h1><p>自回归 Transformer 生成新 token 时，新 query 要与此前每个 token 的 key 计算相关性，再用权重汇总 value。历史 key 和 value 缓存在 KV cache 中，免去重新计算，却让每一步都需读取随上下文长度 T 线性增长的数据。</p><p>论文估算 LLaMA-2-7B 在 FP16、T=32768 时每个解码步要读约 16 GiB 的 KV。批量为 1 时同一历史块在该步缺少复用，因此除了显存带宽，片上 Network-on-Chip 的热点和背压也会成为瓶颈。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 科技与产业</p><h1 tabindex="-1">MeshKV 面对怎样的芯片和访问模式</h1><p>目标是 8×8 等二维处理单元网格，每个 tile 有私有 SRAM，层和注意力头按序请求 KV 段。论文在 FPGA 上实现通信数据通路，用 LLaMA-2-7B 与 Mistral-7B、8K—32K 上下文和单流/多流评估。</p><p>观测到同层多个头经常在相近周期请求相同前缀：32K 时约 78% 的段请求在同一路由器 12 个周期内到达。这个规律让短窗口合并与组播有机会减少副本。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 科技与产业</p><h1 tabindex="-1">TaKV：先把“家”均匀铺到网格</h1><p>集中式设计让所有 KV 请求经过一个逻辑内存控制点。TaKV 用层号和段号的仿射映射为每块选择 home tile，把注入点分散；检测到占用偏斜时可做一周期交换，避免局部热点。</p><p>同平台 32K、batch=1 下，TaKV 单独把 LLaMA-2-7B 互连流量从集中式的 1.00 降到 0.66。它不仅减少总流量，更重要的是缩短平均路径并均衡网格切面。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 科技与产业</p><h1 tabindex="-1">Mare 和 Pad：一次送多人，同时做下一步</h1><p>Mare 在 home tile 合并相近的相同请求，用 multicast tree 把一份 KV 数据复制到多个目的地，并用重复抑制与分离虚拟网络避免死锁。关掉组播时，多流吞吐降到完整系统的 0.62、流量升到 1.55，说明它是主要贡献。</p><p>Pad 把预取、tile 矩阵乘和在线 softmax 分成三段，用 credit 和 FIFO 对齐。下一段 KV 在当前段计算时移动，约 22 周期的网络往返被重叠；关掉 Pad 时吞吐降到完整系统的 0.78。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 科技与产业</p><h1 tabindex="-1">系统每一拍需要保存哪些中间状态</h1><p>每个 KV 段有 home tile、目标集合、是否已合并、路由树和未确认副本；每条链路有 credit 与队列占用；计算侧有当前段 logits、在线 softmax 的最大值、归一化和部分输出。丢失任一状态都可能重复数据或破坏结果。</p><p>流水线只有各阶段相对均衡时有效。FIFO 太浅会等网络，段太小会增加包头与调度成本，段太大又会留下尾段拖延；长而扁的 16×4 网格因组播树更长，论文速度提升低于 8×8。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 科技与产业</p><h1 tabindex="-1">同平台硬件结果支持三个组件的组合价值</h1><p>32K、batch=1 下完整 MeshKV 将 LLaMA-2-7B 互连流量降到集中式的 0.42，即减少 58%；切面有效 KV 带宽利用率为 61%，相对 Shared 的 29% 约 2.1 倍；单流吞吐提升 1.35 倍。</p><p>batch=8 时多个流可共享组播，吞吐最高 1.9 倍；估算链路能耗降 48%、总 token 能耗降 17%，但分布 SRAM 读取能耗升 7%。这些都是相同 8×8 FPGA 配置下的相对结果，不能横比其他整机加速器绝对延迟。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 科技与产业</p><h1 tabindex="-1">MeshKV 不是一颗完整可部署的 LLM 芯片</h1><p>实现聚焦 KV 通信数据通路，不包含完整 FFN、归一化、外部内存系统和服务软件。模型映射、芯片工艺、NoC 拓扑、batch 与请求共享程度改变收益；不同平台的绝对时间不可直接比较。</p><p>组播复用依赖多个头或流在合并窗口内请求相同数据；请求分散、前缀不共享或网格形状过长时收益会下降。教学 demo 只数网络发送份数，不模拟拥塞、credit、softmax 或 FPGA 时序。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 科技与产业</p><h1 tabindex="-1">把一次解码的 KV 搬运变成三层优化</h1><p>先按层和段把缓存 home 分散，消除单入口；再把同一数据的多个接收者合成组播树，消除重复副本；最后用 credit 对齐预取、乘法和在线 softmax，让网络等待藏在计算后面。</p><p>三层分别回答“放哪里”“送几份”“何时送”。只做压缩或把缓存放进更快 SRAM，若不改变这三个问题，片上网格仍可能被热点和背压限制。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 科技与产业</p><h1 tabindex="-1">最小实践：分散与组播怎样减少网络发送</h1><p>需求：让四个请求者读取两个相同 KV 段，比较集中式逐请求发送与按 home 分散后每段组播一次的发送数和入口负载。正常例展示复用，边界例说明网络跳数未建模。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>集中逐请求发送：4 份
+home-A 对 layer3-seg7 组播 1 份 → tile-1,tile-2,tile-4
+home-B 对 layer3-seg8 组播 1 份 → tile-3
+分散组播发送：2 份；home负载={&#x27;home-A&#x27;: 1, &#x27;home-B&#x27;: 1}
+此例减少 50% 的数据份数
+边界：只按相同段合并请求；未模拟跳数、拥塞、credit、重复抑制、流水线或论文FPGA。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 科技与产业</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>KV 已在片上 SRAM，为什么集中式布局仍会让解码变慢？</li><li>TaKV、Mare、Pad 分别解决哪一个问题？</li><li>如果每个流的前缀完全不同，MeshKV 哪部分收益最可能先下降？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 科技与产业</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.19207v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.19207v1">元数据与版本</a></p><p>已读取解码流量动机、TaKV 布局、Mare 组播与重复抑制、Pad 流水线、FPGA 配置、流量利用率吞吐能耗和消融；核对图 1、3—5及表 IV—VI。</p><p>论文证据是同 FPGA 数据通路的相对硬件测量。发送计数 demo 为通信类比，不复现 NoC 路由或 Transformer 计算。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、12 条图表说明，正文约 30,679 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 让 KV 缓存不再堵车：长上下文芯片上的分布、组播与流水线</option><option value="2">2. 仓库搬进工厂，货车仍可能全堵在一个门口</option><option value="3">3. 先看整篇的关系</option><option value="4">4. KV 缓存是什么，为什么每步都要读</option><option value="5">5. MeshKV 面对怎样的芯片和访问模式</option><option value="6">6. TaKV：先把“家”均匀铺到网格</option><option value="7">7. Mare 和 Pad：一次送多人，同时做下一步</option><option value="8">8. 系统每一拍需要保存哪些中间状态</option><option value="9">9. 同平台硬件结果支持三个组件的组合价值</option><option value="10">10. MeshKV 不是一颗完整可部署的 LLM 芯片</option><option value="11">11. 把一次解码的 KV 搬运变成三层优化</option><option value="12">12. 最小实践：分散与组播怎样减少网络发送</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">MeshKV: A Network-on-Chip KV Cache Fabric for Scalable Transformer Decoding Accelerators</p><p>Liu, Dong、Yu, Yanxuan</p>
+<p>arXiv:2609.19207v1 · 发布日期：2026-09-16 · 科技与产业</p>
+<p><a href="https://arxiv.org/abs/2609.19207v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.19207v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.19207v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.19207v1">元数据与版本</a></p><p>已读取解码流量动机、TaKV 布局、Mare 组播与重复抑制、Pad 流水线、FPGA 配置、流量利用率吞吐能耗和消融；核对图 1、3—5及表 IV—VI。</p><p>论文证据是同 FPGA 数据通路的相对硬件测量。发送计数 demo 为通信类比，不复现 NoC 路由或 Transformer 计算。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、12 条图表说明，正文约 30,679 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

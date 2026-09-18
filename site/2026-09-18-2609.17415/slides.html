@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="用相互拖累的三家机构理解：一次局部失败为何会形成自洽级联，以及有限救助为何要看网络而不只看规模。">
+<title>图解全文 · 把金融传染网络写成可退火求解的 Ising 系统：级联、救助优化与易感性</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.17415v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 金融</p><h1 tabindex="-1">把金融传染网络写成可退火求解的 Ising 系统：级联、救助优化与易感性</h1><p class="lead">用相互拖累的三家机构理解：一次局部失败为何会形成自洽级联，以及有限救助为何要看网络而不只看规模。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 金融</p><h1 tabindex="-1">救一家，可能间接保住很多家</h1><p>三家公司互相持有资产。A 受损后低于偿付门槛，给持有 A 的 B 带来损失；B 再失败又拖累 C。最终失败集合必须“自洽”：集合中的每家在传播后的价值都低于门槛，而不是随意把最差公司列出来。</p><p>论文把失败/存活写成二进制变量，并转成 Ising/QUBO 能量最小化问题，再同时优化失败平衡和救助选择。读完你应能解释网络反馈、预算约束与 bailout susceptibility；但合成网络上的优化不是现实救助名单。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 金融</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[资产与交叉持有网络] --&gt; B[求平衡价值]
+B --&gt; C{低于偿付阈值?}
+C -- 是 --&gt; D[二进制失败状态]
+D --&gt; E[沿依赖边形成自洽级联]
+E --&gt; F[写成Ising或QUBO]
+G[救助预算] --&gt; H[联合选择救助与失败平衡]
+F --&gt; H
+H --&gt; I[核对可行性和敏感性]
+I --&gt; J[合成结果不等于现实政策名单]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 金融</p><h1 tabindex="-1">先把 Ising 和 QUBO 翻成普通话</h1><p>Ising 模型用每个节点的两种状态表示，例如存活 -1、失败 +1，相邻节点通过耦合相互影响。QUBO 是二次无约束二进制优化：目标只含 0/1 变量的一次项和两两乘积，约束可通过惩罚项写进同一个能量函数。</p><p>退火算法从高“温度”开始允许偶尔接受更差状态，以跳出局部低谷，随后降温寻找低能量配置。它是求近似优化解的方法；写成 QUBO 并不表示必须使用量子计算，也不保证找到了全球最优。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 金融</p><h1 tabindex="-1">金融网络怎样进入二进制系统</h1><p>输入包括机构对基础资产的持有、机构间交叉持有或依赖矩阵、初始价值、偿付阈值、外生冲击和救助预算。价值先通过网络关系形成固定点；低于阈值会触发非线性失败成本，并继续传播。</p><p>输出可以是平衡价值与失败集合、某个种子冲击能引发的最大自洽级联、预算内救助集合及干预后的状态。易感性则描述给一个节点小干预时，整个系统状态响应多强。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 金融</p><h1 tabindex="-1">把“最坏级联”变成能量最低</h1><p>每个失败变量为 1 时获得“希望多找失败”的目标收益，但若它没有足够失败邻居支持，或违反种子与传播逻辑，就加惩罚。惩罚必须足够大，才能让低能量解同时满足级联自洽，而非为了多计失败而作弊。</p><p>论文把 Maximum Cascade Failure Problem 转成 QUBO，并用模拟量子退火寻找配置。这个形式适合经典退火、量子启发式算法或未来硬件；真正计算可信度仍需独立重复、可行性检查和与小规模精确解比较。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 金融</p><h1 tabindex="-1">把救助与失败平衡放进同一个问题</h1><p>救助会改变节点局部场并重新塑造传播路径，所以不能先固定失败集合再随意选最大机构。联合 QUBO 同时决定哪些机构救、救后哪些失败，并用预算惩罚限制干预成本。</p><p>bailout susceptibility 来自平衡状态的协方差响应，可理解为“轻推这个节点，网络有多大连锁反应”。高易感节点不一定资产最大，而可能处于能阻断多条传播路径的位置。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 金融</p><h1 tabindex="-1">三节点教学级联</h1><p>设 A 已失败；B 有两个依赖来源，其中一个来自 A，阈值为一个失败邻居；于是 B 失败。C 依赖 B，也随之失败。若预算只能救一个，救 A 可能不允许（种子固定失败），救 B 可让 C 免于传播；只救末端 C 则 B 仍失败。</p><p>每轮中间状态是当前失败集合、新增失败和是否收敛。真实估值还能相互反馈而非简单阈值，论文用固定点和更完整的耦合表达；教学布尔传播只保留“网络位置决定间接效果”。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 金融</p><h1 tabindex="-1">合成实验展示了哪些能力</h1><p>20 个机构的估值例中，一个机构低于阈值，总平衡损失约 9.69，即初始价值的 12.5%。1,000 节点合成网络中，模拟量子退火找到包含 561 家的自洽最坏级联，独立的并行回火版本得到相同规模和近似能量。</p><p>100 节点救助实验中，初始有 92 家失败；直接救助 40 家后，另有 47 家间接受保护，只剩 9 家失败，外生种子保持失败。它展示网络阻断可能产生乘数效果，但数字来自作者设定的合成层级网络。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 金融</p><h1 tabindex="-1">漂亮网络图不等于现实压力测试</h1><p>模型需要已知且稳定的暴露矩阵、阈值和失败传播规则；现实衍生品、流动性、恢复率、政策预期和时间动态更复杂。合成网络参数可能决定级联形状，不能把 561/1000 外推到真实系统。</p><p>退火找到低能量不证明全球最优或量子优势，惩罚权重不当还会得到不可行解。教学 demo 枚举一个四节点布尔模型，可精确核对，但没有估值、成本异质性或现实机构数据，也不构成救助建议。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 金融</p><h1 tabindex="-1">从持有关系到干预结果</h1><p>资产和交叉持有产生平衡价值；门槛把连续价值变成失败状态；失败通过依赖边传播；二进制变量与惩罚构成 QUBO；优化寻找最坏级联或预算内救助；再用固定点核对可行性，并以易感性解释哪些节点有系统影响。</p><p>排错顺序是：暴露方向是否正确、失败阈值是否有经济含义、迭代是否收敛、QUBO 解是否满足原约束、结果是否对参数和随机种子稳健。只看最低能量数值无法替代这些检查。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 金融</p><h1 tabindex="-1">最小实践：枚举救哪一个节点</h1><p>需求：在 A→B、B→C、B→D 的四节点网络中固定 A 失败，模拟阈值传播，并枚举预算为 1 时救 B、C 或 D 的最终失败数。正常例显示救 B 的间接保护；边界说明这不是金融估值或 QUBO 性能测试。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>不救助：A、B、C、D
+救 B：失败 A
+救 C：失败 A、B、D
+救 D：失败 A、B、C
+最小失败方案：救 B，同时间接保护 C、D。
+边界：这是确定性布尔传播的精确枚举，不含估值、成本差异、概率、QUBO惩罚或真实金融机构。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 金融</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么按机构资产规模从大到小救，不一定是网络中的最优方案？</li><li>两个退火器找到同样级联规模，是否证明全球最优？</li><li>QUBO 解能量很低但违反预算，应先怀疑什么？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 金融</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.17415v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.17415v1">元数据与版本</a></p><p>已读取模型、失败固定点、MCFP 与救助 QUBO、易感性、数值结果和结论；核对图 1—6及主要能量与失败数字。</p><p>论文结果来自合成网络；教学枚举只解释传播与网络干预，不使用真实银行数据、量子硬件或投资信息。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 3 个相关章节、10 条图表说明，正文约 74,590 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 把金融传染网络写成可退火求解的 Ising 系统：级联、救助优化与易感性</option><option value="2">2. 救一家，可能间接保住很多家</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先把 Ising 和 QUBO 翻成普通话</option><option value="5">5. 金融网络怎样进入二进制系统</option><option value="6">6. 把“最坏级联”变成能量最低</option><option value="7">7. 把救助与失败平衡放进同一个问题</option><option value="8">8. 三节点教学级联</option><option value="9">9. 合成实验展示了哪些能力</option><option value="10">10. 漂亮网络图不等于现实压力测试</option><option value="11">11. 从持有关系到干预结果</option><option value="12">12. 最小实践：枚举救哪一个节点</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Financial Contagion Networks as Annealing-Ready Ising Systems Cascades, Bailout Optimization, and Susceptibility</p><p>Tomar, Abhinav、Nagpal, Lakshya、Chauhan, Vikas、Hassan, S. R.</p>
+<p>arXiv:2609.17415v1 · 发布日期：2026-07-09 · 金融</p>
+<p><a href="https://arxiv.org/abs/2609.17415v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.17415v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.17415v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.17415v1">元数据与版本</a></p><p>已读取模型、失败固定点、MCFP 与救助 QUBO、易感性、数值结果和结论；核对图 1—6及主要能量与失败数字。</p><p>论文结果来自合成网络；教学枚举只解释传播与网络干预，不使用真实银行数据、量子硬件或投资信息。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 3 个相关章节、10 条图表说明，正文约 74,590 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

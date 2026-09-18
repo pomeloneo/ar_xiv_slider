@@ -5,7 +5,6 @@ import mermaid from "mermaid";
 const FONT = 'system-ui, "Noto Sans SC", "Microsoft YaHei", sans-serif';
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 4;
-const MIN_FIT_SCALE = 0.9;
 
 function addZoomControls(figure, output, svg) {
   const box = svg.viewBox.baseVal;
@@ -33,9 +32,9 @@ function addZoomControls(figure, output, svg) {
   const resize = () => {
     // A hidden slide has width zero. ResizeObserver reruns when it is revealed.
     const available = output.clientWidth || naturalWidth;
-    // A wide overview should scroll inside its frame rather than shrink Chinese
-    // labels into unreadable marks on a phone. Zoom-out remains an explicit choice.
-    const fittedWidth = Math.max(naturalWidth * MIN_FIT_SCALE, Math.min(naturalWidth, available));
+    // Start with the whole relationship visible. Readers can then zoom in and
+    // scroll without having to infer the missing left or right side first.
+    const fittedWidth = Math.min(naturalWidth, available);
     const width = fittedWidth * zoom;
     if (Math.abs(width - appliedWidth) > 0.1) {
       svg.style.width = `${width}px`;

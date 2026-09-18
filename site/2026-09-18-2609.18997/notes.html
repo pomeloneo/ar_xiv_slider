@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="单站阈值看不见“大家一起动”；滑动相关矩阵的最大特征值量化同步程度，CUSUM 累积弱信号并触发告警，特征向量指出来源。">
+<title>详细讲解 · 三座数据中心同时跳功率，电网怎样用现有遥测发现</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18997v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">科技与产业 · arXiv:2609.18997v1</p>
+<h1>三座数据中心同时跳功率，电网怎样用现有遥测发现</h1><p class="original" lang="en">Detection of Synchronized AI Data Center Load Episodes Using SCADA Telemetry</p>
+<p class="lead">单站阈值看不见“大家一起动”；滑动相关矩阵的最大特征值量化同步程度，CUSUM 累积弱信号并触发告警，特征向量指出来源。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">三个人都没喊得很响，但同时打同一个节拍</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">相关矩阵像一张“谁和谁一起动”的表</a><a href="#section-3">检测器只需要已有的一秒级功率序列</a><a href="#section-4">SI 把多站共同波动压成一个连续分数</a><a href="#section-5">CUSUM 不等一帧越线，而是累计持续偏高</a><a href="#section-6">一次告警包含严重度、证据积累和空间归因</a><a href="#section-7">测试台结果既有区分力，也暴露短事件弱点</a><a href="#section-8">模拟电网上的方法还不是现场报警产品</a><a href="#section-9">从原始功率到可解释告警的五步</a><a href="#section-10">最小实践：独立波动与同步波动的 SI</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>三个人都没喊得很响，但同时打同一个节拍</h2><p>传统 EMS 像三只分开的音量表：每只都没超线，就不会报警。分布式训练却可能让不同园区在通信阶段一起抬升或回落，单站看似普通，合在一起却减少了电网原以为存在的负荷分散。</p><p>论文用现有有功功率遥测计算 Synchronization Index，再用 CUSUM 把持续的小幅升高变成时序告警，并从同一次特征分解得到站点参与度。读完后你应能解释去趋势、协方差、最大特征值、窗口与延迟的取舍。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[多站SCADA有功功率] --&gt; B[减因果移动平均]
+B --&gt; C[按站点基线标准差归一]
+C --&gt; D[30秒滑动相关矩阵]
+D --&gt; E[最大特征值占总方差SI]
+E --&gt; F[CUSUM累计持续偏高]
+F --&gt; G{累计值超过阈值?}
+G -- 否 --&gt; H[继续更新或重置]
+G -- 是 --&gt; I[同步事件告警]
+D --&gt; J[最大特征向量平方]
+J --&gt; K[站点参与度归因]
+I --&gt; L[结合运营上下文排查共同原因]
+K --&gt; L</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>相关矩阵像一张“谁和谁一起动”的表</h2><p>先从每个站的原始功率减去近期移动平均，只留下较快波动；再按历史标准差归一化，避免大站天然压过小站。滑动窗口内的相关矩阵对角线约为 1，非对角线表示两个站是否同向变化。</p><p>最大特征值表示最强共同变化模式能解释多少波动。SI=最大特征值/全部特征值之和；N 个独立站的理想下界为 1/N，完全一起动时趋近 1。最大特征向量各分量平方之和为 1，可当站点参与份额。</p></section><section id="section-3"><h2>检测器只需要已有的一秒级功率序列</h2><p>每秒读取多个数据中心接入变电站的有功功率；用 30 秒因果移动平均去慢趋势，再在 30 秒滑窗内计算标准化协方差。论文案例为 RTDS 实时数字仿真的 IEEE 39 节点系统，三个 AI 数据中心接在不同母线。</p><p>正常启动期估计实际 SI 基线，因为共同冷却或基础设施会使它高于理论 1/N。运营者再设最小要检测的升幅、CUSUM allowance 和阈值 h，输出严重度、告警与站点参与度。</p></section><section id="section-4"><h2>SI 把多站共同波动压成一个连续分数</h2><p>如果三个站彼此独立，方差分散在三个方向，最大特征值只占约三分之一；若它们受同一训练节拍驱动，相关矩阵出现近似秩一的共同成分，最大特征值吸收更多总方差，SI 上升。</p><p>在等方差、任意两站相关都为 ρ 的特殊情形，SI=[1+(N-1)ρ]/N。三站平均相关从 0 增到 0.6 时，SI 从 0.333 增至 0.733；公式帮助解释方向，真实矩阵不要求相关完全相等。</p></section><section id="section-5"><h2>CUSUM 不等一帧越线，而是累计持续偏高</h2><p>每秒把 SI 超过基线加 allowance 后的余量累进，若变为负数就重置为零；累计量超过 h 才告警。这样能抓住单帧不强但持续的事件，同时避免普通上下抖动反复触发。</p><p>窗口是核心取舍：短窗反应快但特征值噪声大，长窗稳定却会稀释短事件。论文保留 30 秒窗；3—8 秒的八个短簇未被检出，说明“延迟有界”不等于所有持续时间都能发现。</p></section><section id="section-6"><h2>一次告警包含严重度、证据积累和空间归因</h2><p>SI 是当前窗口同步严重度；CUSUM S 是跨窗口积累的证据；参与向量 π 是每个站对主同步模式的贡献。三者不能互换：高 SI 可能太短而不报警，报警也需要参与向量告诉运营者查哪里。</p><p>论文的一个归因例中，母线 12 承担 0.732 的同步方差、母线 4 只有 0.116；不同事件最弱站点会变化。归因来自同一特征分解，不需额外分类器，但只表示统计共同模式，不自动证明某站是根本原因。</p></section><section id="section-7"><h2>测试台结果既有区分力，也暴露短事件弱点</h2><p>SI 阈值的 AUC 为 0.851，明显好于随机；设 h=1.0 时窗口级检测率 52.0%、误报率 20.8%，SI 首次越过漂移水平后平均约 1.8 秒响应。13 个事件簇只检出 5 个。</p><p>漏掉的八个簇持续 3—8 秒，峰值 SI 为 0.503—0.688；被检出簇峰值约 0.580—0.773。论文将遗漏归因于幅度与持续时间共同不足，这也是实际部署前必须重新校准窗口和阈值的证据。</p></section><section id="section-8"><h2>模拟电网上的方法还不是现场报警产品</h2><p>验证来自 RTDS 与三站设置，正常标签还参与了基线与阈值校准，没有真正现场 SCADA 的长期漂移、缺测、拓扑变化和未知共同负荷。误报 20.8% 与事件簇召回有限，远未达到直接自动处置标准。</p><p>相关不等于共同训练任务：天气、冷却、价格响应也能同步多个负荷。未来需现场留出校准、更多站点、边缘硬件和备用影响量化。教学 demo 使用人造波形和简化幂迭代。</p></section><section id="section-9"><h2>从原始功率到可解释告警的五步</h2><p>去掉慢趋势；按站点历史波动标准化；滑窗构造相关矩阵；用最大特征值占比计算 SI；用 CUSUM 累积超基线证据并告警；最后把最大特征向量平方归一化为站点参与度。</p><p>这个设计的关键不是复杂 AI 分类器，而是把同步的物理结构写成统计量。代价是它只看共同变化结构，仍需运营上下文判断共同原因和处置动作。</p></section><section id="section-10"><h2>最小实践：独立波动与同步波动的 SI</h2><p>需求：生成三条确定性的教学波形，分别构造近似独立和共享节拍两段；手写相关矩阵、幂迭代最大特征值和 CUSUM。正常例应看到同步段 SI 更高，边界说明不是论文 RTDS 数据。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>近似独立：SI=0.336，参与度=0.01,0.04,0.95
+共享节拍：SI=0.984，参与度=0.33,0.33,0.33
+秒1：SI=0.336，CUSUM=0.000，告警=否
+秒2：SI=0.336，CUSUM=0.000，告警=否
+秒3：SI=0.336，CUSUM=0.000，告警=否
+秒4：SI=0.984，CUSUM=0.598，告警=是
+秒5：SI=0.984，CUSUM=1.197，告警=是
+秒6：SI=0.984，CUSUM=1.795，告警=是
+秒7：SI=0.984，CUSUM=2.394，告警=是
+边界：波形与阈值均为教学构造；不是RTDS或现场SCADA，也不能复现论文检测指标。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么三个站都没越过单站功率阈值，SI 仍可能很高？</li><li>把 30 秒窗缩成 5 秒，会同时带来什么好处和代价？</li><li>参与度最高的站点，是否一定是造成同步事件的根因？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.18997v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.18997v1">元数据与版本</a></p><p>已读取同步训练物理机制、去趋势与标准化、滑窗协方差、SI、CUSUM、参与度、RTDS 设置、窗口敏感性和检测结果；核对图 1—5及表 I—II。</p><p>论文证据来自 IEEE 39 节点 RTDS。教学波形未使用真实 SCADA，不复现其 AUC、检测率或事件归因。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 3 个相关章节、7 条图表说明，正文约 47,801 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Detection of Synchronized AI Data Center Load Episodes Using SCADA Telemetry</p><p>Chaudhary, Chandan、Tiwari, Abanish、Pei, Yansong、Ben-Idris, Mohammed、Mitra, Joydeep</p>
+<p>arXiv:2609.18997v1 · 发布日期：2026-07-17 · 科技与产业</p>
+<p><a href="https://arxiv.org/abs/2609.18997v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.18997v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

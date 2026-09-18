@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="芯片模块谁和谁连接，会影响它们该靠多近，也会影响放在哪一层；论文把原本先分层后布局的两步，变成可连续搜索、最后再合法化的一条流程。">
+<title>参考答案 · 两层芯片怎样一起排版：先别过早决定每个模块放哪一层</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.18946v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>一旦模块层号固定，后续几何优化不能用换层修正跨层连接和拥挤之间的权衡。</p></li><li><p>它只按连接拓扑给连续坐标，没有严格满足不重叠、面积、外框和直角连通形状。</p></li><li><p>不保证；HPWL 只是代理，真实结果还取决于布线、时序、热、功耗、过孔和工艺规则。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="传统 trace 适合看一次执行，长期优化却要跨许多运行聚合；论文借用软件 profiler 的思想，把不稳定的自然语言步骤归并成语义操作栈，让成本和失败能按责任层级累积。">
+<title>图解全文 · AgentPProf：把长周期智能体的工作画成“火焰图”</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20301v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · AI</p><h1 tabindex="-1">AgentPProf：把长周期智能体的工作画成“火焰图”</h1><p class="lead">传统 trace 适合看一次执行，长期优化却要跨许多运行聚合；论文借用软件 profiler 的思想，把不稳定的自然语言步骤归并成语义操作栈，让成本和失败能按责任层级累积。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · AI</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>传统 trace 适合看一次执行，长期优化却要跨许多运行聚合；论文借用软件 profiler 的思想，把不稳定的自然语言步骤归并成语义操作栈，让成本和失败能按责任层级累积。</p><p>今天读完《AgentPProf：把长周期智能体的工作画成“火焰图”》，目标不是记住论文名，而是能用自己的话回答：一个运行几天、调用很多工具的智能体，怎样找出究竟哪类任务最耗 token、最常失败，而不是逐条翻日志？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · AI</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[轨迹切成任务层级]
+C --&gt; D[按资源或失败折叠聚合]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · AI</p><h1 tabindex="-1">先补两块必要基础</h1><p>debugging 关注“这一次为什么错”；profiling 关注“很多次运行中，时间、成本或错误长期集中在哪里”。火焰图中横向宽度代表累计资源，而不是时间先后。</p><p>代码 profiler 有稳定函数名，智能体轨迹却写成“检查登录”“再看凭据”等自由文本。必须先把事件统一成 operation，再分成任务与子任务层级。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · AI</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是跨运行的模型消息、工具调用、用户交互和资源记录。输出是统一操作、递归切分出的语义操作栈，以及可被 pprof 读取的折叠栈。</p><p>查询时可把同一层级按操作次数、token、时延或失败差异加权，得到普通或差分火焰图；同一切分不必为每个指标重跑。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · AI</p><h1 tabindex="-1">第一步：递归找任务边界并建立语义栈</h1><p>论文观察到一个任务通常占据连续轨迹，并可再分子任务。分割器先找大边界，再对片段递归切分，形成类似函数调用栈的意图层级。</p><p>统一 operation 把不同框架的消息和工具调用投影到共同表示，稳定责任实体不再是某一条自然语言，而是“诊断认证→检查凭据”这类语义路径。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · AI</p><h1 tabindex="-1">第二步：跨运行聚合并做差分定位</h1><p>所有运行的相同语义路径被折叠，宽度可表示 token 或操作数。比较好运行与坏运行时，差分火焰图突出失败中额外出现的恢复、重试等路径。</p><p>这并不自动证明某路径导致失败，只是把调查优先级从海量日志缩小到高占用或高差异区域。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · AI</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>三次登录排障都包含“读日志→查账户→测网络”，失败运行还反复“刷新令牌→重试”。聚合后，刷新令牌分支占失败额外 token 的大部分，成为优先检查点。</p><p>若分割器把两个任务误并，火焰图会把资源归错责任；因此需要用人工标注评切分，再用问题定位任务检验 profile 是否真有帮助。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · AI</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>在 CodeTraceBench 的 405 条轨迹上，语义切分与人工阶段标注达到 0.764 的 B³ F1。该指标同时考察聚类式分段的精确与召回。</p><p>在三个问题定位基准（完整查询数 614、400、220）上，加入 profile 的方法 MAP 最高提升 56%；论文还展示按次数、token 和好坏差异生成的标准 pprof 火焰图。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · AI</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>profile 给出相关热点而非因果证明；自然语言意图边界可能模糊，新的框架和跨项目命名会影响聚合稳定性。</p><p>多项目评估、与现有 tracing 生态的集成、在线触发与利用 profile 做运行时控制仍属未来工作。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · AI</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“一个运行几天、调用很多工具的智能体，怎样找出究竟哪类任务最耗 token、最常失败，而不是逐条翻日志？”先被拆成可观察输入，再经过“第一步：递归找任务边界并建立语义栈”与“第二步：跨运行聚合并做差分定位”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · AI</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“把三条运行中的相同语义路径按 token 汇总，并突出失败额外重试”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 正常运行：诊断认证→查凭据 300 token
+- 失败运行：诊断认证→查凭据→刷新令牌→重试 900 token
+- 权重：token
+中间状态：
+1. 统一不同日志事件
+2. 递归切出诊断与子步骤
+3. 按语义路径累加 token
+4. 比较坏运行减好运行
+正常例：差分热点指向刷新令牌与重试分支，供开发者优先调查。
+边界：热点不是失败因果；示例未运行论文分割模型或真实 pprof。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么逐次 trace 不能替代长期 profile？</li><li>火焰图最宽的分支能否直接判定为 bug 根因？</li><li>如果相同任务每次措辞不同，聚合前需要解决什么？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20301v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20301v1">元数据与版本</a></p><p>已读语义操作栈、递归分割、pprof 投影、CodeTraceBench 与定位实验、结论；核对图 1—4、表 1。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、5 条图表说明，正文约 51,430 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. AgentPProf：把长周期智能体的工作画成“火焰图”</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：递归找任务边界并建立语义栈</option><option value="7">7. 第二步：跨运行聚合并做差分定位</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">AgentPProf: Semantic Profiler for Long Horizon AI Agents</p><p>Zheng, Yusheng、Chang, Chaokun、Mao, Yu、Wu, Tianyuan、Huang, Yuxi、Ma, Tao、Mao, Wenan、Cheng, Shuyi、Quinn, Andi、Wang, Wei</p>
+<p>arXiv:2609.20301v1 · 发布日期：2026-09-14 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20301v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20301v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20301v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20301v1">元数据与版本</a></p><p>已读语义操作栈、递归分割、pprof 投影、CodeTraceBench 与定位实验、结论；核对图 1—4、表 1。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、5 条图表说明，正文约 51,430 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

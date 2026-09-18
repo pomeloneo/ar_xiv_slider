@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="一个总统选举事件可拆出许多候选人子合约；若每张合约、每个大事件和每一美元投资分别等权，回答的是不同问题。论文用 5.88 亿笔交易展示聚合口径本身就是经济结论的一部分。">
+<title>图解全文 · 预测市场的热门—冷门偏差：结论为何随统计单位改变</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.12878v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 金融</p><h1 tabindex="-1">预测市场的热门—冷门偏差：结论为何随统计单位改变</h1><p class="lead">一个总统选举事件可拆出许多候选人子合约；若每张合约、每个大事件和每一美元投资分别等权，回答的是不同问题。论文用 5.88 亿笔交易展示聚合口径本身就是经济结论的一部分。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 金融</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>一个总统选举事件可拆出许多候选人子合约；若每张合约、每个大事件和每一美元投资分别等权，回答的是不同问题。论文用 5.88 亿笔交易展示聚合口径本身就是经济结论的一部分。</p><p>今天读完《预测市场的热门—冷门偏差：结论为何随统计单位改变》，目标不是记住论文名，而是能用自己的话回答：低于 10 美分的“小概率合约”整体看起来亏钱，为什么换成按大事件分组后，结论可能反过来？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 金融</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[区分美元、合约与事件加权]
+C --&gt; D[需求习惯不等于收益归因]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 金融</p><h1 tabindex="-1">先补两块必要基础</h1><p>预测合约到期通常支付 0 或 1 美元。以 0.08 美元买入的小概率合约若成真赚很多，若失败损失 0.08；favorite-longshot bias 指冷门价格相对结果概率偏高、热门相对更划算的系统性模式。</p><p>child market 是具体子合约，parent event 是把相关子合约归为同一事件。一个大事件若列出很多冷门候选，会在“每合约等权”统计中占更大份量。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 金融</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是 Polymarket 5.88 亿笔交易、248 万个账户、成交价格、最终结果、子市场—父事件映射和账户历史。输出是不同价格尾部的每美元回报与概率误差。</p><p>论文分别按资金流、每个子合约等权、先按父事件分组等口径计算，并按 Crypto、Politics、Sports 及账户历史需求拆分。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 金融</p><h1 tabindex="-1">第一步：先定义“平均”到底平均谁</h1><p>把所有购买混在一起，资金投得多的事件权重最大；每个子合约等权时，子合约多的父事件权重更大；父事件等权则每个大问题只算一次。</p><p>三种口径都可以正确，却描述“平均投资美元”“平均挂牌合约”“平均大事件”三个不同对象。报告偏差必须同时给分母。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 金融</p><h1 tabindex="-1">第二步：区分持续偏好与最终谁亏钱</h1><p>账户过去常买冷门，确实能预测下月继续买冷门；但这不强力预测它会比其他冷门买家亏得更多。</p><p>因此“有一群稳定的非理性新手承担全部损失”并未被证据支持。聚合偏差、覆盖多少事件、谁承担损失是三个问题。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 金融</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>事件 A 有 100 个候选人子合约且多数冷门亏，事件 B 只有 2 个子合约且冷门赚。每合约等权会让 A 获得约 50 倍权重；父事件等权则 A、B 各一半。</p><p>所以论文中低价购买按每个子合约等权亏 6.3 美分/美元，按父事件先聚合却赚 4.1 美分；资金流加权的观测购买亏 19.3 美分。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 金融</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>低于 10 美分的实际购买按资金流聚合亏 19.3 美分/美元；每子合约等权亏 6.3 美分；父事件聚合后赚 4.1 美分。90 美分以上购买赚 0.83 美分。</p><p>偏差在 Crypto 和 Politics 呈双边模式，在 Sports 中没有；过去最偏好冷门的账户前 10% 占下月低价购买 26.6%，但收益与其他冷门买家相近。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 金融</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>数据来自一个平台和已解析的链上/平台结构，无法唯一识别偏差由偏好、信念、限制还是市场设计造成；不同类别也不一致。</p><p>历史收益不是未来回报保证，论文不是下注建议。账户不等于真实个人，聚合口径变化也不表示某一种一定更“正确”。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 金融</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“低于 10 美分的“小概率合约”整体看起来亏钱，为什么换成按大事件分组后，结论可能反过来？”先被拆成可观察输入，再经过“第一步：先定义“平均”到底平均谁”与“第二步：区分持续偏好与最终谁亏钱”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 金融</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“演示每子合约等权与每父事件等权如何给出相反平均回报”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 事件A子合约数：100
+- 事件A平均回报：-0.06
+- 事件B子合约数：2
+- 事件B平均回报：0.1
+中间状态：
+1. 按 102 个子合约加权
+2. A 因子合约多占绝大权重
+3. 再让 A、B 两事件各占一半
+4. 比较两个平均值的符号
+正常例：同一底层结果可在两种合理统计单位下出现不同总体结论。
+边界：教学数字不是 Polymarket 原始交易重算，也不构成下注或投资建议。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 金融</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么“按每张合约平均”和“按每个事件平均”回答不同问题？</li><li>过去爱买冷门能否推出该账户未来一定亏得更多？</li><li>Sports 没有相同模式说明了什么？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 金融</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.12878v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.12878v1">元数据与版本</a></p><p>已读数据与测量、价格尾部回报、父子市场聚合、账户持续需求、类别与稳健性、结论；核对表 1—26 与图 1、3、5—7 的关键结果。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 3 个相关章节、35 条图表说明，正文约 144,195 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 预测市场的热门—冷门偏差：结论为何随统计单位改变</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：先定义“平均”到底平均谁</option><option value="7">7. 第二步：区分持续偏好与最终谁亏钱</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">The Favorite-Longshot Bias in Prediction Markets: Evidence from Polymarket</p><p>Cardozo, Marcos、Rivero-Wildemauwe, José Ignacio</p>
+<p>arXiv:2609.12878v1 · 发布日期：2026-09-11 · 金融</p>
+<p><a href="https://arxiv.org/abs/2609.12878v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.12878v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.12878v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.12878v1">元数据与版本</a></p><p>已读数据与测量、价格尾部回报、父子市场聚合、账户持续需求、类别与稳健性、结论；核对表 1—26 与图 1、3、5—7 的关键结果。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 3 个相关章节、35 条图表说明，正文约 144,195 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

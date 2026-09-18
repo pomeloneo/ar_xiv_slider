@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="L2 行情告诉你队伍总长度，却不告诉每张订单的先后位置；中间有人撤单时，撤的是你前面还是后面，会让同一公开订单簿路径对应不同成交结果。">
+<title>图解全文 · 同一张订单簿，可能成交得完全不同：L2 数据的部分识别</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.13597v2" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 金融</p><h1 tabindex="-1">同一张订单簿，可能成交得完全不同：L2 数据的部分识别</h1><p class="lead">L2 行情告诉你队伍总长度，却不告诉每张订单的先后位置；中间有人撤单时，撤的是你前面还是后面，会让同一公开订单簿路径对应不同成交结果。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 金融</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>L2 行情告诉你队伍总长度，却不告诉每张订单的先后位置；中间有人撤单时，撤的是你前面还是后面，会让同一公开订单簿路径对应不同成交结果。</p><p>今天读完《同一张订单簿，可能成交得完全不同：L2 数据的部分识别》，目标不是记住论文名，而是能用自己的话回答：只看到每个价位的总挂单量，为什么无法准确回测一张排队限价单会不会成交？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 金融</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[重建相容队列历史]
+C --&gt; D[报告完成率与成本边界]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 金融</p><h1 tabindex="-1">先补两块必要基础</h1><p>FIFO/price-time priority 表示同价先到先成交。L2 只显示价位聚合数量，market-by-order 才能看到队列中每张订单的身份与顺序。</p><p>partial identification（部分识别）承认数据不能给唯一答案，转而计算所有与观测相容的隐含历史下，结果可能落在哪个区间。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 金融</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是同步的东京交易所 L1/L2 快照、成交导致的移除和两只证券的观测路径。研究固定所有公开价格、数量和成交，只改变不可见的队列内撤单分配规则。</p><p>输出是被动订单完成率、implementation shortfall 与策略选择在前端撤单、后端撤单等相容重建下的范围；主动立即成交基准不受队列位置影响。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 金融</p><h1 tabindex="-1">第一步：固定可见订单簿，枚举不可见撤单位置</h1><p>当某价位总量减少且不是成交，L2 只知道有人取消。若取消发生在你的订单前方，你更快排到；若发生在后方，你的位置不变。</p><p>作者构造多种潜在分配和三个取消规则，要求它们都复现同一聚合路径，再运行完全相同的影子订单。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 金融</p><h1 tabindex="-1">第二步：用结果区间而非单点回测</h1><p>不同相容历史下的完成率和成本形成识别区间。若策略在所有重建中都相同，结论较稳；若最佳策略改变，就暴露对不可见队列假设的敏感性。</p><p>主动成交不用排 FIFO，所以作为不变基准可检查差异是否真的来自被动队列。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 金融</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>某价位你前面显示 100 股，随后聚合量少了 40 股。若这 40 股都从前方撤掉，你只剩 60 股在前；若都从后方撤掉，你仍排在原位置。屏幕轨迹完全一样。</p><p>回测若默认“按比例撤单”会产出一个精确成交时间，但这个精确值来自假设，不是 L2 数据本身。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 金融</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>对 1301.T，从后端移除切换为前端移除使被动完成率提高 8.01 个百分点、implementation shortfall 降低 1.010 bp。</p><p>7911.T 复制得到同方向结果：完成率差 7.39 个百分点、成本差 0.384 bp；两只证券的主动基准保持不变。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 金融</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>样本仅两只证券、七个月，留出证据来自相同 18 个日期；取消规则仍是模型选择，前/后端只是条件端点，不是全部真实可能性。</p><p>影子策略假定零延迟、无费用/返佣、无自身市场冲击，末端库存按复制订单簿平仓；绝对成本差不可直接解释成流动性因果。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 金融</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“只看到每个价位的总挂单量，为什么无法准确回测一张排队限价单会不会成交？”先被拆成可观察输入，再经过“第一步：固定可见订单簿，枚举不可见撤单位置”与“第二步：用结果区间而非单点回测”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 金融</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“演示同一 L2 数量减少如何产生两个不同 FIFO 排位”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 你前方初始数量：100
+- 观测撤单：40
+- 前端撤单后前方：60
+- 后端撤单后前方：100
+中间状态：
+1. 观察价位总量减少 40
+2. 构造撤在你前方的相容历史
+3. 构造撤在你后方的相容历史
+4. 比较后续成交所需市场单量
+正常例：同一聚合轨迹不能唯一决定你的成交，因此应报告区间或敏感性。
+边界：没有真实交易、费用、延迟或市场冲击，不是执行建议。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 金融</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么 L2 数量下降不能告诉你排位改善了多少？</li><li>主动成交基准为什么不受这个不确定性影响？</li><li>回测最佳策略随取消规则变化说明什么？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 金融</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.13597v2">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.13597v2">元数据与版本</a></p><p>已读相容历史构造、取消分配、影子执行、两证券复制、限制与结论；核对完成率、成本和策略敏感性结果。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 8 个相关章节、3 条图表说明，正文约 56,130 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 同一张订单簿，可能成交得完全不同：L2 数据的部分识别</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：固定可见订单簿，枚举不可见撤单位置</option><option value="7">7. 第二步：用结果区间而非单点回测</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Same Book, Different Fills: Partial Identification of FIFO Execution from Aggregate Order Books</p><p>Danait, Riya、Zamora, Yuliana、Boier, Ioana</p>
+<p>arXiv:2609.13597v2 · 发布日期：2026-09-11 · 金融</p>
+<p><a href="https://arxiv.org/abs/2609.13597v2">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.13597v2">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.13597v2">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.13597v2">元数据与版本</a></p><p>已读相容历史构造、取消分配、影子执行、两证券复制、限制与结论；核对完成率、成本和策略敏感性结果。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 8 个相关章节、3 条图表说明，正文约 56,130 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

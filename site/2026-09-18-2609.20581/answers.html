@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="局部置信度像是分别问“每个座位最可能坐谁”，但整排座位可能受“家庭必须坐在一起”这类联合约束；论文证明边缘概率不能告诉采样器多个位置是否可独立并行。">
+<title>参考答案 · 离散扩散模型的“高置信并行填词”为何可能改变整体分布</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20581v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>不能。两个位置可能受强联合约束，边缘置信不包含条件独立信息。</p></li><li><p>correctness 只看每个样本是否合规，不检查不同合法样本出现的频率是否正确。</p></li><li><p>可检查已知硬约束违规率，并明确它只测到支持集外偏移的一部分。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,6 @@
+集中逐请求发送：4 份
+home-A 对 layer3-seg7 组播 1 份 → tile-1,tile-2,tile-4
+home-B 对 layer3-seg8 组播 1 份 → tile-3
+分散组播发送：2 份；home负载={'home-A': 1, 'home-B': 1}
+此例减少 50% 的数据份数
+边界：只按相同段合并请求；未模拟跳数、拥塞、credit、重复抑制、流水线或论文FPGA。

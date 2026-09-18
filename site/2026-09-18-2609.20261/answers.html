@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="普通数据库事务只能保证数据库里的读写顺序，却不知道智能体在外部看过的证据或权限是否已经变化；这篇论文把这个“想的时候对、做的时候已过期”的风险变成可检查的提交契约。">
+<title>参考答案 · AI 智能体提交操作时：如何保证证据、政策与权限仍然有效</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20261v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>因为证书属于数据库事务之外的外部状态，除非被显式捕获并在提交期间加有效性保护，否则数据库只排序内部读写。</p></li><li><p>哈希只说明内容身份；发行方可能撤销它、政策可能改选其他版本，所以适用性必须另行验证。</p></li><li><p>不等于。TCT-C 只证明当前依赖和政策仍允许同一个具体效果，不声称原随机推导轨迹可串行化或语义正确。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="很多团队把“计划、工具编排、完成检查”打包成一个 harness 后只报总成功率；这篇论文把计划带来的成功增量、验证器避免的误放行和额外成本分开，普通读者也能看清权衡。">
+<title>详细讲解 · 智能体 Harness 为什么有价值：计划信息与放行控制要分开算</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20474v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">AI · arXiv:2609.20474v1</p>
+<h1>智能体 Harness 为什么有价值：计划信息与放行控制要分开算</h1><p class="original" lang="en">How Do Agent Harnesses Create Value? Planning Information and Release Control in Stateful LLM Agents</p>
+<p class="lead">很多团队把“计划、工具编排、完成检查”打包成一个 harness 后只报总成功率；这篇论文把计划带来的成功增量、验证器避免的误放行和额外成本分开，普通读者也能看清权衡。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">先从一个普通人会遇到的问题开始</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先补两块必要基础</a><a href="#section-3">论文接收什么，输出什么</a><a href="#section-4">第一步：用等长度假计划隔离“信息含量”</a><a href="#section-5">第二步：终端验证器只决定是否放行</a><a href="#section-6">跟着一个小例子看中间状态</a><a href="#section-7">作者拿什么证据支持主张</a><a href="#section-8">哪些结论不能顺手扩大</a><a href="#section-9">把整条因果链重新接起来</a><a href="#section-10">最小实践：把核心机制跑一遍</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>先从一个普通人会遇到的问题开始</h2><p>很多团队把“计划、工具编排、完成检查”打包成一个 harness 后只报总成功率；这篇论文把计划带来的成功增量、验证器避免的误放行和额外成本分开，普通读者也能看清权衡。</p><p>今天读完《智能体 Harness 为什么有价值：计划信息与放行控制要分开算》，目标不是记住论文名，而是能用自己的话回答：给智能体一份好计划和在最后加一个审查员，分别改善什么，什么时候哪一个更值钱？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[Fixed 对照 Sham]
+C --&gt; D[只读验证控制误放]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先补两块必要基础</h2><p>oracle success 是由环境真值判断任务是否真的完成；false pass 是任务其实失败却被系统当成完成。两者不是同一个指标：少误放可能以错杀一些正确任务为代价。</p><p>Fixed 组收到预写的任务专属计划，Sham 组收到字数和外壳相同、但内容被打乱的政策文字。这样比较尽量把“有用指导”与“只是多给了文字”区分开。</p></section><section id="section-3"><h2>论文接收什么，输出什么</h2><p>输入是零售或航空任务、执行模型、harness 配置和重复运行。输出包括 oracle 验证成功、是否被终端验证器拒绝、误放行以及记录的推理成本。</p><p>论文把价值写成情景函数：成功增加有收益，避免误放行也有收益，但两者权重取决于错误责任成本；再减去计划或验证所需推理费用。</p></section><section id="section-4"><h2>第一步：用等长度假计划隔离“信息含量”</h2><p>若只把有计划组和无计划组相比，优势可能来自更长上下文或额外注意。Fixed—Sham 对比保持字数与包装接近，只改变计划是否真的对应任务。</p><p>计划主要作用在执行之前和过程中，帮助模型安排子目标与依赖；论文发现收益集中在复杂任务，而不是每类任务都同样明显。</p></section><section id="section-5"><h2>第二步：终端验证器只决定是否放行</h2><p>验证器读取最近对话和结果，不能修改环境，只能拒绝一个看似完成的轨迹。它不让失败任务变成功，却能避免把错误结果交付出去。</p><p>因此选择 harness 组件不能只看准确率：低责任场景可能更重视计划提高成功率，高责任场景可能更重视验证器拦下误放行。</p></section><section id="section-6"><h2>跟着一个小例子看中间状态</h2><p>假设 100 个任务，计划让真成功从 70 增到 77；验证器在剩余 23 个失败中拦下 14 个，同时错拦 4 个成功。计划改变“做成多少”，验证器改变“哪些结果允许交付”。</p><p>若每个误放行损失很小，错拦造成的可用性损失可能不划算；若误放行会产生高额退款或合规责任，即使验证器错拦一部分正确任务也可能更有价值。</p></section><section id="section-7"><h2>作者拿什么证据支持主张</h2><p>在 265 个匹配单元、23 个零售任务的汇总比较中，Fixed 相对 Sham 的 oracle 成功率提高 7.17 个百分点，90% 按任务聚类 bootstrap 区间为 1.15—13.36 个百分点。</p><p>只读终端验证器拦下 61% 的无效零售轨迹，同时扣留 17% 的正确轨迹，每次额外成本低于 1 美分。独立验证器以完整组合约十二分之一的增量成本获得了几乎全部误放行收益。</p></section><section id="section-8"><h2>哪些结论不能顺手扩大</h2><p>主要样本经过任务和配置可用性筛选，航空试验只有 6 个任务；公开基准可能出现在模型训练数据中，且部分托管模型版本与请求设置记录不完整。</p><p>90% 区间不是常见的 95% 区间；结果说明特定基准上的相对效应，不能直接保证新任务、新模型或真实商业损失函数中的最佳组合。</p></section><section id="section-9"><h2>把整条因果链重新接起来</h2><p>研究问题“给智能体一份好计划和在最后加一个审查员，分别改善什么，什么时候哪一个更值钱？”先被拆成可观察输入，再经过“第一步：用等长度假计划隔离“信息含量””与“第二步：终端验证器只决定是否放行”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section id="section-10"><h2>最小实践：把核心机制跑一遍</h2><p>需求：用一组明确标为教学设定的小数据演示“把计划的成功增量和验证器的误放行控制放进同一张价值账”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 基础真成功：70
+- 计划后真成功：77
+- 失败轨迹：23
+- 验证器拦下失败：14
+- 错拦正确：4
+中间状态：
+1. 先算计划多完成 7 个任务
+2. 再算验证器少放出 14 个错误
+3. 同时记录错拦 4 个正确结果
+4. 按业务的错误责任决定权重
+正常例：计划改善完成能力；验证器控制交付风险，它们不能用一个成功率混为一谈。
+边界：数字是教学缩放，不是论文原始样本重算，也没有估算你的真实业务损失。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么验证器拦下失败不能算成任务被成功完成？</li><li>Sham 组为什么比单纯“无计划”更能隔离计划内容的作用？</li><li>在误放行损失极高时，应优先看哪个指标？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20474v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20474v1">元数据与版本</a></p><p>已读评估框架、实验设计、主结果、成本/责任情景、讨论与结论；核对图 1—2、表 1—3 及验证器取舍。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 5 个相关章节、53 条图表说明，正文约 142,728 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">How Do Agent Harnesses Create Value? Planning Information and Release Control in Stateful LLM Agents</p><p>Zhang, Yukun、Xu, Kemu、Chen, Yishen</p>
+<p>arXiv:2609.20474v1 · 发布日期：2026-09-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20474v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20474v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

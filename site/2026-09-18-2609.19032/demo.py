@@ -1,0 +1,14 @@
+inputs = {'处理区公告前': 102, '处理区公告后': 108, '对照区公告前': 102, '对照区公告后': 104}
+steps = ['处理区变化为6', '对照区同期变化为2', '用6减2得到DiD为4', '再检查平行趋势和同期冲击']
+normal = '相对变化为4个指数点，而不是把处理区全部6点都归给公告。'
+boundary = '数字为教学例，不是用论文微观数据重估，也不提供房地产投资建议。'
+
+print("教学输入：")
+for name, value in inputs.items():
+    print(f"- {name}：{value}")
+print("中间状态：")
+for index, step in enumerate(steps, 1):
+    print(f"{index}. {step}")
+print("正常例：" + normal)
+assert inputs and steps and normal
+print("边界：" + boundary)

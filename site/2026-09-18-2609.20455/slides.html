@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="直接根据一次失败重写整份技能，像修一处漏水却把整屋管道换掉；论文给技能节点和关系稳定地址，用成功/失败对比定位最小编辑面，再经过局部与全局两道门决定是否提交。">
+<title>图解全文 · SkillAA：失败后只修技能图中最可能出错的一小块</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20455v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · AI</p><h1 tabindex="-1">SkillAA：失败后只修技能图中最可能出错的一小块</h1><p class="lead">直接根据一次失败重写整份技能，像修一处漏水却把整屋管道换掉；论文给技能节点和关系稳定地址，用成功/失败对比定位最小编辑面，再经过局部与全局两道门决定是否提交。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · AI</p><h1 tabindex="-1">先从一个普通人会遇到的问题开始</h1><p>直接根据一次失败重写整份技能，像修一处漏水却把整屋管道换掉；论文给技能节点和关系稳定地址，用成功/失败对比定位最小编辑面，再经过局部与全局两道门决定是否提交。</p><p>今天读完《SkillAA：失败后只修技能图中最可能出错的一小块》，目标不是记住论文名，而是能用自己的话回答：智能体答错后，怎样判断该改“何时用技能”、执行步骤还是技能关系，并避免一次修改把原来正确的案例弄坏？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · AI</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[归因到节点字段或关系]
+C --&gt; D[Local Gate 与 Big Gate]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · AI</p><h1 tabindex="-1">先补两块必要基础</h1><p>外部 skill 是不改模型参数的任务程序。技能图节点可分 applicability（何时用/不用）、execution（怎样做）等字段，边描述技能组合依赖。</p><p>abductive attribution（溯因归因）不是读取隐藏思维链，而是依据预测、可审计的执行摘要、稳定节点 ID 和正确性，选择最可能解释失败的可编辑位置。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · AI</p><h1 tabindex="-1">论文接收什么，输出什么</h1><p>输入是冻结的学生/教师模型、初始技能图、彼此独立的更新集和测试集，以及每次执行的 prediction、trace、usage 与验证结果。只有技能图可变。</p><p>输出是更新后的图。候选编辑先通过 Local Gate 在可能受影响案例上测试，再由 Big Gate 把同一轮候选合并后在整个更新集验证；失败就原子回滚。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · AI</p><h1 tabindex="-1">第一步：用稳定地址把失败路由到最小编辑面</h1><p>教师比较错误轨迹与相似成功案例，判断是触发条件、执行步骤、排除边界、关系缺失，还是一次性执行失误/证据不足。后两类可决定不改图。</p><p>usage 中的稳定 ID 让“Q3 使用 E2 调到 Q7”可追踪；候选只能编辑归因授权的位置，其他字段保持不变。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · AI</p><h1 tabindex="-1">第二步：局部门找回归，全局门决定提交</h1><p>Local Gate 复测直接受影响的技能和案例，快速淘汰局部退化。通过者一起进入 Big Gate，在完整更新池上检查净收益。</p><p>测试集只用于最终评估，不能参与编辑选择；否则技能图会把测试答案学进去，看似进步却没有泛化证据。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · AI</p><h1 tabindex="-1">跟着一个小例子看中间状态</h1><p>某问答技能总把关系方向读反。归因定位到节点 Q3 的“方向判断”字段，只改一条步骤；局部复测相关问题，全局再检查其他题是否下降。</p><p>若错误其实来自本次检索没有证据，系统应标成 insufficient evidence 而不永久改技能。把偶发环境失败写成通用规则会污染后续任务。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · AI</p><h1 tabindex="-1">作者拿什么证据支持主张</h1><p>以 gpt-5.6-sol 为例，SkillAA 在 SearchQA、LiveMath、DocVQA 分别达到 81.5%、66.7%、91.2%，在主设置的每个模型—基准组合中观察均值最高。</p><p>三次独立优化/评估使用种子 42、43、44，报告均值与半极差。消融支持结构化节点、显式关系、归因编辑和 Local Gate；Big Gate 的留出收益随模型而变。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · AI</p><h1 tabindex="-1">哪些结论不能顺手扩大</h1><p>结果限于三类主基准、一个 ALFWorld 扩展、较小技能图和少量重复；教师归因仍可能错，模型与提示版本也影响结果。</p><p>最高观察均值不等于与所有替代方法在相同监督与计算预算下严格可比；将反复验证的技能内化进模型参数仍是未来工作。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · AI</p><h1 tabindex="-1">把整条因果链重新接起来</h1><p>研究问题“智能体答错后，怎样判断该改“何时用技能”、执行步骤还是技能关系，并避免一次修改把原来正确的案例弄坏？”先被拆成可观察输入，再经过“第一步：用稳定地址把失败路由到最小编辑面”与“第二步：局部门找回归，全局门决定提交”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · AI</p><h1 tabindex="-1">最小实践：把核心机制跑一遍</h1><p>需求：用一组明确标为教学设定的小数据演示“演示一次错误如何只修改一个技能字段，并在局部回归失败时回滚”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 失败：关系方向读反
+- 候选地址：Q3.execution.step2
+- 局部旧正确数：4
+- 候选后正确数：3
+中间状态：
+1. 对比成功与失败轨迹
+2. 归因到 Q3 的方向步骤
+3. 只生成该字段候选编辑
+4. 局部正确数下降，因此回滚
+正常例：候选没有越过 Local Gate，不进入全局提交。
+边界：这是规则化演示，没有调用教师模型或复现三个基准分数。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · AI</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>为什么“证据不足”时不应自动改技能？</li><li>Local Gate 已通过，为什么还需要 Big Gate？</li><li>测试集能否用来选择候选编辑？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · AI</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20455v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20455v1">元数据与版本</a></p><p>已读统一技能图、溯因路由、Local/Big Gate、主实验与消融、结论；核对图 1—3、算法 1—2、表 1—5。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、16 条图表说明，正文约 109,607 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. SkillAA：失败后只修技能图中最可能出错的一小块</option><option value="2">2. 先从一个普通人会遇到的问题开始</option><option value="3">3. 先看整篇的关系</option><option value="4">4. 先补两块必要基础</option><option value="5">5. 论文接收什么，输出什么</option><option value="6">6. 第一步：用稳定地址把失败路由到最小编辑面</option><option value="7">7. 第二步：局部门找回归，全局门决定提交</option><option value="8">8. 跟着一个小例子看中间状态</option><option value="9">9. 作者拿什么证据支持主张</option><option value="10">10. 哪些结论不能顺手扩大</option><option value="11">11. 把整条因果链重新接起来</option><option value="12">12. 最小实践：把核心机制跑一遍</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">SkillAA: Attribution-Guided Skill-Graph Updating with Targeted Validation and Rollback</p><p>Shang, Ziqiao、Ge, Ling-Yue、Guo, Lan-Zhe</p>
+<p>arXiv:2609.20455v1 · 发布日期：2026-09-17 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20455v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20455v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20455v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20455v1">元数据与版本</a></p><p>已读统一技能图、溯因路由、Local/Big Gate、主实验与消融、结论；核对图 1—3、算法 1—2、表 1—5。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 4 个相关章节、16 条图表说明，正文约 109,607 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

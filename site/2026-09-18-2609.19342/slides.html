@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="负载侧电池拦住秒级算力尖峰，发电侧电池保留小时级应急能量；位置、功率和电量解决的是不同问题。">
+<title>图解全文 · 两组电池怎样同时保护 AI 数据中心和自备电厂</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+<script defer src="../assets/lesson.js"></script>
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.19342v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><section class="slide" id="slide-1" aria-label="第 1 页"><p class="eyebrow">01 / 14 · 科技与产业</p><h1 tabindex="-1">两组电池怎样同时保护 AI 数据中心和自备电厂</h1><p class="lead">负载侧电池拦住秒级算力尖峰，发电侧电池保留小时级应急能量；位置、功率和电量解决的是不同问题。</p><p>用具体例子读懂整篇论文：问题、机制、证据、局限和自测。方向键或下方按钮翻页。</p></section><section class="slide" id="slide-2" aria-label="第 2 页"><p class="eyebrow">02 / 14 · 科技与产业</p><h1 tabindex="-1">像在厨房门口和仓库各放一个缓冲区</h1><p>GPU 突然拉高几百兆瓦时，燃气轮机来不及瞬间跟上；如果大机组又突然停机，几秒的缓冲也撑不了十小时。把所有任务交给同一块电池，会混淆“反应有多快”和“能撑多久”两种容量。</p><p>论文先合成秒级和分钟级数据中心负荷，再分别优化 load-side 与 generation-side BESS，并把太阳能、风能、燃料电池和燃气轮机一同调度。读完后你应能分清 MW、MWh、SOC、平滑和备用。</p></section><section class="slide" id="slide-3" aria-label="第 3 页"><p class="eyebrow">03 / 14 · 科技与产业</p><h1 tabindex="-1">先看整篇的关系</h1><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[秒级AI负荷与尖峰] --&gt; B[负载侧高功率BESS]
+B --&gt; C[平滑后的净负荷]
+C --&gt; D[风光燃料电池和燃机调度]
+D --&gt; E[发电侧长时BESS]
+E --&gt; F[能量调度与旋转备用]
+G[功率上限MW] --&gt; B
+H[效率降额与寿命余量] --&gt; B
+I[SOC与事故持续时间MWh] --&gt; E
+J[N-1最大机组退出] --&gt; E
+F --&gt; K[连续供电与恢复]
+K --&gt; L[模型可行不等于现场可靠性承诺]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section class="slide" id="slide-4" aria-label="第 4 页"><p class="eyebrow">04 / 14 · 科技与产业</p><h1 tabindex="-1">MW 是速度，MWh 是能撑多久</h1><p>电池功率 MW 表示此刻最多充放多快；能量 MWh 表示累计可存多少。383 MW、两小时的系统名义能量约 766 MWh，适合吸收高幅度快速变化；271.1 MW、四小时约 1084.4 MWh，更强调跨时段供能和备用。</p><p>SOC 是当前电量占可用容量的比例。调度不能为了眼前低价把电池耗尽，因为机组故障时还要留出 bridging energy；同时要考虑充放效率、温度降额、设备可用率、寿命退化和安全余量。</p></section><section class="slide" id="slide-5" aria-label="第 5 页"><p class="eyebrow">05 / 14 · 科技与产业</p><h1 tabindex="-1">五阶段框架吃进哪些不确定与约束</h1><p>负荷模型把 IT 计算、推理、训练、存储、网络与非 IT 冷却、UPS 和配电损耗拆开，并加入秒级突发。市场侧使用 ERCOT 西区价格、风光资料，先生成 10,000 个情景，再缩减为每月一个代表日、共 288 小时。</p><p>优化同时接收机组启停、爬坡、最小出力、燃料与排放、风光不确定、BESS SOC、备用和 N-1 约束。输出包括负载侧与发电侧电池规模、机组调度、备用分配、无碳电力比例和故障路径。</p></section><section class="slide" id="slide-6" aria-label="第 6 页"><p class="eyebrow">06 / 14 · 科技与产业</p><h1 tabindex="-1">负载侧电池先把尖峰挡在燃机之前</h1><p>合成园区负荷在 530.8—1048.7 MW 间变化，最大秒级爬坡为 335.8 MW/s。50 MW 电池只能削掉一小部分，150 MW 仍留下极端尖峰；论文在损耗、温度、可用率、寿命和 10% 余量后选择 383 MW、两小时。</p><p>其目标是让发电机看到更平滑的净负荷，减少频繁爬坡、轴系疲劳和可能的次同步扭振风险。论文没有做完整机械轴系电磁暂态验证，所以“缓解 SSTI”是工程设计动机和间接结果，不是现场故障消除证明。</p></section><section class="slide" id="slide-7" aria-label="第 7 页"><p class="eyebrow">07 / 14 · 科技与产业</p><h1 tabindex="-1">发电侧电池把能量留给备用与恢复</h1><p>发电侧优化选择 124 个模块，合计 271.1 MW、1084.4 MWh。正常运行时最低 SOC 约 38%，其中包含事故备用、黑启动和跨越机组爬坡所需的能量，不只做电价套利。</p><p>最大机组在峰值时刻停运十小时的模拟中，SOC 约从 90% 降至 12%，随后回充至 80% 以上。所测单一设备 N-1 情景均为 ENS=0、失负荷小时=0、供电 100%；这是确定性模型内结果，不是现实可用率承诺。</p></section><section class="slide" id="slide-8" aria-label="第 8 页"><p class="eyebrow">08 / 14 · 科技与产业</p><h1 tabindex="-1">电池调度每一步都要守住三个状态</h1><p>第一是瞬时功率余量：还能充放多少 MW；第二是能量余量：SOC 能撑多久；第三是未来义务：下一时段负荷、风光与最大机组故障需要留多少。只盯当前电价会吃掉可靠性余量。</p><p>负载侧控制看秒级爬坡，发电侧调度看小时级能量和备用。论文把两者分开建模正是为了避免用慢调度掩盖快尖峰，或用高功率短时设备冒充长时后备。</p></section><section class="slide" id="slide-9" aria-label="第 9 页"><p class="eyebrow">09 / 14 · 科技与产业</p><h1 tabindex="-1">仿真结果显示多种价值，但都依赖场景</h1><p>383 MW 负载侧方案在论文合成轨迹中最平滑；271.1 MW 四小时发电侧方案满足所设 N-1 事故。三月无碳电力比例由无电池的 33.98% 升至有电池的 41.08%，全年代表小时平均约 36.5%。</p><p>这些数值来自特定 ERCOT 价格、资源组合、合成数据中心负荷、设备成本与 12 个代表日。它们说明优化链能找到可行设计，不是所有千兆瓦园区都应照抄同一电池规模。</p></section><section class="slide" id="slide-10" aria-label="第 10 页"><p class="eyebrow">10 / 14 · 科技与产业</p><h1 tabindex="-1">复杂优化仍省略了真实运营中的几层风险</h1><p>负荷为高保真合成模型而非长期现场测量；场景被压缩为代表日，负载平滑还是单一确定性时域。作者也提出未来需用滚动时域、分布鲁棒机会约束和真实维护计划处理预测误差与可用率。</p><p>N-1 结果只覆盖模型规定的单设备故障，不包含共同原因故障、燃料供应中断、控制通信失败或极端天气。教学 demo 不含机组、价格、退化和 SSTI，只展示功率与 SOC 约束。</p></section><section class="slide" id="slide-11" aria-label="第 11 页"><p class="eyebrow">11 / 14 · 科技与产业</p><h1 tabindex="-1">从 GPU 尖峰到连续供电的两级缓冲</h1><p>原始算力负荷先经过负载侧电池，快速充放把尖峰变成燃机能跟随的净负荷；园区资源再按成本和约束供电；发电侧电池维持旋转备用，在最大机组退出时跨越缺口并等待其他机组爬升。</p><p>设计时先从要解决的时间尺度反推功率，再从持续时间与事故反推能量，最后在 SOC 轨迹中验证每个时刻都留有恢复空间。一个“电池容量”数字无法代替这三步。</p></section><section class="slide" id="slide-12" aria-label="第 12 页"><p class="eyebrow">12 / 14 · 科技与产业</p><h1 tabindex="-1">最小实践：平滑尖峰时别把应急电量用光</h1><p>需求：给定一条虚构负荷与较慢的发电计划，让电池把差额限制在功率上限内，同时追踪 SOC；再用低初始 SOC 展示边界。正常例只验证能量守恒和约束。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>时段  负荷  发电计划  电池放电(+)/充电(-)  SOC
+ 1     80       85               -5.0    61.2
+ 2     82       85               -3.0    62.0
+ 3    118       90               25.0    55.8
+ 4     84       90               -6.0    57.2
+ 5     79       85               -6.0    58.8
+ 6    105       90               15.0    55.0
+ 7     81       85               -4.0    56.0
+期末SOC=56.0 MWh；功率上限=25 MW
+边界：负荷、时长和控制规则均为教学构造；未包含效率、退化、机组约束、价格、备用或SSTI。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section class="slide" id="slide-13" aria-label="第 13 页"><p class="eyebrow">13 / 14 · 科技与产业</p><h1 tabindex="-1">先自己试着解释</h1><ol><li>383 MW 两小时和 271.1 MW 四小时，哪个一定“更大”？为什么问题本身不完整？</li><li>正常时为什么不让发电侧电池把 SOC 降到最低以多做套利？</li><li>论文所有 N-1 情景零失供，能否推出真实园区永不掉电？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section class="slide" id="slide-14" aria-label="第 14 页"><p class="eyebrow">14 / 14 · 科技与产业</p><h1 tabindex="-1">原文与阅读范围</h1><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.19342v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.19342v1">元数据与版本</a></p><p>已读取五阶段框架、负荷分解、负载侧平滑、BESS 技术约束、场景缩减、发电侧规划、无碳比例与 N-1 结果；核对图 1、7—13及主要尺寸表。</p><p>论文证据来自合成负荷与优化仿真。教学 SOC 算例为自造，不是 SSTI 或 ERCOT 调度复现。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、38 条图表说明，正文约 253,900 个字符。</p></details></section><nav class="slide-controls" aria-label="翻页" hidden><button id="previous">上一页</button><label>跳转 <select id="page-select"><option value="1">1. 两组电池怎样同时保护 AI 数据中心和自备电厂</option><option value="2">2. 像在厨房门口和仓库各放一个缓冲区</option><option value="3">3. 先看整篇的关系</option><option value="4">4. MW 是速度，MWh 是能撑多久</option><option value="5">5. 五阶段框架吃进哪些不确定与约束</option><option value="6">6. 负载侧电池先把尖峰挡在燃机之前</option><option value="7">7. 发电侧电池把能量留给备用与恢复</option><option value="8">8. 电池调度每一步都要守住三个状态</option><option value="9">9. 仿真结果显示多种价值，但都依赖场景</option><option value="10">10. 复杂优化仍省略了真实运营中的几层风险</option><option value="11">11. 从 GPU 尖峰到连续供电的两级缓冲</option><option value="12">12. 最小实践：平滑尖峰时别把应急电量用光</option><option value="13">13. 先自己试着解释</option><option value="14">14. 原文与阅读范围</option></select></label><button id="next">下一页</button></nav><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">Resilient Design and Optimal Operation of Battery Energy Storage Systems for Behind-the-Meter Data Center Microgrids</p><p>Haggi, Hamed、Morankar, Chinmay</p>
+<p>arXiv:2609.19342v1 · 发布日期：2026-09-16 · 科技与产业</p>
+<p><a href="https://arxiv.org/abs/2609.19342v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.19342v1">论文正文</a></p></details><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.19342v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.19342v1">元数据与版本</a></p><p>已读取五阶段框架、负荷分解、负载侧平滑、BESS 技术约束、场景缩减、发电侧规划、无碳比例与 N-1 结果；核对图 1、7—13及主要尺寸表。</p><p>论文证据来自合成负荷与优化仿真。教学 SOC 算例为自造，不是 SSTI 或 ERCOT 调度复现。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、38 条图表说明，正文约 253,900 个字符。</p></details></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="普通数据库事务只能保证数据库里的读写顺序，却不知道智能体在外部看过的证据或权限是否已经变化；这篇论文把这个“想的时候对、做的时候已过期”的风险变成可检查的提交契约。">
+<title>详细讲解 · AI 智能体提交操作时：如何保证证据、政策与权限仍然有效</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20261v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><p class="eyebrow">AI · arXiv:2609.20261v1</p>
+<h1>AI 智能体提交操作时：如何保证证据、政策与权限仍然有效</h1><p class="original" lang="en">When AI Agents Commit: Cognitive Serializability Across Data, Evidence, Policy, and Authority</p>
+<p class="lead">普通数据库事务只能保证数据库里的读写顺序，却不知道智能体在外部看过的证据或权限是否已经变化；这篇论文把这个“想的时候对、做的时候已过期”的风险变成可检查的提交契约。</p><nav class="toc" aria-label="文章目录"><a href="#section-0">先从一个普通人会遇到的问题开始</a><a href="#section-1">先看整篇的关系</a><a href="#section-2">先补两块必要基础</a><a href="#section-3">论文接收什么，输出什么</a><a href="#section-4">第一步：把智能体实际看过的依据全部密封</a><a href="#section-5">第二步：先拿保护，再按当前状态复核并提交</a><a href="#section-6">跟着一个小例子看中间状态</a><a href="#section-7">作者拿什么证据支持主张</a><a href="#section-8">哪些结论不能顺手扩大</a><a href="#section-9">把整条因果链重新接起来</a><a href="#section-10">最小实践：把核心机制跑一遍</a><a href="#section-11">先自己试着解释</a><a href="#section-12">原文与阅读范围</a></nav><section id="section-0"><h2>先从一个普通人会遇到的问题开始</h2><p>普通数据库事务只能保证数据库里的读写顺序，却不知道智能体在外部看过的证据或权限是否已经变化；这篇论文把这个“想的时候对、做的时候已过期”的风险变成可检查的提交契约。</p><p>今天读完《AI 智能体提交操作时：如何保证证据、政策与权限仍然有效》，目标不是记住论文名，而是能用自己的话回答：智能体思考了几秒后准备下单，怎样确认它读过的库存、供应商证书、政策和授权在真正提交时仍同时有效？还要能指出作者的证据支持到哪一步、哪一步仍不能下结论。</p></section><section id="section-1"><h2>先看整篇的关系</h2><figure data-mermaid>
+<div data-mermaid-output></div><p data-mermaid-status>正在绘制关系图…</p>
+<figcaption>沿着研究问题、方法、验证和局限，复述这篇论文的主线。宽图可左右滑动。</figcaption>
+<details><summary>查看可编辑的 Mermaid 源码</summary><pre data-mermaid-source>flowchart TD
+A[现实问题] --&gt; B[定义输入与假设]
+B --&gt; C[捕获并密封全部依赖]
+C --&gt; D[持锁复核后持久化]
+D --&gt; E[论文证据]
+E --&gt; F[作者主张]
+F --&gt; G[局限与适用边界]
+G --&gt; H[预测或迁移练习]</pre></details>
+</figure><p>顺着图读一遍，就能看到问题如何进入方法、经过哪些中间状态、证据支持到哪里，以及结论在哪些条件下会失效。</p></section><section id="section-2"><h2>先补两块必要基础</h2><p>数据库的 serializability（可串行化）意思是并发事务的结果等价于某种逐个执行顺序。它保护数据库内部状态，却不会自动锁住网页证据、政策版本或外部授权。</p><p>论文把智能体看到的每项输入变成带类型、版本和来源的 dependency token（依赖令牌）。内容哈希只证明字节没变；“这份文件现在仍适用”还要单独的适用性证明。</p></section><section id="section-3"><h2>论文接收什么，输出什么</h2><p>输入是智能体推导操作时接触的数据库状态、外部证据、政策、信念和授权，以及它准备执行的具体变更。输出不是“答案”，而是准许或拒绝一次可持久化操作，并留下与操作绑定的回执。</p><p>关键中间状态包括密封依赖包、完整读写范围、当前政策、外部有效性栅栏和数据库 guard。严格模式要求原推导依据仍原样有效；兼容模式只重新证明当前依据仍允许同一个具体效果。</p></section><section id="section-4"><h2>第一步：把智能体实际看过的依据全部密封</h2><p>可信代理拦截数据库读取、外部 API、政策检查和授权，把它们规范化并写入密封 envelope。智能体不能绕过代理直接取数，否则论文的保证不成立。</p><p>注册表还要提前声明操作可能读写的完整范围。漏掉一个会影响效果的依赖，系统不一定自动报错，而是直接落到定理保护范围之外。</p></section><section id="section-5"><h2>第二步：先拿保护，再按当前状态复核并提交</h2><p>提交门先按固定顺序取得本地 guard 和必要的外部保留，再在这些保护仍有效时检查依赖、政策、权限和具体变更。保护要持续到数据库提交或声明的耐久事件。</p><p>严格 TCT-S 要找到一个逻辑时刻，使推导时见过的所有值与提交效果同时有效；较弱的 TCT-C 允许依据变化，但必须由已注册的联合谓词重新证明这个效果仍兼容。</p></section><section id="section-6"><h2>跟着一个小例子看中间状态</h2><p>教学例中，智能体看到库存 12 件、供应商证书有效、单笔上限 10 万元、经理批准，然后拟下单 8 件。思考期间证书被撤销。普通数据库仍可能成功扣库存；TCT 的证据栅栏应在提交前发现证书状态变化。</p><p>若政策只是把审批人姓名换了，但仍允许同一笔 8 件订单，严格模式会因依据改变而拒绝；兼容模式只有在注册的复核规则证明效果仍合规时才可放行。</p></section><section id="section-7"><h2>作者拿什么证据支持主张</h2><p>作者在 PostgreSQL 16 原型上构造 28 类受控扰动历史，每种配置运行 100 次；实现对注入异常给出了协议规定的准入结果。供应链基准包含 10 万库存项、1 万供应商和 5 万活跃订单。</p><p>原型在 32 个并发线程时峰值达到 1,842 笔事务/秒，平均提交阶段额外开销为 3.22 毫秒。它说明该契约在给定硬件和模拟负载上可实现，不等于生产系统已获得普遍安全保证。</p></section><section id="section-8"><h2>哪些结论不能顺手扩大</h2><p>安全依赖可信代理、注册表、数据库和外部发行方都按假设工作；被攻破的中介、未登记的副作用、模型参数中的隐含知识和旁路调用不在保护范围。</p><p>哈希不能证明内容真实，回执也不保证远程副作用与本地事务原子完成。生产性能、跨组织发行方协调和不完整依赖发现仍是开放问题。</p></section><section id="section-9"><h2>把整条因果链重新接起来</h2><p>研究问题“智能体思考了几秒后准备下单，怎样确认它读过的库存、供应商证书、政策和授权在真正提交时仍同时有效？”先被拆成可观察输入，再经过“第一步：把智能体实际看过的依据全部密封”与“第二步：先拿保护，再按当前状态复核并提交”，最后由论文实验或数据核对。</p><p>排错时依次检查：输入是否代表真实问题、中间状态是否按定义计算、比较组是否公平、指标是否回答原问题、结论是否越过样本和假设边界。</p></section><section id="section-10"><h2>最小实践：把核心机制跑一遍</h2><p>需求：用一组明确标为教学设定的小数据演示“比较普通数据库提交与依赖复核提交在证书中途撤销时的决定”。脚本打印输入、中间状态、正常例和失效边界，便于逐步核对。</p><p>验收标准：输出能解释机制方向，并明确它没有复现论文数据、模型或效果数字。</p><p>运行方式：<code>python3 demo.py</code>。只使用 Python 标准库。下面是本次实际运行并保存的输出；它是教学算例，不是论文实验复现。</p><pre>教学输入：
+- 库存：12
+- 拟购买：8
+- 推导时证书：有效
+- 提交时证书：已撤销
+中间状态：
+1. 记录库存、证书、政策和授权版本
+2. 密封下单 8 件的提案
+3. 提交前同时复核依赖
+4. 证书版本变化，因此严格模式拒绝
+正常例：若所有依赖保持有效，订单和回执一起提交；本例因证书撤销而拒绝。
+边界：这里只演示依赖变化；没有实现论文的锁、签名、注册表或 PostgreSQL 性能实验。
+</pre><p><a href="demo.py">下载可编辑代码</a> · <a href="demo-output.txt">查看完整运行输出</a></p></section><section id="section-11"><h2>先自己试着解释</h2><ol><li>为什么 PostgreSQL SERIALIZABLE 仍不能自动发现供应商证书被撤销？</li><li>内容哈希没变，为什么文件仍可能不再适用？</li><li>TCT-C 放行一笔操作是否等于原来的推理过程仍然正确？</li></ol><p>答案在独立参考答案页。材料已经一次性交付完整；你是否已经掌握，要等你的真实回答才能判断。</p></section><section id="section-12"><h2>原文与阅读范围</h2><details><summary>展开核对原文、证据和阅读边界</summary><p><a href="https://arxiv.org/html/2609.20261v1">arXiv 正文</a> · <a href="https://arxiv.org/abs/2609.20261v1">元数据与版本</a></p><p>已读引言、系统模型与密封、充分条件和边界、PostgreSQL 原型评估、范围与限制；核对图 1、算法 1、表 1—4 和图 2—3。</p><p>教学中的日常类比、演示数据和运行结果由本学习包构造；作者主张与论文证据已在正文中单独标出，二者不混用。</p><p>本次保存并解析的正文格式为 arxiv_html，提取到 6 个相关章节、14 条图表说明，正文约 157,237 个字符。</p></details></section><p><a href="answers.html">完成自测后，再看参考答案</a></p><details class="sources"><summary>论文信息与原文</summary>
+<p lang="en">When AI Agents Commit: Cognitive Serializability Across Data, Evidence, Policy, and Authority</p><p>He, Jun、Yu, Deying</p>
+<p>arXiv:2609.20261v1 · 发布日期：2026-07-28 · AI</p>
+<p><a href="https://arxiv.org/abs/2609.20261v1">arXiv 论文信息</a> · <a href="https://arxiv.org/html/2609.20261v1">论文正文</a></p></details></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

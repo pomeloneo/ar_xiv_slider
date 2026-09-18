@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="很多团队把“计划、工具编排、完成检查”打包成一个 harness 后只报总成功率；这篇论文把计划带来的成功增量、验证器避免的误放行和额外成本分开，普通读者也能看清权衡。">
+<title>参考答案 · 智能体 Harness 为什么有价值：计划信息与放行控制要分开算</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script defer src="../assets/read-state.js"></script>
+<script defer src="../assets/mermaid/renderer.js"></script>
+
+</head><body>
+<header class="topbar"><a href="../">每日 arXiv 论文带读</a>
+<nav aria-label="阅读方式"><a href="./">本篇总览</a><a href="slides.html">图解全文</a><a href="notes.html">详细讲解</a></nav>
+<button data-read-toggle="2609.20474v1" disabled>标为已读</button></header>
+<p class="storage-notice" data-storage-notice role="status" hidden></p>
+<main><article><h1>参考答案</h1><p>先尝试自行解释，再用这里核对理由。答案不是对你掌握程度的判定。</p><ol><li><p>它只阻止错误交付，没有修复环境或完成目标，因此改变的是接受决定而非 oracle success。</p></li><li><p>它控制了额外字数、包装和提示存在本身，剩余差异更接近任务专属信息的价值。</p></li><li><p>应优先看避免的 false pass 及错拦代价，再结合成本，而不是只看平均成功率。</p></li></ol><p><a href="notes.html">返回详细讲解</a></p></article></main>
+<footer>材料已准备 · 理解程度待你回答后验证。阅读标记仅保存在当前浏览器。</footer>
+</body></html>

@@ -1,0 +1,13 @@
+flowchart TD
+A[固定七日窗口与接口] --> B[去重市场ticker]
+B --> C[映射exact event]
+C --> D[拆出selected legs和primitive]
+C --> E[归属collection模板]
+D --> F[唯一数与频率分布]
+E --> F
+F --> G[Herfindahl与有效数量]
+B --> H[当前累计量或未平仓量]
+B --> I[端点和生命周期覆盖]
+G --> J[对象规模不等于经济广度]
+H --> J
+I --> J
