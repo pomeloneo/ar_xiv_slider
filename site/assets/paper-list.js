@@ -12,7 +12,8 @@
     const requested = params.get("status");
     const status = ["read", "unread"].includes(requested) ? requested : "all";
     const topicDetails = document.querySelector('.topic-filters');
-    if (topicDetails && tag && !["AI", "金融", "经济"].includes(tag)) topicDetails.open = true;
+    if (topicDetails && tag && tags.some((control) =>
+      control.dataset.tag === tag && topicDetails.contains(control))) topicDetails.open = true;
     let visible = 0;
     let readCount = 0;
     for (const paper of papers) {

@@ -24,6 +24,7 @@ PRIVATE_NAMES = {
     "config", "configuration", "credentials", "secrets", "tokens", "history",
     "private", "logs", "auth", "agents", "skill", "sources", "rendered",
 }
+PRIMARY_DIRECTIONS = ("AI", "金融", "经济", "社会研究", "科技与产业")
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--direction",
         required=True,
-        choices=("AI", "金融", "经济"),
+        choices=PRIMARY_DIRECTIONS,
         help="Primary learning direction",
     )
     parser.add_argument("--summary", required=True, help="One-sentence learning value")
@@ -218,7 +219,7 @@ def load_manifest(path: Path) -> list[dict[str, Any]]:
             raise SystemExit(f"Existing manifest contains invalid tags: {path}")
         if (
             item["path"] != f"{publication_key}/"
-            or item["direction"] not in {"AI", "金融", "经济"}
+            or item["direction"] not in PRIMARY_DIRECTIONS
             or item["path"] in seen_paths
             or item["arxiv_id"] in seen_arxiv_ids
         ):
@@ -231,12 +232,12 @@ def load_manifest(path: Path) -> list[dict[str, Any]]:
 def render_home_page(entries: list[dict[str, Any]]) -> str:
     all_tags = sorted(
         {tag for entry in entries for tag in entry.get("tags", [entry["direction"]])},
-        key=lambda tag: (tag not in {"AI", "金融", "经济"}, tag),
+        key=lambda tag: (tag not in PRIMARY_DIRECTIONS, tag),
     )
     filters = ['<a class="filter is-active" href="./" data-tag="" aria-current="true">全部</a>']
     topic_filters = []
     for tag in all_tags:
-        target = filters if tag in {"AI", "金融", "经济"} else topic_filters
+        target = filters if tag in PRIMARY_DIRECTIONS else topic_filters
         target.append(
             f'<a class="filter" href="?tag={quote(tag)}" '
             f'data-tag="{html.escape(tag, quote=True)}">{html.escape(tag)}</a>'
@@ -355,7 +356,7 @@ def render_home_page(entries: list[dict[str, Any]]) -> str:
 <body>
   <header>
     <h1>每日 arXiv 论文带读</h1>
-    <p>每天一篇 AI、金融或经济论文，用中文从基础讲清整篇主线。可按标签筛选，打开本篇总览后选择图解全文或详细讲解即可。</p>
+    <p>每天一篇 AI、金融、经济、社会研究或科技与产业论文，主题涵盖中国经济、中国房地产、算力与半导体、核电与金属等，用中文从基础讲清整篇主线。可按标签筛选，打开本篇总览后选择图解全文或详细讲解即可。</p>
   </header>
   <main>
 {empty_markup}

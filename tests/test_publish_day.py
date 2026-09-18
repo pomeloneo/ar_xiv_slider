@@ -64,6 +64,52 @@ class PublishDayTests(unittest.TestCase):
         self.assertEqual(entry["title_zh"], "论文中文标题")
         self.assertEqual(entry["tags"], ["AI", "机器学习", "可靠性"])
 
+    def test_cli_accepts_expanded_directions(self):
+        for direction in ("社会研究", "科技与产业"):
+            with self.subTest(direction=direction):
+                argv = [
+                    str(SCRIPT), "--source", str(self.source), "--date", self.args.date,
+                    "--title", self.args.title, "--title-zh", self.args.title_zh,
+                    "--arxiv-id", self.args.arxiv_id, "--direction", direction,
+                    "--summary", self.args.summary, "--tag", "中国经济", "--tag", "中国房地产",
+                ]
+                with patch("sys.argv", argv):
+                    args = publisher.parse_args()
+                self.assertEqual(args.direction, direction)
+                self.assertEqual(args.tags, ["中国经济", "中国房地产"])
+
+    def test_expanded_directions_preserve_topic_tags_on_rerun(self):
+        for direction, tags in (
+            ("社会研究", ["中国经济", "中国房地产"]),
+            ("科技与产业", ["算力", "半导体", "数据中心", "核电", "金属"]),
+        ):
+            with self.subTest(direction=direction):
+                self.args.direction = direction
+                self.args.tags = tags
+                self.publish()
+                entries = publisher.load_manifest(self.site / "papers.json")
+                self.assertEqual(entries[0]["direction"], direction)
+                self.assertEqual(entries[0]["tags"], [direction, *tags])
+                self.publish()
+                self.assertEqual(publisher.load_manifest(self.site / "papers.json"), entries)
+
+    def test_primary_directions_remain_outside_collapsed_topic_filters(self):
+        self.publish()
+        entry = publisher.load_manifest(self.site / "papers.json")[0]
+        entries = [
+            dict(entry, direction=direction, tags=[direction, "中国经济", "中国房地产", "核电", "金属", f"主题{i}", f"主题{i + 5}"])
+            for i, direction in enumerate(("AI", "金融", "经济", "社会研究", "科技与产业"))
+        ]
+        page = publisher.render_home_page(entries)
+        primary, topics = page.split('<details class="topic-filters">', 1)
+        topics = topics.split("</details>", 1)[0]
+        for direction in ("AI", "金融", "经济", "社会研究", "科技与产业"):
+            self.assertIn(f'data-tag="{direction}"', primary)
+            self.assertNotIn(f'data-tag="{direction}"', topics)
+        for topic in ("中国经济", "中国房地产", "核电", "金属"):
+            self.assertNotIn(f'data-tag="{topic}"', primary)
+            self.assertIn(f'data-tag="{topic}"', topics)
+
     def test_home_page_shows_bilingual_titles_and_filter_controls(self):
         self.publish()
         page = (self.site / "index.html").read_text()
